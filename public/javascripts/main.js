@@ -1,6 +1,4 @@
-Backbone.Model.prototype.idSuffix = 'Id';
-
-Backbone.Model.prototype.getAsync = function (key, callback) {
+Backbone.Model.prototype.getModelAsync = function (key, callback) {
   var relatedModels;
   if (typeof this.relatedModels === 'function') {
     relatedModels = this.relatedModels();
@@ -10,17 +8,35 @@ Backbone.Model.prototype.getAsync = function (key, callback) {
 
   var modelClass = relatedModels[key];
   var model = new modelClass();
-  model.set(model.idAttribute, key + this.idSuffix);
+  model.set(model.idAttribute, this.get(key));
 
-  var deferredModel = model.fetch().done(function () {
+  return model.fetch().done(function () {
     callback(model);
   });
+};
 
-  return deferredModel;
+Backbone.Model.prototype.getCollectionAsync = function (key, callback) {
+  var relatedCollections;
+  if (typeof this.relatedCollections === 'function') {
+    relatedCollections = this.relatedCollections();
+  } else {
+    relatedCollections = this.relatedCollections;
+  }
+
+  var collectionClass = relatedCollections[key];
+  var collection = new collectionClass();
+
+  var data = {};
+  data[this.relationalQueryParam] = this.id;
+  return collection.fetch({
+    data: data
+  }).done(function () {
+    callback(collection);
+  });
 };
 
 var User = Backbone.Model.extend({
-  url: '/users/user',
+  urlRoot: '/api/user',
   relatedModels: function () {
     return {
       pantry: Pantry
@@ -29,12 +45,22 @@ var User = Backbone.Model.extend({
 });
 
 var Pantry = Backbone.Model.extend({
-  url: '/users/pantry',
-  relatedModels: function () {
+  urlRoot: '/api/pantry',
+  relationalQueryParam: 'pantry',
+  relatedModels: {
+    user: User
+  },
+  relatedCollections: function () {
     return {
-      user: User
+      shipments: Shipments
     }
   }
+});
+
+var Shipment = Backbone.Model.extend({});
+var Shipments = Backbone.Collection.extend({
+  model: Shipment,
+  url: '/api/shipments'
 });
 
 var user = new User({
@@ -42,7 +68,10 @@ var user = new User({
 });
 
 user.fetch().done(function () {
-  user.getAsync('pantry', function (pantry) {
-    alert(pantry.get('name'));
+  user.getModelAsync('pantry', function (pantry) {
+    console.log(pantry.get('name'));
+    pantry.getCollectionAsync('shipments', function(shipments) {
+      console.log(shipments);
+    })
   });
 });
