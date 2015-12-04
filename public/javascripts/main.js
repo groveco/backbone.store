@@ -67,11 +67,27 @@ var user = new User({
   id: 12
 });
 
+// just relational
+
 user.fetch().done(function () {
   user.getModelAsync('pantry', function (pantry) {
     console.log(pantry.get('name'));
     pantry.getCollectionAsync('shipments', function(shipments) {
       console.log(shipments);
     })
+  });
+});
+
+// repository
+
+var repository = new Repository(Backbone.Collection.extend({
+  model: User
+}));
+
+repository.getById(12).done(function (user) {
+  console.log(user);
+  // should not send a request
+  repository.getById(12).done(function (user) {
+    console.log(user);
   });
 });
