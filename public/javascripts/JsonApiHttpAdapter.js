@@ -5,11 +5,21 @@ class JsonApiHttpAdapter {
     this._url = url;
   }
 
+  query(options) {
+    let deferred = $.Deferred();
+    this._ajax(null, 'GET', options).then(data => {
+      deferred.resolve(data);
+    }, () => {
+      deferred.reject();
+    });
+    return deferred;
+  }
+
   getById(id) {
     let deferred = $.Deferred();
-    this._ajax(id, 'GET').then(function (data) {
+    this._ajax(id, 'GET').then(data => {
       deferred.resolve(data);
-    }, function () {
+    }, () => {
       deferred.reject();
     });
     return deferred;
@@ -17,9 +27,19 @@ class JsonApiHttpAdapter {
 
   create(attributes) {
     let deferred = $.Deferred();
-    this.ajax(null, 'POST', attributes).then(function (data) {
+    this.ajax(null, 'POST', attributes).then(data => {
       deferred.resolve(data);
-    }, function () {
+    }, () => {
+      deferred.reject();
+    });
+    return deferred;
+  }
+
+  update(id, attributes) {
+    let deferred = $.Deferred();
+    this.ajax(id, 'PUT', attributes).then(data => {
+      deferred.resolve(data);
+    }, () => {
       deferred.reject();
     });
     return deferred;
@@ -27,9 +47,9 @@ class JsonApiHttpAdapter {
 
   delete(id) {
     let deferred = $.Deferred();
-    this._ajax(id, 'DELETE').then(function () {
+    this._ajax(id, 'DELETE').then(() => {
       deferred.resolve();
-    }, function () {
+    }, () => {
       deferred.reject();
     });
     return deferred;
@@ -41,10 +61,10 @@ class JsonApiHttpAdapter {
       url: this._url,
       type: type,
       contentType: 'application/vnd.api+json',
-      success: function (data) {
+      success: data => {
         deferred.resolve(data);
       },
-      error: function () {
+      error: () => {
         deferred.reject();
       }
     };
@@ -52,7 +72,11 @@ class JsonApiHttpAdapter {
       options.url += id + '/';
     }
     if (data) {
-      options.data = data;
+      if (type in ['POST', 'PUT']) {
+        options.data = JSON.stringify(data);
+      } else {
+        options.data = data;
+      }
     }
     $.ajax(options);
     return deferred;

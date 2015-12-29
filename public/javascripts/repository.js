@@ -10,33 +10,31 @@ class Repository {
   }
 
   query(options) {
-    var that = this;
     var deferred = $.Deferred();
     var collection = new this.collectionClass();
     collection.fetch({
       data: options
-    }).then(function () {
-      that.collection.set(collection.models);
+    }).then(() => {
+      this.collection.set(collection.models);
       deferred.resolve(collection);
-    }, function (xhr) {
-      deferred.reject(xhr.responseText);
+    }, () => {
+      deferred.reject();
     });
     return deferred;
   }
 
   getById(id) {
-    let that = this;
     let deferred = $.Deferred();
     let model = this.collection.get(id);
     if (model) {
       deferred.resolve(model);
     } else {
       model = new this.modelClass();
-      this._adapter.getById(id).then(function (data) {
+      this._adapter.getById(id).then(data => {
         model.set(data);
-        that.collection.set(model);
+        this.collection.set(model);
         deferred.resolve(model);
-      }, function (xhr) {
+      }, () => {
         deferred.reject(xhr.responseText);
       });
     }
@@ -45,16 +43,15 @@ class Repository {
 
   create(attributes) {
     attributes = attributes || {};
-    let that = this;
     let deferred = $.Deferred();
     let model = this.collection.get(id);
     if (!model) {
       model = new this.modelClass();
-      this._adapter.save(attributes).then(function (data) {
+      this._adapter.save(attributes).then(data => {
         model.set(data);
-        that.collection.set(model);
+        this.collection.set(model);
         deferred.resolve(model);
-      }, function (xhr) {
+      }, () => {
         deferred.reject(xhr.responseText);
       });
     } else {
@@ -63,16 +60,28 @@ class Repository {
     return deferred;
   }
 
+  update(model, attributes) {
+    let deferred = $.Deferred();
+    model.set(attributes);
+    this._adapter.update(model.id, model.toJSON()).then((data) => {
+      this.collection.remove(model);
+      model.clear().set(data);
+      this.collection.add(model);
+      deferred.resolve(model);
+    }, () => {
+      deferred.reject();
+    });
+  }
+
   delete(id) {
-    let that = this;
     let deferred = $.Deferred();
     let model = this.collection.get(id);
     if (model) {
-      this._adapter.delete(id).then(function () {
-        that.collection.remove(model);
+      this._adapter.delete(id).then(() => {
+        this.collection.remove(model);
         deferred.resolve();
-      }, function (xhr) {
-        deferred.reject(xhr.responseText);
+      }, () => {
+        deferred.reject();
       });
     } else {
       deferred.reject('Model already exists');
