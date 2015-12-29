@@ -1,12 +1,14 @@
-window.Repository = (function () {
+import $ from 'jquery';
 
-  function Repository(collectionClass) {
+class Repository {
+
+  constructor(collectionClass) {
     this.collectionClass = collectionClass;
     this.modelClass = collectionClass.prototype.model;
     this.collection = new this.collectionClass();
   }
 
-  Repository.prototype.query = function (options) {
+  query(options) {
     var that = this;
     var deferred = $.Deferred();
     var collection = new this.collectionClass();
@@ -19,9 +21,9 @@ window.Repository = (function () {
       deferred.reject(xhr.responseText);
     });
     return deferred;
-  };
+  }
 
-  Repository.prototype.getById = function (id) {
+  getById(id) {
     var that = this;
     var deferred = $.Deferred();
     var model = this.collection.get(id);
@@ -38,9 +40,9 @@ window.Repository = (function () {
       });
     }
     return deferred;
-  };
+  }
 
-  Repository.prototype.save = function (id, attributes) {
+  save(id, attributes) {
     attributes = attributes || {};
     var that = this;
     var deferred = $.Deferred();
@@ -49,7 +51,7 @@ window.Repository = (function () {
       model = id;
     } else {
       model = new this.modelClass();
-      model.set(model.isAttribute, id);
+      model.set(model.idAttribute, id);
     }
     model.set(attributes);
     model.save().then(function () {
@@ -59,9 +61,9 @@ window.Repository = (function () {
       deferred.reject(xhr.responseText);
     });
     return deferred;
-  };
+  }
 
-  Repository.prototype.delete = function (id) {
+  delete(id) {
     var that = this;
     var deferred = $.Deferred();
     var model = this.collection.get(id);
@@ -71,7 +73,5 @@ window.Repository = (function () {
       deferred.reject(xhr.responseText);
     });
     return deferred;
-  };
-
-  return Repository;
-})();
+  }
+}

@@ -1,3 +1,5 @@
+let Backbone = require('backbone');
+
 Backbone.Model.prototype.getModelAsync = function (key, callback) {
   var relatedModels;
   if (typeof this.relatedModels === 'function') {
