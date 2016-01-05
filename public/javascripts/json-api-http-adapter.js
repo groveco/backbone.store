@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import {HttpMethods} from './HttpMetods'
+import {HttpMethods} from './http-methods'
 
 class JsonApiHttpAdapter {
   constructor(url) {
