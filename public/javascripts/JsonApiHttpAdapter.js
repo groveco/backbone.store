@@ -1,4 +1,5 @@
 import $ from 'jquery'
+import {HttpMethods} from './HttpMetods'
 
 class JsonApiHttpAdapter {
   constructor(url) {
@@ -7,8 +8,8 @@ class JsonApiHttpAdapter {
 
   query(options) {
     let deferred = $.Deferred();
-    this._ajax(null, 'GET', options).then(data => {
-      deferred.resolve(data);
+    this._ajax(null, HttpMethods.GET, options).then(data => {
+      deferred.resolve(this._parse(data));
     }, () => {
       deferred.reject();
     });
@@ -17,8 +18,8 @@ class JsonApiHttpAdapter {
 
   getById(id) {
     let deferred = $.Deferred();
-    this._ajax(id, 'GET').then(data => {
-      deferred.resolve(data);
+    this._ajax(id, HttpMethods.GET).then(data => {
+      deferred.resolve(this._parse(data));
     }, () => {
       deferred.reject();
     });
@@ -27,8 +28,8 @@ class JsonApiHttpAdapter {
 
   create(attributes) {
     let deferred = $.Deferred();
-    this.ajax(null, 'POST', attributes).then(data => {
-      deferred.resolve(data);
+    this.ajax(null, HttpMethods.POST, attributes).then(data => {
+      deferred.resolve(this._parse(data));
     }, () => {
       deferred.reject();
     });
@@ -37,22 +38,41 @@ class JsonApiHttpAdapter {
 
   update(id, attributes) {
     let deferred = $.Deferred();
-    this.ajax(id, 'PUT', attributes).then(data => {
-      deferred.resolve(data);
+    this.ajax(id, HttpMethods.PUT, attributes).then(data => {
+      deferred.resolve(this._parse(data));
     }, () => {
       deferred.reject();
     });
     return deferred;
   }
 
-  delete(id) {
+  destroy(id) {
     let deferred = $.Deferred();
-    this._ajax(id, 'DELETE').then(() => {
+    this._ajax(id, HttpMethods.DELETE).then(() => {
       deferred.resolve();
     }, () => {
       deferred.reject();
     });
     return deferred;
+  }
+
+  _parse(jsonApiData) {
+    let result = {
+      data: {}
+    };
+    Object.assign(result.data, jsonApiData.data.attributes);
+    result.data.id = jsonApiData.data.id;
+    if (jsonApiData.relationships) {
+      result.relationships = Object.keys(jsonApiData.relationships).forEach((key, index) => {
+        let relationshipData = jsonApiData.relationships[key].data;
+        if (relationshipData instanceof Array) {
+          result.relationships[key] = relationshipData.map(item => item.id);
+        } else {
+          result.relationships[key] = relationshipData.id;
+        }
+      });
+    }
+    return result;
   }
 
   _ajax(id, type, data) {
@@ -82,3 +102,5 @@ class JsonApiHttpAdapter {
     return deferred;
   }
 }
+
+export {JsonApiHttpAdapter};

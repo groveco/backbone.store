@@ -71,13 +71,14 @@ class Repository {
     }, () => {
       deferred.reject();
     });
+    return deferred;
   }
 
-  delete(id) {
+  destroy(id) {
     let deferred = $.Deferred();
     let model = this.collection.get(id);
     if (model) {
-      this._adapter.delete(id).then(() => {
+      this._adapter.destroy(id).then(() => {
         this.collection.remove(model);
         deferred.resolve();
       }, () => {
@@ -89,3 +90,5 @@ class Repository {
     return deferred;
   }
 }
+
+export {Repository};
