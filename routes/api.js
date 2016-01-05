@@ -40,7 +40,7 @@ router.get('/pantry/42', function(req, res, next) {
   });
 });
 
-router.get('/shipments', function(req, res, next) {
+router.get('/shipment', function(req, res, next) {
   res.send([{
     data: {
       id: 1,

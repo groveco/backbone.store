@@ -57,18 +57,16 @@ class JsonApiHttpAdapter {
   }
 
   _parse(jsonApiData) {
-    let result = {
-      data: {}
-    };
-    Object.assign(result.data, jsonApiData.data.attributes);
-    result.data.id = jsonApiData.data.id;
+    let result = {};
+    Object.assign(result, jsonApiData.data.attributes);
+    result.id = jsonApiData.data.id;
     if (jsonApiData.relationships) {
-      result.relationships = Object.keys(jsonApiData.relationships).forEach((key, index) => {
+      Object.keys(jsonApiData.relationships).forEach((key, index) => {
         let relationshipData = jsonApiData.relationships[key].data;
         if (relationshipData instanceof Array) {
-          result.relationships[key] = relationshipData.map(item => item.id);
+          result[key] = relationshipData.map(item => item.id);
         } else {
-          result.relationships[key] = relationshipData.id;
+          result[key] = relationshipData.id;
         }
       });
     }

@@ -1,15 +1,16 @@
-var gulp = require('gulp');
 var babelify = require('babelify');
 var browserify = require('browserify');
-var watchify = require('watchify');
+var gulp = require('gulp');
+var remapify = require('remapify');
 var source = require('vinyl-source-stream');
+var watchify = require('watchify');
 
 gulp.task('watchify', function() {
   var b = browserify('public/javascripts/main.js', {
     fullPaths: true,
     debug: true
   });
-  b.transform(babelify);
+  b.transform(babelify, { presets: ['es2015'] });
   var w = watchify(b, {
     poll: true
   });

@@ -1,10 +1,17 @@
 import $ from 'jquery';
+let Backbone = require('backbone');
 
 class Repository {
 
   constructor(collectionClass, adapter) {
-    this.collectionClass = collectionClass;
-    this.modelClass = collectionClass.prototype.model;
+    let collection = new collectionClass();
+    if (collection instanceof Backbone.Model) {
+      this.modelClass = collectionClass;
+      this.collectionClass = Backbone.Collection;
+    } else {
+      this.collectionClass = collectionClass;
+      this.modelClass = collectionClass.prototype.model;
+    }
     this.collection = new this.collectionClass();
     this._adapter = adapter;
   }
