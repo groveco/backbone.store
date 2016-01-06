@@ -1,5 +1,6 @@
 import {factory} from './repository-factory'
 import {factory as storeFact} from './store-factory'
+import {init} from './initializer'
 import {User} from './models/user'
 import {Pantry} from './models/pantry'
 import {Shipment} from './models/shipment'
@@ -23,7 +24,3 @@ deferred.then(model => {
   	console.log(pantry);
   })
 });
-
-let foo = 'foo';
-
-export {foo};

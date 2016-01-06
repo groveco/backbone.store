@@ -1,10 +1,5 @@
-import {Pantry} from './pantry';
-let Backbone = require('backbone');
+import Backbone from 'backbone'
 
-let Shipment = Backbone.Model.extend({
-  relatedModels: {
-    pantry: Pantry
-  }
-});
+let Shipment = Backbone.Model.extend({});
 
 export {Shipment};
