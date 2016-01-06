@@ -60,9 +60,9 @@ class JsonApiHttpAdapter {
     let result = {};
     Object.assign(result, jsonApiData.data.attributes);
     result.id = jsonApiData.data.id;
-    if (jsonApiData.relationships) {
-      Object.keys(jsonApiData.relationships).forEach((key, index) => {
-        let relationshipData = jsonApiData.relationships[key].data;
+    if (jsonApiData.data.relationships) {
+      Object.keys(jsonApiData.data.relationships).forEach((key, index) => {
+        let relationshipData = jsonApiData.data.relationships[key].data;
         if (relationshipData instanceof Array) {
           result[key] = relationshipData.map(item => item.id);
         } else {
