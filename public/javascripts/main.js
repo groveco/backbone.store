@@ -20,7 +20,7 @@ deferred.then(model => {
   console.log('user ->');
   console.log(model);
   model.getAsync('pantry').then(pantry => {
-  	console.log('pantry ->');
-  	console.log(pantry);
+    console.log('pantry ->');
+    console.log(pantry);
   })
 });
