@@ -1,10 +1,9 @@
 import {JsonApiHttpAdapter} from './json-api-http-adapter'
 import {Repository} from './repository'
 
-let factory = (modelClass, url) => {
+let factory = (modelName, modelClass, url) => {
   let adapter = new JsonApiHttpAdapter(url);
-  let repository = new Repository(modelClass, adapter);
-  return repository;
+  return new Repository(modelName, modelClass, adapter);
 };
 
 export {factory};

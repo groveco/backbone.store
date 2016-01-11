@@ -1,12 +1,12 @@
 import {Store} from './store'
-let Backbone = require('backbone');
+import Backbone from 'backbone'
 
 function addGetAsync(store) {
   Backbone.Model.prototype.getAsync = function (type) {
-    let model = this.relatedModels[type];
-    if (model) {
+    let modelName = this.relatedModels[type];
+    if (modelName) {
       let id = this.get(type);
-      let repository = store.getRepository(model);
+      let repository = store.getRepository(modelName);
       if (repository) {
         return repository.getById(id);
       } else {
@@ -18,7 +18,7 @@ function addGetAsync(store) {
   }
 }
 
-export function factory() {
+let factory = function () {
   let store = null;
   return {
     getStore: function () {
@@ -29,4 +29,6 @@ export function factory() {
       return store;
     }
   }
-}
+};
+
+export {factory}

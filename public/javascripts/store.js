@@ -4,11 +4,11 @@ class Store {
   }
 
   register(repository) {
-    this._repositories.set(repository.modelClass, repository);
+    this._repositories.set(repository.modelName, repository);
   }
 
-  getRepository(modelClass) {
-    return this._repositories.get(modelClass);
+  getRepository(modelName) {
+    return this._repositories.get(modelName);
   }
 }
 
