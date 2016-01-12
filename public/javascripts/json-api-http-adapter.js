@@ -61,15 +61,56 @@ class JsonApiHttpAdapter {
     Object.assign(result, jsonApiData.data.attributes);
     result.id = jsonApiData.data.id;
     if (jsonApiData.data.relationships) {
+      result.relationships = {};
       Object.keys(jsonApiData.data.relationships).forEach((key, index) => {
         let relationshipData = jsonApiData.data.relationships[key].data;
         if (relationshipData instanceof Array) {
-          result[key] = relationshipData.map(item => item.id);
+          result.relationships[key] = relationshipData.map(item => item.id);
         } else {
-          result[key] = relationshipData.id;
+          result.relationships[key] = relationshipData.id;
         }
       });
     }
+    return result;
+  }
+
+  _serialize(obj) {
+    let result = {
+      data: {
+        id: obj.id
+        attributes: {}
+      }
+    };
+    if (obj.relationships) {
+      result.relationships = this._serializeRelationships(obj.relationships);
+    }
+    Object.keys(obj).forEach((key, index) => {
+      if (key !== 'relationships' && key !== 'id') {
+        result.data.attributes[key] = obj[key];
+      }
+    });
+    return result;
+  }
+
+  _serializeRelationships(relationships) {
+    result = {};
+    Object.keys(relationships).forEach((key, index) => {
+      if (relationships[key] instanceof Array) {
+        result[key] = relationships[key].map(item => {
+          return { 
+            data: {
+              id: item 
+            }
+          };
+        });
+      } else {
+        result[key] = {
+          data: {
+            id: relationships[key];
+          }
+        }
+      }
+    });
     return result;
   }
 
