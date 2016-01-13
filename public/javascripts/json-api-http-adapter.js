@@ -26,6 +26,16 @@ class JsonApiHttpAdapter {
     return deferred;
   }
 
+  getByLink(link) {
+    let deferred = $.Deferred();
+    this._ajaxByLink(link).then(data => {
+      deferred.resolve(this._parse(data));
+    }, () => {
+      deferred.reject();
+    });
+    return deferred;
+  }
+
   create(attributes) {
     let deferred = $.Deferred();
     this.ajax(null, HttpMethods.POST, attributes).then(data => {
@@ -56,6 +66,19 @@ class JsonApiHttpAdapter {
     return deferred;
   }
 
+  _parseRelationship(relationship) {
+    let result = {};
+    if (relationship.data instanceof Array) {
+      result.id = relationship.data.map(item => item.id);
+    } else {
+      result.id = relationship.data.id;
+    }
+    if (relationship.links && relationship.links.related) {
+      result.link = relationship.links.related;
+    } 
+    return result;
+  }
+
   _parse(jsonApiData) {
     let result = {};
     Object.assign(result, jsonApiData.data.attributes);
@@ -63,12 +86,8 @@ class JsonApiHttpAdapter {
     if (jsonApiData.data.relationships) {
       result.relationships = {};
       Object.keys(jsonApiData.data.relationships).forEach((key, index) => {
-        let relationshipData = jsonApiData.data.relationships[key].data;
-        if (relationshipData instanceof Array) {
-          result.relationships[key] = relationshipData.map(item => item.id);
-        } else {
-          result.relationships[key] = relationshipData.id;
-        }
+        let relationship = jsonApiData.data.relationships[key];
+        result.relationships[key] = this._parseRelationship(relationship);
       });
     }
     return result;
@@ -77,7 +96,7 @@ class JsonApiHttpAdapter {
   _serialize(obj) {
     let result = {
       data: {
-        id: obj.id
+        id: obj.id,
         attributes: {}
       }
     };
@@ -106,7 +125,7 @@ class JsonApiHttpAdapter {
       } else {
         result[key] = {
           data: {
-            id: relationships[key];
+            id: relationships[key]
           }
         }
       }
@@ -140,6 +159,24 @@ class JsonApiHttpAdapter {
     $.ajax(options);
     return deferred;
   }
+
+  _ajaxByLink(link) {
+    let deferred = $.Deferred();
+    let options = {
+      url: link,
+      type: HttpMethods.GET,
+      contentType: 'application/vnd.api+json',
+      success: data => {
+        deferred.resolve(data);
+      },
+      error: () => {
+        deferred.reject();
+      }
+    };
+    $.ajax(options);
+    return deferred;
+  }
+
 }
 
 export {JsonApiHttpAdapter};

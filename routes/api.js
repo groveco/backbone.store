@@ -14,7 +14,10 @@ router.get('/user/12', function(req, res, next) {
           data: {
             id: 42,
             type: 'pantry'
-          }
+          },
+            links: {
+              related: 'api/pantry/42'
+            }
         }
       }
     }

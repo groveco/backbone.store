@@ -31,14 +31,14 @@ class Repository {
     return deferred;
   }
 
-  getById(id) {
+  get(func, id) {
     let deferred = $.Deferred();
     let model = this.collection.get(id);
     if (model) {
       deferred.resolve(model);
     } else {
       model = new this.modelClass();
-      this._adapter.getById(id).then(data => {
+      func().then(data => {
         model.set(data);
         this.collection.set(model);
         deferred.resolve(model);
@@ -47,6 +47,16 @@ class Repository {
       });
     }
     return deferred;
+  }
+
+  getById(id) {
+    let func = this._adapter.getById.bind(this._adapter, id);
+    return this.get(func, id);
+  }
+
+  getByLink(id, link) {
+    let func = this._adapter.getByLink.bind(this._adapter, link);
+    return this.get(func, id);
   }
 
   create(attributes) {

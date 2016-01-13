@@ -6,16 +6,21 @@ let store = null;
 let addGetAsync = function (store) {
   Backbone.Model.prototype.getAsync = function (type) {
     let modelName = this.relatedModels[type];
-    if (modelName) {
-      let id = this.get(type);
-      let repository = store.getRepository(modelName);
-      if (repository) {
-        return repository.getById(id);
-      } else {
-        throw new Error('Can`t get repository for "' + type + '".');
-      }
+
+    let relationship = this.get('relationships')[modelName];
+    if (!relationship) {
+      throw new Error('There is no related model "' + modelName + '".');
+    }
+
+    let repository = store.getRepository(modelName);
+    if (!repository) {
+      throw new Error('Can`t get repository for "' + modelName + '".');
+    }
+
+    if (relationship.link) {
+      return repository.getByLink(relationship.id, relationship.link);
     } else {
-      throw new Error('There is no related model "' + type + '".');
+      return repository.getById(relationship.id);
     }
   }
 };
