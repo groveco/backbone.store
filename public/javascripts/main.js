@@ -1,10 +1,10 @@
 import {factory} from './repository-factory'
-import {factory as storeFact} from './store-factory'
+import {Store} from './store'
 import {User} from './models/user'
 import {Pantry} from './models/pantry'
 import {Shipment} from './models/shipment'
 
-let store = storeFact.getStore();
+let store = Store.instance();
 let userRepository = factory('user', User, '/api/user/');
 let pantryRepository = factory('pantry', Pantry, '/api/pantry/');
 let shipmentRepository = factory('shipment', Shipment, '/api/shipment/');
