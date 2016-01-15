@@ -1,93 +1,25 @@
-Backbone.Model.prototype.getModelAsync = function (key, callback) {
-  var relatedModels;
-  if (typeof this.relatedModels === 'function') {
-    relatedModels = this.relatedModels();
-  } else {
-    relatedModels = this.relatedModels;
-  }
+import {factory} from './repository-factory'
+import {factory as storeFact} from './store-factory'
+import {User} from './models/user'
+import {Pantry} from './models/pantry'
+import {Shipment} from './models/shipment'
 
-  var modelClass = relatedModels[key];
-  var model = new modelClass();
-  model.set(model.idAttribute, this.get(key));
+let store = storeFact.getStore();
+let userRepository = factory('user', User, '/api/user/');
+let pantryRepository = factory('pantry', Pantry, '/api/pantry/');
+let shipmentRepository = factory('shipment', Shipment, '/api/shipment/');
 
-  return model.fetch().done(function () {
-    callback(model);
-  });
-};
+store.register(userRepository);
+store.register(pantryRepository);
+store.register(shipmentRepository);
 
-Backbone.Model.prototype.getCollectionAsync = function (key, callback) {
-  var relatedCollections;
-  if (typeof this.relatedCollections === 'function') {
-    relatedCollections = this.relatedCollections();
-  } else {
-    relatedCollections = this.relatedCollections;
-  }
-
-  var collectionClass = relatedCollections[key];
-  var collection = new collectionClass();
-
-  var data = {};
-  data[this.relationalQueryParam] = this.id;
-  return collection.fetch({
-    data: data
-  }).done(function () {
-    callback(collection);
-  });
-};
-
-var User = Backbone.Model.extend({
-  urlRoot: '/api/user',
-  relatedModels: function () {
-    return {
-      pantry: Pantry
-    }
-  }
-});
-
-var Pantry = Backbone.Model.extend({
-  urlRoot: '/api/pantry',
-  relationalQueryParam: 'pantry',
-  relatedModels: {
-    user: User
-  },
-  relatedCollections: function () {
-    return {
-      shipments: Shipments
-    }
-  }
-});
-
-var Shipment = Backbone.Model.extend({});
-var Shipments = Backbone.Collection.extend({
-  model: Shipment,
-  url: '/api/shipments'
-});
-
-var user = new User({
-  id: 12
-});
-
-// just relational
-
-user.fetch().done(function () {
-  user.getModelAsync('pantry', function (pantry) {
-    console.log(pantry.get('name'));
-    pantry.getCollectionAsync('shipments', function(shipments) {
-      console.log(shipments);
-    })
-  });
-});
-
-// repository
-
-var repository = new Repository(Backbone.Collection.extend({
-  model: User
-}));
-
-repository.getById(12).done(function (user) {
-  console.log(user);
-  // should not send a request
-  repository.getById(12).done(function (user) {
-    console.log(user);
-  });
+let repo = store.getRepository('user');
+let deferred = repo.getById(12);
+deferred.then(model => {
+  console.log('user ->');
+  console.log(model);
+  model.getAsync('pantry').then(pantry => {
+    console.log('pantry ->');
+    console.log(pantry);
+  })
 });

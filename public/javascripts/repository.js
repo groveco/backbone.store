@@ -1,77 +1,112 @@
-window.Repository = (function () {
+import $ from 'jquery';
+let Backbone = require('backbone');
 
-  function Repository(collectionClass) {
-    this.collectionClass = collectionClass;
-    this.modelClass = collectionClass.prototype.model;
+class Repository {
+
+  constructor(modelName, collectionClass, adapter) {
+    let collection = new collectionClass();
+    if (collection instanceof Backbone.Model) {
+      this.modelClass = collectionClass;
+      this.collectionClass = Backbone.Collection;
+    } else {
+      this.collectionClass = collectionClass;
+      this.modelClass = collectionClass.prototype.model;
+    }
     this.collection = new this.collectionClass();
+    this._adapter = adapter;
+    this.modelName = modelName;
   }
 
-  Repository.prototype.query = function (options) {
-    var that = this;
+  query(options) {
     var deferred = $.Deferred();
     var collection = new this.collectionClass();
     collection.fetch({
       data: options
-    }).then(function () {
-      that.collection.set(collection.models);
+    }).then(() => {
+      this.collection.set(collection.models);
       deferred.resolve(collection);
-    }, function (xhr) {
-      deferred.reject(xhr.responseText);
+    }, () => {
+      deferred.reject();
     });
     return deferred;
-  };
+  }
 
-  Repository.prototype.getById = function (id) {
-    var that = this;
-    var deferred = $.Deferred();
-    var model = this.collection.get(id);
+  get(func, id) {
+    let deferred = $.Deferred();
+    let model = this.collection.get(id);
     if (model) {
       deferred.resolve(model);
     } else {
       model = new this.modelClass();
-      model.set(model.idAttribute, id);
-      model.fetch().then(function () {
-        that.collection.set(model);
+      func().then(data => {
+        model.set(data);
+        this.collection.set(model);
         deferred.resolve(model);
-      }, function (xhr) {
+      }, () => {
         deferred.reject(xhr.responseText);
       });
     }
     return deferred;
-  };
+  }
 
-  Repository.prototype.save = function (id, attributes) {
+  getById(id) {
+    let func = this._adapter.getById.bind(this._adapter, id);
+    return this.get(func, id);
+  }
+
+  getByLink(id, link) {
+    let func = this._adapter.getByLink.bind(this._adapter, link);
+    return this.get(func, id);
+  }
+
+  create(attributes) {
     attributes = attributes || {};
-    var that = this;
-    var deferred = $.Deferred();
-    var model;
-    if (id instanceof this.modelClass) {
-      model = id;
-    } else {
+    let deferred = $.Deferred();
+    let model = this.collection.get(id);
+    if (!model) {
       model = new this.modelClass();
-      model.set(model.isAttribute, id);
+      this._adapter.save(attributes).then(data => {
+        model.set(data);
+        this.collection.set(model);
+        deferred.resolve(model);
+      }, () => {
+        deferred.reject(xhr.responseText);
+      });
+    } else {
+      deferred.reject('Model already exists');
     }
+    return deferred;
+  }
+
+  update(model, attributes) {
+    let deferred = $.Deferred();
     model.set(attributes);
-    model.save().then(function () {
-      that.collection.set(model);
+    this._adapter.update(model.id, model.toJSON()).then((data) => {
+      this.collection.remove(model);
+      model.clear().set(data);
+      this.collection.add(model);
       deferred.resolve(model);
-    }, function (xhr) {
-      deferred.reject(xhr.responseText);
+    }, () => {
+      deferred.reject();
     });
     return deferred;
-  };
+  }
 
-  Repository.prototype.delete = function (id) {
-    var that = this;
-    var deferred = $.Deferred();
-    var model = this.collection.get(id);
-    model.destroy().then(function () {
-      deferred.resolve();
-    }, function (xhr) {
-      deferred.reject(xhr.responseText);
-    });
+  destroy(id) {
+    let deferred = $.Deferred();
+    let model = this.collection.get(id);
+    if (model) {
+      this._adapter.destroy(id).then(() => {
+        this.collection.remove(model);
+        deferred.resolve();
+      }, () => {
+        deferred.reject();
+      });
+    } else {
+      deferred.reject('Model already exists');
+    }
     return deferred;
-  };
+  }
+}
 
-  return Repository;
-})();
+export {Repository};

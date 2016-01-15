@@ -3,33 +3,89 @@ var router = express.Router();
 
 router.get('/user/12', function(req, res, next) {
   res.send({
-    id: 12,
-    name: 'foo',
-    pantry: 42
+    data: {
+      id: 12,
+      type: 'user',
+      attributes: {
+        name: 'foo'
+      },
+      relationships: {
+        'pantry': {
+          data: {
+            id: 42,
+            type: 'pantry'
+          },
+            links: {
+              related: 'api/pantry/42'
+            }
+        }
+      }
+    }
   });
 });
 
 router.get('/pantry/42', function(req, res, next) {
   res.send({
-    id: 42,
-    user: 12,
-    name: 'bar'
+    data: {
+      id: 42,
+      attributes: {
+        name: 'bar'
+      },
+      relationships: {
+        'user': {
+          data: {
+            id: 12,
+            type: 'user'
+          }
+        }
+      }
+    }
   });
 });
 
-router.get('/shipments', function(req, res, next) {
+router.get('/shipment', function(req, res, next) {
   res.send([{
-    id: 1,
-    pantry: 52,
-    name: 'shipment1'
+    data: {
+      id: 1,
+      type: 'shipment',
+      attributes: {
+        name: 'shipment1'
+      },
+      relationships: {
+        'pantry': {
+          id: 52,
+          type: 'pantry'
+        }
+      }
+    }
   }, {
-    id: 2,
-    pantry: 52,
-    name: 'shipment2'
+    data: {
+      id: 2,
+      type: 'shipment',
+      attributes: {
+        name: 'shipment2'
+      },
+      relationships: {
+        'pantry': {
+          id: 52,
+          type: 'pantry'
+        }
+      }
+    }
   }, {
-    id: 3,
-    pantry: 52,
-    name: 'shipment3'
+    data: {
+      id: 3,
+      type: 'shipment',
+      attributes: {
+        name: 'shipment3'
+      },
+      relationships: {
+        'pantry': {
+          id: 52,
+          type: 'pantry'
+        }
+      }
+    }
   }]);
 });
 
