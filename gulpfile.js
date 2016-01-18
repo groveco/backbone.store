@@ -2,8 +2,18 @@ var babelify = require('babelify');
 var browserify = require('browserify');
 var gulp = require('gulp');
 var remapify = require('remapify');
+var Server = require('karma').Server;
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
+
+gulp.task('karma', function () {
+  new Server({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
+  }, function (exitCode) {
+    process.exit(exitCode);
+  }).start();
+});
 
 gulp.task('watchify', function() {
   var b = browserify('public/javascripts/main.js', {
