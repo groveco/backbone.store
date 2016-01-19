@@ -1,4 +1,3 @@
-import assert from 'assert';
 import {JsonApiParser} from '../json-api-parser'
 
 let jsonApiData = {
