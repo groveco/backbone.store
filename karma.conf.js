@@ -14,7 +14,10 @@ module.exports = function (config) {
 
     browserify: {
       transform: [['babelify', {presets: ['es2015']}]],
-      debug: true
+      debug: true,
+      configure: function (b) {
+        b.add(require.resolve('babel-polyfill'));
+      }
     },
 
     autoWatch: false,

@@ -31,7 +31,7 @@ class Repository {
     return deferred;
   }
 
-  get(func, id) {
+  _get(func, id) {
     let deferred = $.Deferred();
     let model = this.collection.get(id);
     if (model) {
@@ -51,12 +51,12 @@ class Repository {
 
   getById(id) {
     let func = this._adapter.getById.bind(this._adapter, id);
-    return this.get(func, id);
+    return this._get(func, id);
   }
 
   getByLink(id, link) {
     let func = this._adapter.getByLink.bind(this._adapter, link);
-    return this.get(func, id);
+    return this._get(func, id);
   }
 
   create(attributes) {

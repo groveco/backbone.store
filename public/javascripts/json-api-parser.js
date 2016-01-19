@@ -1,4 +1,5 @@
 class JsonApiParser {
+
   parse(jsonApiData) {
     let result = {};
     Object.assign(result, jsonApiData.data.attributes);
@@ -21,7 +22,7 @@ class JsonApiParser {
       }
     };
     if (obj.relationships) {
-      result.relationships = this._serializeRelationships(obj.relationships);
+      result.data.relationships = this._serializeRelationships(obj.relationships);
     }
     Object.keys(obj).forEach((key, index) => {
       if (key !== 'relationships' && key !== 'id') {
@@ -45,20 +46,20 @@ class JsonApiParser {
   }
 
   _serializeRelationships(relationships) {
-    result = {};
+    let result = {};
     Object.keys(relationships).forEach((key, index) => {
       if (relationships[key] instanceof Array) {
         result[key] = relationships[key].map(item => {
           return {
             data: {
-              id: item
+              id: item.id
             }
           };
         });
       } else {
         result[key] = {
           data: {
-            id: relationships[key]
+            id: relationships[key].id
           }
         }
       }
