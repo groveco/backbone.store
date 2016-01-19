@@ -9,13 +9,30 @@ let jsonApiData = {
       name: 'foo'
     },
     relationships: {
-      'pantry': {
+      pantry: {
         data: {
           id: 42,
           type: 'pantry'
         },
         links: {
           related: '/api/pantry/42'
+        }
+      },
+      addresses: {
+        data: [
+          {
+            id: 1,
+            type: 'address'
+          }, {
+            id: 2,
+            type: 'address'
+          }, {
+            id: 3,
+            type: 'address'
+          }
+        ],
+        links: {
+          related: '/api/address'
         }
       }
     }
@@ -29,6 +46,10 @@ let parsedData = {
     pantry: {
       id: 42,
       link: '/api/pantry/42'
+    },
+    addresses: {
+      id: [1, 2, 3],
+      link: '/api/address'
     }
   }
 };
@@ -40,10 +61,21 @@ let serializedData = {
       name: 'foo'
     },
     relationships: {
-      'pantry': {
+      pantry: {
         data: {
           id: 42
         }
+      },
+      addresses: {
+        data: [
+          {
+            id: 1
+          }, {
+            id: 2
+          }, {
+            id: 3
+          }
+        ]
       }
     }
   }

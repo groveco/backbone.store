@@ -48,14 +48,14 @@ class JsonApiParser {
   _serializeRelationships(relationships) {
     let result = {};
     Object.keys(relationships).forEach((key, index) => {
-      if (relationships[key] instanceof Array) {
-        result[key] = relationships[key].map(item => {
-          return {
-            data: {
-              id: item.id
+      if (relationships[key].id instanceof Array) {
+        result[key] ={
+          data: relationships[key].id.map(id => {
+            return {
+              id: id
             }
-          };
-        });
+          })
+        };
       } else {
         result[key] = {
           data: {
