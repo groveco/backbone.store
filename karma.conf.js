@@ -13,10 +13,13 @@ module.exports = function (config) {
     },
 
     browserify: {
-      transform: [['babelify', {presets: ['es2015']}]],
+      transform: [['babelify', {presets: ['es2015']}], 'browserify-shim'],
       debug: true,
       configure: function (b) {
         b.add(require.resolve('babel-polyfill'));
+        b.on('prebundle', function () {
+          b.require('./node_modules/underscore/underscore.js', {expose: 'underscore'});
+        });
       }
     },
 

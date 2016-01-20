@@ -1,5 +1,5 @@
 import $ from 'jquery';
-let Backbone = require('backbone');
+import Backbone from 'backbone';
 
 class Repository {
 
@@ -7,7 +7,9 @@ class Repository {
     let collection = new collectionClass();
     if (collection instanceof Backbone.Model) {
       this.modelClass = collectionClass;
-      this.collectionClass = Backbone.Collection;
+      this.collectionClass = Backbone.Collection.extend({
+        model: this.modelClass
+      });
     } else {
       this.collectionClass = collectionClass;
       this.modelClass = collectionClass.prototype.model;
