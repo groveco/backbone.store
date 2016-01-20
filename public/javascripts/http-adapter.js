@@ -39,7 +39,7 @@ class HttpAdapter {
 
   create(attributes) {
     let deferred = $.Deferred();
-    this.ajax(null, HttpMethods.POST, attributes).then(data => {
+    this._ajax(null, HttpMethods.POST, attributes).then(data => {
       deferred.resolve(this._parser.parse(data));
     }, () => {
       deferred.reject();
@@ -49,7 +49,7 @@ class HttpAdapter {
 
   update(id, attributes) {
     let deferred = $.Deferred();
-    this.ajax(id, HttpMethods.PUT, attributes).then(data => {
+    this._ajax(id, HttpMethods.PUT, attributes).then(data => {
       deferred.resolve(this._parser.parse(data));
     }, () => {
       deferred.reject();
@@ -84,7 +84,7 @@ class HttpAdapter {
       options.url += id + '/';
     }
     if (data) {
-      if (type in ['POST', 'PUT']) {
+      if ([HttpMethods.POST, HttpMethods.PUT].indexOf(type) > -1) {
         options.data = JSON.stringify(data);
       } else {
         options.data = data;

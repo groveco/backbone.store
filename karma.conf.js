@@ -2,7 +2,7 @@ module.exports = function (config) {
   config.set({
     browsers: ['PhantomJS'],
 
-    frameworks: ['browserify', 'mocha', 'chai-spies', 'chai'],
+    frameworks: ['browserify', 'mocha', 'chai-spies', 'chai', 'sinon'],
 
     files: [
       './public/javascripts/tests/**/test-*.js'

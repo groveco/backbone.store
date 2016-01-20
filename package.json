@@ -26,11 +26,13 @@
     "karma-chai-spies": "^0.1.4",
     "karma-mocha": "^0.2.1",
     "karma-phantomjs-launcher": "^0.2.3",
+    "karma-sinon": "^1.0.4",
     "mocha": "^2.3.4",
     "morgan": "~1.6.1",
     "phantomjs": "^1.9.19",
     "remapify": "^2.1.0",
     "serve-favicon": "~2.3.0",
+    "sinon": "^1.17.2",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.6.1"
   }
