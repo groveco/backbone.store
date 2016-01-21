@@ -23,15 +23,19 @@ let addGetAsync = function (store) {
 };
 
 let store = null;
+let privateEnforcer = Symbol();
 
 class Store {
-  constructor() {
+  constructor(enforcer) {
+    if (enforcer !== privateEnforcer) {
+      throw new Error("Constructor is private, use Store.instance() instead");
+    }
     this._repositories = new Map();
   }
 
   static instance() {
     if (store === null) {
-      store = new Store();
+      store = new Store(privateEnforcer);
       addGetAsync(store);
     }
     return store;

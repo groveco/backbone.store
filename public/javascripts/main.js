@@ -1,13 +1,13 @@
-import {factory} from './repository-factory'
+import {repositoryFactory} from './repository-factory'
 import {Store} from './store'
 import {User} from './models/user'
 import {Pantry} from './models/pantry'
 import {Shipment} from './models/shipment'
 
 let store = Store.instance();
-let userRepository = factory('user', User, '/api/user/');
-let pantryRepository = factory('pantry', Pantry, '/api/pantry/');
-let shipmentRepository = factory('shipment', Shipment, '/api/shipment/');
+let userRepository = repositoryFactory('user', User, '/api/user/');
+let pantryRepository = repositoryFactory('pantry', Pantry, '/api/pantry/');
+let shipmentRepository = repositoryFactory('shipment', Shipment, '/api/shipment/');
 
 store.register(userRepository);
 store.register(pantryRepository);
