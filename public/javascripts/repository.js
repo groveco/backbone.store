@@ -33,24 +33,6 @@ class Repository {
     return deferred;
   }
 
-  _get(func, id) {
-    let deferred = $.Deferred();
-    let model = this.collection.get(id);
-    if (model) {
-      deferred.resolve(model);
-    } else {
-      model = new this.modelClass();
-      func().then(data => {
-        model.set(data);
-        this.collection.set(model);
-        deferred.resolve(model);
-      }, () => {
-        deferred.reject(xhr.responseText);
-      });
-    }
-    return deferred;
-  }
-
   getById(id) {
     let func = this._adapter.getById.bind(this._adapter, id);
     return this._get(func, id);
@@ -64,19 +46,14 @@ class Repository {
   create(attributes) {
     attributes = attributes || {};
     let deferred = $.Deferred();
-    let model = this.collection.get(id);
-    if (!model) {
-      model = new this.modelClass();
-      this._adapter.save(attributes).then(data => {
-        model.set(data);
-        this.collection.set(model);
-        deferred.resolve(model);
-      }, () => {
-        deferred.reject(xhr.responseText);
-      });
-    } else {
-      deferred.reject('Model already exists');
-    }
+    let model = new this.modelClass();
+    this._adapter.create(attributes).then(data => {
+      model.set(data);
+      this.collection.set(model);
+      deferred.resolve(model);
+    }, () => {
+      deferred.reject();
+    });
     return deferred;
   }
 
@@ -84,9 +61,7 @@ class Repository {
     let deferred = $.Deferred();
     model.set(attributes);
     this._adapter.update(model.id, model.toJSON()).then((data) => {
-      this.collection.remove(model);
       model.clear().set(data);
-      this.collection.add(model);
       deferred.resolve(model);
     }, () => {
       deferred.reject();
@@ -105,7 +80,25 @@ class Repository {
         deferred.reject();
       });
     } else {
-      deferred.reject('Model already exists');
+      deferred.reject('Model does not exist');
+    }
+    return deferred;
+  }
+
+  _get(func, id) {
+    let deferred = $.Deferred();
+    let model = this.collection.get(id);
+    if (model) {
+      deferred.resolve(model);
+    } else {
+      model = new this.modelClass();
+      func().then(data => {
+        model.set(data);
+        this.collection.set(model);
+        deferred.resolve(model);
+      }, () => {
+        deferred.reject();
+      });
     }
     return deferred;
   }
