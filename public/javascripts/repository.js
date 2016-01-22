@@ -19,20 +19,6 @@ class Repository {
     this.modelName = modelName;
   }
 
-  query(options) {
-    var deferred = $.Deferred();
-    var collection = new this.collectionClass();
-    collection.fetch({
-      data: options
-    }).then(() => {
-      this.collection.set(collection.models);
-      deferred.resolve(collection);
-    }, () => {
-      deferred.reject();
-    });
-    return deferred;
-  }
-
   getById(id) {
     let func = this._adapter.getById.bind(this._adapter, id);
     return this._get(func, id);
@@ -41,6 +27,19 @@ class Repository {
   getByLink(id, link) {
     let func = this._adapter.getByLink.bind(this._adapter, link);
     return this._get(func, id);
+  }
+
+  getCollectionByLink(link) {
+    let deferred = $.Deferred();
+    let collection = new this.collectionClass();
+    this._adapter.getByLink(link).then(data => {
+      collection.set(data);
+      this.collection.set(collection.models);
+      deferred.resolve(collection);
+    }, () => {
+      deferred.reject();
+    });
+    return deferred;
   }
 
   create(attributes) {

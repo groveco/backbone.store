@@ -1,3 +1,4 @@
+import $ from 'jquery'
 import Backbone from 'backbone'
 import {HttpAdapter} from '../http-adapter'
 import {JsonApiParser} from '../json-api-parser'
@@ -45,6 +46,14 @@ describe('Repository', function () {
     let link = '/api/user/42/';
     let spy = chai.spy.on(this.repository._adapter, 'getByLink');
     this.repository.getByLink(id, link);
+    spy.should.have.been.called.with(link);
+  });
+
+  it('calls adapter\'s getByLink method on own getCollectionByLink', function () {
+    let id = 42;
+    let link = '/api/user/42/';
+    let spy = chai.spy.on(this.repository._adapter, 'getByLink');
+    this.repository.getCollectionByLink(link);
     spy.should.have.been.called.with(link);
   });
 
@@ -100,6 +109,27 @@ describe('Repository', function () {
     let link = '/api/user/1/';
     this.fakeRepository.getByLink(link);
     assert.lengthOf(this.fakeRepository.collection, 1);
+  });
+
+  it('adds models to cache on getCollectionByLink', function () {
+    let link = '/api/user/1/';
+    let collection = [{
+      id: 1,
+      name: 'foo1'
+    }, {
+      id: 2,
+      name: 'foo2'
+    }, {
+      id: 3,
+      name: 'foo3'
+    }];
+    this.fakeRepository._adapter.getByLink = function () {
+      let deferred = $.Deferred();
+      deferred.resolve(collection);
+      return deferred;
+    };
+    this.fakeRepository.getCollectionByLink(link);
+    assert.lengthOf(this.fakeRepository.collection, collection.length);
   });
 
   it('adds model to cache on create', function () {

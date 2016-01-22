@@ -80,6 +80,36 @@ let serializedData = {
   }
 };
 
+let jsonApiCollection = {
+  data: [{
+    id: 1,
+    attributes: {
+      name: 'foo1'
+    }
+  },{
+    id: 2,
+    attributes: {
+      name: 'foo2'
+    }
+  }, {
+    id: 3,
+    attributes: {
+      name: 'foo3'
+    }
+  }]
+};
+
+let parsedCollection = [{
+  id: 1,
+  name: 'foo1'
+}, {
+  id: 2,
+  name: 'foo2'
+}, {
+  id: 3,
+  name: 'foo3'
+}];
+
 describe('JSON API parser', () => {
 
   before(function () {
@@ -94,5 +124,10 @@ describe('JSON API parser', () => {
   it('serializes data', function () {
     let serialized = this.parser.serialize(parsedData);
     assert.deepEqual(serialized, serializedData);
+  });
+
+  it('parses collection', function () {
+    let parsed = this.parser.parse(jsonApiCollection);
+    assert.deepEqual(parsed, parsedCollection);
   });
 });

@@ -1,15 +1,12 @@
 class JsonApiParser {
 
   parse(jsonApiData) {
-    let result = {};
-    Object.assign(result, jsonApiData.data.attributes);
-    result.id = jsonApiData.data.id;
-    if (jsonApiData.data.relationships) {
-      result.relationships = {};
-      Object.keys(jsonApiData.data.relationships).forEach((key) => {
-        let relationship = jsonApiData.data.relationships[key];
-        result.relationships[key] = this._parseRelationship(relationship);
-      });
+    let result = null;
+    let data = jsonApiData.data;
+    if (data instanceof Array) {
+      result = data.map(elem => this._parseSingleObject(elem));
+    } else {
+      result = this._parseSingleObject(data);
     }
     return result;
   }
@@ -29,6 +26,20 @@ class JsonApiParser {
         result.data.attributes[key] = obj[key];
       }
     });
+    return result;
+  }
+
+  _parseSingleObject(object) {
+    let result = {};
+    Object.assign(result, object.attributes);
+    result.id = object.id;
+    if (object.relationships) {
+      result.relationships = {};
+      Object.keys(object.relationships).forEach((key) => {
+        let relationship = object.relationships[key];
+        result.relationships[key] = this._parseRelationship(relationship);
+      });
+    }
     return result;
   }
 

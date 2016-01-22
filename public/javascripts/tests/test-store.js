@@ -83,13 +83,31 @@ describe('getAsync', function () {
     spy.should.have.been.called.with(id);
   });
 
+  it('calls getCollectionByLink in repository if collection relation name is passed', function () {
+    let link = '/api/tests/';
+    let model = new RelationalModel({
+      id: 1,
+      relationships: {
+        tests: {
+          link: link
+        }
+      }
+    });
+    let store = Store.instance();
+    let repo = createFakeRepository();
+    let spy = chai.spy.on(repo, 'getCollectionByLink');
+    store.register(repo);
+    model.getAsync('tests');
+    spy.should.have.been.called.with(link);
+  });
+
   it('throws exception if related model with this name is not defined', function () {
     let relation = 'notexisting';
     let model = new RelationalModel();
     let func = function () {
       model.getAsync(relation);
     };
-    assert.throws(func, 'Relation for "' + relation + '" is not defined.');
+    assert.throws(func, 'Relation for "' + relation + '" is not defined in the model.');
   });
 
   it('throws exception if there\'s no data in relation', function () {
@@ -116,5 +134,25 @@ describe('getAsync', function () {
       model.getAsync(relation);
     };
     assert.throws(func, 'Can`t get repository for "' + relationType + '".');
+  });
+
+  it('throws exception if link is not set for the collection', function () {
+    let relation = 'tests';
+    let model = new RelationalModel({
+      id: 1,
+      relationships: {
+        tests: {
+          id: [1, 2]
+        }
+      }
+    });
+    let store = Store.instance();
+    let repo = createFakeRepository();
+    let spy = chai.spy.on(repo, 'getCollectionByLink');
+    store.register(repo);
+    let func = function () {
+      model.getAsync(relation);
+    };
+    assert.throws(func, 'Can\'t fetch collection of "' + model.relatedCollections[relation] + '" without link.');
   });
 });

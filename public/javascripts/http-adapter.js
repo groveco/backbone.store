@@ -2,19 +2,10 @@ import $ from 'jquery'
 import {HttpMethods} from './http-methods'
 
 class HttpAdapter {
+
   constructor(url, parser) {
     this._parser = parser;
     this._url = url;
-  }
-
-  query(options) {
-    let deferred = $.Deferred();
-    this._ajax(null, HttpMethods.GET, options).then(data => {
-      deferred.resolve(this._parser.parse(data));
-    }, () => {
-      deferred.reject();
-    });
-    return deferred;
   }
 
   getById(id) {

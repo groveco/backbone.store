@@ -2,9 +2,14 @@ import Backbone from 'backbone'
 
 let addGetAsync = function (store) {
   Backbone.Model.prototype.getAsync = function (type) {
+    let isCollection = false;
     let modelName = this.relatedModels && this.relatedModels[type];
     if (!modelName) {
-      throw new Error('Relation for "' + type + '" is not defined.');
+      modelName = this.relatedCollections && this.relatedCollections[type];
+      isCollection = true;
+    }
+    if (!modelName) {
+      throw new Error('Relation for "' + type + '" is not defined in the model.');
     }
 
     let relationship = this.get('relationships') && this.get('relationships')[type];
@@ -17,10 +22,18 @@ let addGetAsync = function (store) {
       throw new Error('Can`t get repository for "' + modelName + '".');
     }
 
-    if (relationship.link) {
-      return repository.getByLink(relationship.id, relationship.link);
+    if (isCollection) {
+      if (relationship.link) {
+        return repository.getCollectionByLink(relationship.link);
+      } else {
+        throw new Error('Can\'t fetch collection of "' + modelName + '" without link.');
+      }
     } else {
-      return repository.getById(relationship.id);
+      if (relationship.link) {
+        return repository.getByLink(relationship.id, relationship.link);
+      } else {
+        return repository.getById(relationship.id);
+      }
     }
   }
 };
