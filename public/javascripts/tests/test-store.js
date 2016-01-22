@@ -1,5 +1,8 @@
 import Backbone from 'backbone'
+import {FakeAdapter} from './test-classes/adapter'
 import {Model} from './test-classes/model'
+import {RelationalModel} from './test-classes/relational-model'
+import {Repository} from '../repository'
 import {repositoryFactory} from '../repository-factory'
 import {Store} from '../store'
 
@@ -7,9 +10,13 @@ let createRepository = function () {
   return repositoryFactory('model', Model, '/api/model/')
 };
 
+let createFakeRepository = function () {
+  return new Repository('test', Model, new FakeAdapter());
+};
+
 describe('Store', function () {
 
-  it('adds getAsync to Backbone model on first instantiation', function () {
+  it('is added to Backbone model on first store instantiation', function () {
     assert.notProperty(Backbone.Model.prototype, 'getAsync');
     Store.instance();
     assert.property(Backbone.Model.prototype, 'getAsync');
@@ -32,6 +39,82 @@ describe('Store', function () {
     let repo = createRepository();
     let store = Store.instance();
     store.register(repo);
-    assert(store.getRepository(repo.modelName))
-  })
+    assert(store.getRepository(repo.modelName));
+  });
+});
+
+describe('getAsync', function () {
+
+  it('calls getByLink in repository if link is provided', function () {
+    let id = 2;
+    let link = '/api/test/2/';
+    let model = new RelationalModel({
+      id: 1,
+      relationships: {
+        test: {
+          id: id,
+          link: link
+        }
+      }
+    });
+    let store = Store.instance();
+    let repo = createFakeRepository();
+    let spy = chai.spy.on(repo, 'getByLink');
+    store.register(repo);
+    model.getAsync('test');
+    spy.should.have.been.called.with(id, link);
+  });
+
+  it('calls getById in repository if link is not provided', function () {
+    let id = 2;
+    let model = new RelationalModel({
+      id: 1,
+      relationships: {
+        test: {
+          id: id
+        }
+      }
+    });
+    let store = Store.instance();
+    let repo = createFakeRepository();
+    let spy = chai.spy.on(repo, 'getById');
+    store.register(repo);
+    model.getAsync('test');
+    spy.should.have.been.called.with(id);
+  });
+
+  it('throws exception if related model with this name is not defined', function () {
+    let relation = 'notexisting';
+    let model = new RelationalModel();
+    let func = function () {
+      model.getAsync(relation);
+    };
+    assert.throws(func, 'Relation for "' + relation + '" is not defined.');
+  });
+
+  it('throws exception if there\'s no data in relation', function () {
+    let relation = 'test';
+    let model = new RelationalModel();
+    let func = function () {
+      model.getAsync(relation);
+    };
+    assert.throws(func, 'There is no related model "' + relation + '".');
+  });
+
+  it('throws exception if repository is not registered for this model type', function () {
+    let relation = 'test';
+    let relationType = 'notexisting';
+    let model = new RelationalModel({
+      relationships: {
+        test: {
+          id: 1
+        }
+      }
+    });
+    model.relatedModels.test = relationType;
+    let func = function () {
+      model.getAsync(relation);
+    };
+    assert.throws(func, 'Can`t get repository for "' + relationType + '".');
+  });
 });

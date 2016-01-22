@@ -2,9 +2,12 @@ import Backbone from 'backbone'
 
 let addGetAsync = function (store) {
   Backbone.Model.prototype.getAsync = function (type) {
-    let modelName = this.relatedModels[type];
+    let modelName = this.relatedModels && this.relatedModels[type];
+    if (!modelName) {
+      throw new Error('Relation for "' + type + '" is not defined.');
+    }
 
-    let relationship = this.get('relationships')[modelName];
+    let relationship = this.get('relationships') && this.get('relationships')[type];
     if (!relationship) {
       throw new Error('There is no related model "' + modelName + '".');
     }
