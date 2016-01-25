@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import Backbone from 'backbone';
 
 class Repository {
@@ -30,76 +29,75 @@ class Repository {
   }
 
   getCollectionByLink(link) {
-    let deferred = $.Deferred();
-    let collection = new this.collectionClass();
-    this._adapter.getByLink(link).then(data => {
-      collection.set(data);
-      this.collection.set(collection.models);
-      deferred.resolve(collection);
-    }, () => {
-      deferred.reject();
+    return new Promise((resolve, reject) => {
+      let collection = new this.collectionClass();
+      this._adapter.getByLink(link).then(data => {
+        collection.set(data);
+        this.collection.set(collection.models);
+        resolve(collection);
+      }, () => {
+        reject();
+      });
     });
-    return deferred;
   }
 
-  create(attributes) {
-    attributes = attributes || {};
-    let deferred = $.Deferred();
-    let model = new this.modelClass();
-    this._adapter.create(attributes).then(data => {
-      model.set(data);
-      this.collection.set(model);
-      deferred.resolve(model);
-    }, () => {
-      deferred.reject();
+  create(attributes = {}) {
+    return new Promise((resolve, reject) => {
+      let model = new this.modelClass();
+      this._adapter.create(attributes).then(data => {
+        model.set(data);
+        this.collection.set(model);
+        resolve(model);
+      }, () => {
+        reject();
+      });
     });
-    return deferred;
   }
 
   update(model, attributes) {
-    let deferred = $.Deferred();
-    model.set(attributes);
-    this._adapter.update(model.id, model.toJSON()).then((data) => {
-      model.clear().set(data);
-      deferred.resolve(model);
-    }, () => {
-      deferred.reject();
+    return new Promise((resolve, reject) => {
+      model.set(attributes);
+      this._adapter.update(model.id, model.toJSON()).then((data) => {
+        model.clear().set(data);
+        resolve(model);
+      }, () => {
+        reject();
+      });
     });
-    return deferred;
   }
 
   destroy(id) {
-    let deferred = $.Deferred();
-    let model = this.collection.get(id);
-    if (model) {
-      this._adapter.destroy(id).then(() => {
-        this.collection.remove(model);
-        deferred.resolve();
-      }, () => {
-        deferred.reject();
-      });
-    } else {
-      deferred.reject('Model does not exist');
-    }
-    return deferred;
+    return new Promise((resolve, reject) => {
+      let model = this.collection.get(id);
+      if (model) {
+        this._adapter.destroy(id).then(() => {
+          this.collection.remove(model);
+          resolve();
+        }, () => {
+          reject();
+        });
+      } else {
+        reject('Model does not exist');
+      }
+    });
   }
 
   _get(func, id) {
-    let deferred = $.Deferred();
-    let model = this.collection.get(id);
-    if (model) {
-      deferred.resolve(model);
-    } else {
-      model = new this.modelClass();
-      func().then(data => {
-        model.set(data);
-        this.collection.set(model);
-        deferred.resolve(model);
-      }, () => {
-        deferred.reject();
-      });
-    }
-    return deferred;
+    return new Promise((resolve, reject) => {
+      let model = this.collection.get(id);
+      if (model) {
+        resolve(model);
+      } else {
+        model = new this.modelClass();
+        func().then(data => {
+          model.set(data);
+          this.collection.set(model);
+          resolve(model);
+        }, () => {
+          reject();
+        });
+      }
+    });
   }
 }
 
