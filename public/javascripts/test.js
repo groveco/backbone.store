@@ -1,8 +1,8 @@
-import {repositoryFactory} from './repository-factory'
-import {Store} from './store'
-import {User} from './models/user'
-import {Pantry} from './models/pantry'
-import {Shipment} from './models/shipment'
+var repositoryFactory = (modelClass, url) => {
+  let parser = new JsonApiParser();
+  let adapter = new HttpAdapter(url, parser);
+  return new Repository(modelClass, adapter);
+};
 
 let store = Store.instance();
 let userRepository = repositoryFactory(User, '/api/user/');

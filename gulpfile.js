@@ -16,9 +16,10 @@ gulp.task('karma', function () {
 });
 
 gulp.task('watchify', function() {
-  var b = browserify('public/javascripts/main.js', {
+  var b = browserify('public/javascripts/index.js', {
     fullPaths: true,
-    debug: true
+    debug: true,
+    standalone: 'BackboneStore'
   });
   b.external('jquery');
   b.transform(babelify, { presets: ['es2015'] });
@@ -41,6 +42,6 @@ var bundleShare = function (b) {
     .on('error', function(e) {
       console.log('ERROR: ' + e.message);
     })
-    .pipe(source('bundle.js'))
+    .pipe(source('backbone-store.js'))
     .pipe(gulp.dest('public/dist/'));
 };
