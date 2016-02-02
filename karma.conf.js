@@ -5,6 +5,9 @@ module.exports = function (config) {
     frameworks: ['browserify', 'mocha', 'chai-spies', 'chai', 'sinon'],
 
     files: [
+      './node_modules/jquery/dist/jquery.js',
+      './node_modules/underscore/underscore.js',
+      './node_modules/backbone/backbone.js',
       './public/javascripts/tests/**/test-*.js'
     ],
 

@@ -20,8 +20,9 @@ gulp.task('watchify', function() {
     fullPaths: true,
     debug: true
   });
-  b.add(require.resolve('babel-polyfill'));
+  b.external('jquery');
   b.transform(babelify, { presets: ['es2015'] });
+  b.transform('browserify-shim');
   var w = watchify(b, {
     poll: true
   });

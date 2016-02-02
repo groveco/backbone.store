@@ -1,11 +1,15 @@
 (function(root, factory) {
 if (typeof define === 'function' && define.amd) {
-define(['moduleName1_amd', 'moduleName2_amd'], factory);
+define(['jquery', 'underscore', 'backbone'], factory);
 } else if (typeof exports === 'object') {
-module.exports = factory(require('moduleName1_cjs'), require('moduleName2_cjs'));
+module.exports = factory(require('jquery'), require('underscore'), require('backbone'));
 } else {
-root.Foo = factory(root.moduleName1_glob, root.moduleName2_glob);
+root.BackboneStore = factory(root.$, root._, root.Backbone);
 }
-}(this, function(moduleName1, moduleName2) {
-<%=  %>
+}(this, function($, _, Backbone) {
+var window = {};
+window.$ = $;
+window._ = _;
+window.Backbone = Backbone;
+<%= contents %>
 }));
