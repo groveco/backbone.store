@@ -18,18 +18,18 @@ describe('Repository', function () {
 
   beforeEach(function () {
     let adapter = createAdapter();
-    this.repository = new Repository('test', TestCollection, adapter);
-    this.fakeRepository = new Repository('test', TestCollection, new FakeAdapter());
+    this.repository = new Repository(TestCollection, adapter);
+    this.fakeRepository = new Repository(TestCollection, new FakeAdapter());
   });
 
   it('is initialized with collection', function () {
-    let repo = new Repository('test', TestCollection, createAdapter());
+    let repo = new Repository(TestCollection, createAdapter());
     assert.equal(repo.collectionClass, TestCollection);
     assert.equal(repo.modelClass, TestModel);
   });
 
   it('is initialized with model', function () {
-    let repo = new Repository('test', TestModel, createAdapter());
+    let repo = new Repository(TestModel, createAdapter());
     assert.equal(repo.collectionClass.prototype.model, TestModel);
     assert.equal(repo.modelClass, TestModel);
   });

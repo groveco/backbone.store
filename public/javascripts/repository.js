@@ -2,7 +2,7 @@ import Backbone from 'backbone';
 
 class Repository {
 
-  constructor(modelName, collectionClass, adapter) {
+  constructor(collectionClass, adapter) {
     let collection = new collectionClass();
     if (collection instanceof Backbone.Model) {
       this.modelClass = collectionClass;
@@ -15,7 +15,6 @@ class Repository {
     }
     this.collection = new this.collectionClass();
     this._adapter = adapter;
-    this.modelName = modelName;
   }
 
   getById(id) {

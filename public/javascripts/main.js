@@ -5,13 +5,13 @@ import {Pantry} from './models/pantry'
 import {Shipment} from './models/shipment'
 
 let store = Store.instance();
-let userRepository = repositoryFactory('user', User, '/api/user/');
-let pantryRepository = repositoryFactory('pantry', Pantry, '/api/pantry/');
-let shipmentRepository = repositoryFactory('shipment', Shipment, '/api/shipment/');
+let userRepository = repositoryFactory(User, '/api/user/');
+let pantryRepository = repositoryFactory(Pantry, '/api/pantry/');
+let shipmentRepository = repositoryFactory(Shipment, '/api/shipment/');
 
-store.register(userRepository);
-store.register(pantryRepository);
-store.register(shipmentRepository);
+store.register('user', userRepository);
+store.register('pantry', pantryRepository);
+store.register('shipment', shipmentRepository);
 
 let repo = store.getRepository('user');
 let deferred = repo.getById(12);

@@ -46,7 +46,7 @@ class Store {
     if (enforcer !== privateEnforcer) {
       throw new Error("Constructor is private, use Store.instance() instead");
     }
-    this._repositories = new Map();
+    this._repositories = {};
   }
 
   static instance() {
@@ -57,12 +57,12 @@ class Store {
     return store;
   }
 
-  register(repository) {
-    this._repositories.set(repository.modelName, repository);
+  register(modelName, repository) {
+    this._repositories[modelName] = repository;
   }
 
   getRepository(modelName) {
-    return this._repositories.get(modelName);
+    return this._repositories[modelName];
   }
 }
 

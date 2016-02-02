@@ -7,11 +7,11 @@ import {repositoryFactory} from '../repository-factory'
 import {Store} from '../store'
 
 let createRepository = function () {
-  return repositoryFactory('model', Model, '/api/model/')
+  return repositoryFactory(Model, '/api/model/')
 };
 
 let createFakeRepository = function () {
-  return new Repository('test', Model, new FakeAdapter());
+  return new Repository(Model, new FakeAdapter());
 };
 
 describe('Store', function () {
@@ -38,8 +38,9 @@ describe('Store', function () {
   it('registers repository', function () {
     let repo = createRepository();
     let store = Store.instance();
-    store.register(repo);
-    assert(store.getRepository(repo.modelName));
+    let name = 'test';
+    store.register('test', repo);
+    assert(store.getRepository(name));
   });
 });
 
@@ -60,7 +61,7 @@ describe('getAsync', function () {
     let store = Store.instance();
     let repo = createFakeRepository();
     let spy = chai.spy.on(repo, 'getByLink');
-    store.register(repo);
+    store.register('test', repo);
     model.getAsync('test');
     spy.should.have.been.called.with(id, link);
   });
@@ -78,7 +79,7 @@ describe('getAsync', function () {
     let store = Store.instance();
     let repo = createFakeRepository();
     let spy = chai.spy.on(repo, 'getById');
-    store.register(repo);
+    store.register('test', repo);
     model.getAsync('test');
     spy.should.have.been.called.with(id);
   });
@@ -96,7 +97,7 @@ describe('getAsync', function () {
     let store = Store.instance();
     let repo = createFakeRepository();
     let spy = chai.spy.on(repo, 'getCollectionByLink');
-    store.register(repo);
+    store.register('test', repo);
     model.getAsync('tests');
     spy.should.have.been.called.with(link);
   });
@@ -149,7 +150,7 @@ describe('getAsync', function () {
     let store = Store.instance();
     let repo = createFakeRepository();
     let spy = chai.spy.on(repo, 'getCollectionByLink');
-    store.register(repo);
+    store.register('test', repo);
     let func = function () {
       model.getAsync(relation);
     };
