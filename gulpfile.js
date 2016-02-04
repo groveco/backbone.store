@@ -1,5 +1,6 @@
 var babelify = require('babelify');
 var browserify = require('browserify');
+var browserifyShim = require('browserify-shim');
 var gulp = require('gulp');
 var remapify = require('remapify');
 var Server = require('karma').Server;
@@ -15,15 +16,13 @@ gulp.task('karma', function () {
   }).start();
 });
 
+gulp.task('browserify', function () {
+  var b = browserifyBundle();
+  return bundleShare(b);
+});
+
 gulp.task('watchify', function() {
-  var b = browserify('src/index.js', {
-    fullPaths: true,
-    debug: true,
-    standalone: 'BackboneStore'
-  });
-  b.external('jquery');
-  b.transform(babelify, { presets: ['es2015'] });
-  b.transform('browserify-shim');
+  var b = browserifyBundle();
   var w = watchify(b, {
     poll: true
   });
@@ -36,6 +35,18 @@ gulp.task('watchify', function() {
   });
   return bundleShare(w);
 });
+
+var browserifyBundle = function () {
+  var b = browserify('src/index.js', {
+    fullPaths: true,
+    debug: true,
+    standalone: 'BackboneStore'
+  });
+  b.external('jquery');
+  b.transform(babelify, { presets: ['es2015'] });
+  b.transform(browserifyShim);
+  return b;
+};
 
 var bundleShare = function (b) {
   return b.bundle()
