@@ -1,0 +1,16 @@
+{
+  "data": {
+    "id": 42,
+    "attributes": {
+      "name": "bar"
+    },
+    "relationships": {
+      "user": {
+        "data": {
+          "id": 12,
+          "type": "user"
+        }
+      }
+    }
+  }
+}

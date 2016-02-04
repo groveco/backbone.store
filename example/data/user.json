@@ -1,0 +1,20 @@
+{
+  "data": {
+    "id": 12,
+    "type": "user",
+    "attributes": {
+      "name": "foo"
+    },
+    "relationships": {
+      "pantry": {
+        "data": {
+          "id": 42,
+          "type": "pantry"
+        },
+        "links": {
+          "related": "data/pantry.json"
+        }
+      }
+    }
+  }
+}

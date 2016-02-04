@@ -16,7 +16,7 @@ gulp.task('karma', function () {
 });
 
 gulp.task('watchify', function() {
-  var b = browserify('public/javascripts/index.js', {
+  var b = browserify('src/index.js', {
     fullPaths: true,
     debug: true,
     standalone: 'BackboneStore'
@@ -43,5 +43,5 @@ var bundleShare = function (b) {
       console.log('ERROR: ' + e.message);
     })
     .pipe(source('backbone-store.js'))
-    .pipe(gulp.dest('public/dist/'));
+    .pipe(gulp.dest('dist/'));
 };

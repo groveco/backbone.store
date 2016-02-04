@@ -8,11 +8,11 @@ module.exports = function (config) {
       './node_modules/jquery/dist/jquery.js',
       './node_modules/underscore/underscore.js',
       './node_modules/backbone/backbone.js',
-      './public/javascripts/tests/**/test-*.js'
+      'src/tests/**/test-*.js'
     ],
 
     preprocessors: {
-      './public/javascripts/tests/**/test-*.js': ['browserify']
+      'src/tests/**/test-*.js': ['browserify']
     },
 
     browserify: {
