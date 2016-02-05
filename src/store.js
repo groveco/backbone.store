@@ -1,4 +1,5 @@
 import Backbone from 'backbone'
+import Symbol from 'es6-symbol'
 
 let addGetAsync = function (store) {
   Backbone.Model.prototype.getAsync = function (type) {

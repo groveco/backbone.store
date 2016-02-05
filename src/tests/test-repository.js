@@ -1,4 +1,5 @@
 import $ from 'jquery'
+import _ from 'underscore'
 import Backbone from 'backbone'
 import {HttpAdapter} from '../http-adapter'
 import {JsonApiParser} from '../json-api-parser'
@@ -77,7 +78,7 @@ describe('Repository', function () {
     };
     let spy = chai.spy.on(this.repository._adapter, 'update');
     this.repository.update(model, attrs);
-    Object.assign(initialAttrs, attrs);
+    _.extend(initialAttrs, attrs);
     spy.should.have.been.called.with(model.id, initialAttrs);
   });
 

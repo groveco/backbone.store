@@ -8,6 +8,7 @@ module.exports = function (config) {
       './node_modules/jquery/dist/jquery.js',
       './node_modules/underscore/underscore.js',
       './node_modules/backbone/backbone.js',
+      './node_modules/rsvp/dist/rsvp.js',
       'src/tests/**/test-*.js'
     ],
 
@@ -19,7 +20,6 @@ module.exports = function (config) {
       transform: [['babelify', {presets: ['es2015']}], 'browserify-shim'],
       debug: true,
       configure: function (b) {
-        b.add(require.resolve('babel-polyfill'));
         b.on('prebundle', function () {
           b.require('./node_modules/underscore/underscore.js', {expose: 'underscore'});
         });

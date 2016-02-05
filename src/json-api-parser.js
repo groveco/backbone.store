@@ -1,3 +1,5 @@
+import _ from 'underscore'
+
 class JsonApiParser {
 
   parse(jsonApiData) {
@@ -31,7 +33,7 @@ class JsonApiParser {
 
   _parseSingleObject(object) {
     let result = {};
-    Object.assign(result, object.attributes);
+    _.extend(result, object.attributes);
     result.id = object.id;
     if (object.relationships) {
       result.relationships = {};

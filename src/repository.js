@@ -1,4 +1,6 @@
-import Backbone from 'backbone';
+import _ from 'underscore'
+import Backbone from 'backbone'
+import RSVP from 'rsvp'
 
 class Repository {
 
@@ -18,17 +20,17 @@ class Repository {
   }
 
   getById(id) {
-    let func = this._adapter.getById.bind(this._adapter, id);
+    let func = _.bind(this._adapter.getById, this._adapter, id);
     return this._get(func, id);
   }
 
   getByLink(id, link) {
-    let func = this._adapter.getByLink.bind(this._adapter, link);
+    let func = _.bind(this._adapter.getByLink, this._adapter, link);
     return this._get(func, id);
   }
 
   getCollectionByLink(link) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       let collection = new this.collectionClass();
       this._adapter.getByLink(link).then(data => {
         collection.set(data);
@@ -41,7 +43,7 @@ class Repository {
   }
 
   create(attributes = {}) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       let model = new this.modelClass();
       this._adapter.create(attributes).then(data => {
         model.set(data);
@@ -54,7 +56,7 @@ class Repository {
   }
 
   update(model, attributes) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       model.set(attributes);
       this._adapter.update(model.id, model.toJSON()).then((data) => {
         model.clear().set(data);
@@ -66,7 +68,7 @@ class Repository {
   }
 
   destroy(id) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       let model = this.collection.get(id);
       if (model) {
         this._adapter.destroy(id).then(() => {
@@ -82,7 +84,7 @@ class Repository {
   }
 
   _get(func, id) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       let model = this.collection.get(id);
       if (model) {
         resolve(model);

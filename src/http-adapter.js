@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import {HttpMethods} from './http-methods'
+import RSVP from 'rsvp'
 
 class HttpAdapter {
 
@@ -9,7 +10,7 @@ class HttpAdapter {
   }
 
   getById(id) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       this._ajax(id, HttpMethods.GET).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
@@ -19,7 +20,7 @@ class HttpAdapter {
   }
 
   getByLink(link) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       this._ajaxByLink(link).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
@@ -29,7 +30,7 @@ class HttpAdapter {
   }
 
   create(attributes) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       this._ajax(null, HttpMethods.POST, attributes).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
@@ -39,7 +40,7 @@ class HttpAdapter {
   }
 
   update(id, attributes) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       this._ajax(id, HttpMethods.PUT, attributes).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
@@ -49,7 +50,7 @@ class HttpAdapter {
   }
 
   destroy(id) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       this._ajax(id, HttpMethods.DELETE).then(() => {
         resolve();
       }, () => {
@@ -59,7 +60,7 @@ class HttpAdapter {
   }
 
   _ajax(id, type, data) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       let options = {
         url: this._url,
         type: type,
@@ -86,7 +87,7 @@ class HttpAdapter {
   }
 
   _ajaxByLink(link) {
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
       let options = {
         url: link,
         type: HttpMethods.GET,
