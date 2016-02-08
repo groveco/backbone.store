@@ -1,6 +1,5 @@
 var babelify = require('babelify');
 var browserify = require('browserify');
-var browserifyShim = require('browserify-shim');
 var gulp = require('gulp');
 var remapify = require('remapify');
 var Server = require('karma').Server;
@@ -37,14 +36,11 @@ gulp.task('watchify', function() {
 });
 
 var browserifyBundle = function () {
-  var b = browserify('src/index.js', {
+  var b = browserify('example/js/test.js', {
     fullPaths: true,
-    debug: true,
-    standalone: 'BackboneStore'
+    debug: true
   });
-  b.external('jquery');
   b.transform(babelify, { presets: ['es2015'] });
-  b.transform(browserifyShim);
   return b;
 };
 

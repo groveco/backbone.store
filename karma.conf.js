@@ -5,10 +5,6 @@ module.exports = function (config) {
     frameworks: ['browserify', 'mocha', 'chai-spies', 'chai', 'sinon'],
 
     files: [
-      './node_modules/jquery/dist/jquery.js',
-      './node_modules/underscore/underscore.js',
-      './node_modules/backbone/backbone.js',
-      './node_modules/rsvp/dist/rsvp.js',
       'src/tests/**/test-*.js'
     ],
 
@@ -17,7 +13,7 @@ module.exports = function (config) {
     },
 
     browserify: {
-      transform: [['babelify', {presets: ['es2015']}], 'browserify-shim'],
+      transform: [['babelify', {presets: ['es2015']}]],
       debug: true,
       configure: function (b) {
         b.on('prebundle', function () {
