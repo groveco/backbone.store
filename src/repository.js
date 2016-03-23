@@ -1,34 +1,62 @@
+/**
+ * Repository.
+ * @module
+ */
 import _ from 'underscore'
 import Backbone from 'backbone'
 import RSVP from 'rsvp'
 
+/**
+ * Repository class which provides access to entities and stores them.
+ */
 class Repository {
 
-  constructor(collectionClass, adapter) {
-    let collection = new collectionClass();
+  /**
+   * Creates Repository.
+   * @param {Function} entityClass - Model or collection class of repository model.
+   * @param adapter - Adapter to any data source.
+   */
+  constructor(entityClass, adapter) {
+    let collection = new entityClass();
     if (collection instanceof Backbone.Model) {
-      this.modelClass = collectionClass;
+      this.modelClass = entityClass;
       this.collectionClass = Backbone.Collection.extend({
         model: this.modelClass
       });
     } else {
-      this.collectionClass = collectionClass;
-      this.modelClass = collectionClass.prototype.model;
+      this.collectionClass = entityClass;
+      this.modelClass = entityClass.prototype.model;
     }
     this.collection = new this.collectionClass();
     this._adapter = adapter;
   }
 
+  /**
+   * Get model by Id.
+   * @param {number} id - Model Id.
+   * @returns {Promise} Promise for requested model.
+   */
   getById(id) {
     let func = _.bind(this._adapter.getById, this._adapter, id);
     return this._get(func, id);
   }
 
+  /**
+   * Get model by link.
+   * @param {number} id - Model Id.
+   * @param {string} link - model link.
+   * @returns {Promise} Promise for requested model.
+   */
   getByLink(id, link) {
     let func = _.bind(this._adapter.getByLink, this._adapter, link);
     return this._get(func, id);
   }
 
+  /**
+   * Get collection by link.
+   * @param {string} link - Collection link.
+   * @returns {Promise} Promise for requested collection.
+   */
   getCollectionByLink(link) {
     return new RSVP.Promise((resolve, reject) => {
       let collection = new this.collectionClass();
@@ -42,6 +70,11 @@ class Repository {
     });
   }
 
+  /**
+   * Create model.
+   * @param {object} attributes - Data to create model with.
+   * @returns {Promise} Promise for created model.
+   */
   create(attributes = {}) {
     return new RSVP.Promise((resolve, reject) => {
       let model = new this.modelClass();
@@ -55,6 +88,12 @@ class Repository {
     });
   }
 
+  /**
+   * Create model.
+   * @param {Backbone.Model} model - Model to update.
+   * @param {object} attributes - Data to update model with.
+   * @returns {Promise} Promise for updated model.
+   */
   update(model, attributes) {
     return new RSVP.Promise((resolve, reject) => {
       model.set(attributes);
@@ -67,6 +106,11 @@ class Repository {
     });
   }
 
+  /**
+   * Destroy model.
+   * @param {number} id - Id of model to destroy.
+   * @returns {Promise} Promise for destroy.
+   */
   destroy(id) {
     return new RSVP.Promise((resolve, reject) => {
       let model = this.collection.get(id);
