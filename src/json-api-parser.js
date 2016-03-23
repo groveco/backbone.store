@@ -1,7 +1,19 @@
+/**
+ * JsonApiParser.
+ * @module
+ */
 import _ from 'underscore'
 
+/**
+ * Parser that parses data in JSON API format to BackboneStore format.
+ */
 class JsonApiParser {
 
+  /**
+   * Parses data from JSON API format to BackboneStore format.
+   * @param {object} jsonApiData - Data in JSON API format.
+   * @returns {object} Data in BackboneStore format.
+   */
   parse(jsonApiData) {
     let result = null;
     let data = jsonApiData.data;
@@ -13,6 +25,11 @@ class JsonApiParser {
     return result;
   }
 
+  /**
+   * Serializes data from BackboneStore format to JSON API format.
+   * @param {object} obj - Data in BackboneStore format.
+   * @returns {object} Data in JSON API format.
+   */
   serialize(obj) {
     let result = {
       data: {
