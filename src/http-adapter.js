@@ -1,14 +1,31 @@
+/**
+ * HttpAdapter
+ * @module
+ */
 import $ from 'jquery'
 import {HttpMethods} from './http-methods'
 import RSVP from 'rsvp'
 
+/**
+ * Adapter which works with data over HTTP.
+ */
 class HttpAdapter {
 
+  /**
+   * Create a HttpAdapter
+   * @param {string} url - Base resource url.
+   * @param parser - Parser which parses data from specified format to BackboneStore format
+   */
   constructor(url, parser) {
     this._parser = parser;
     this._url = url;
   }
 
+  /**
+   * Get entity by Id.
+   * @param {number|string} id - Entity Id.
+   * @returns {Promise} Promise for fetched data.
+   */
   getById(id) {
     return new RSVP.Promise((resolve, reject) => {
       this._ajax(id, HttpMethods.GET).then(data => {
@@ -19,6 +36,11 @@ class HttpAdapter {
     });
   }
 
+  /**
+   * Get entity by link.
+   * @param {string} link - Link to entity.
+   * @returns {Promise} Promise for fetched data.
+   */
   getByLink(link) {
     return new RSVP.Promise((resolve, reject) => {
       this._ajaxByLink(link).then(data => {
@@ -29,6 +51,11 @@ class HttpAdapter {
     });
   }
 
+  /**
+   * Create entity.
+   * @param {object} attributes - Data to create entity with.
+   * @returns {Promise} Promise for created data.
+   */
   create(attributes) {
     return new RSVP.Promise((resolve, reject) => {
       this._ajax(null, HttpMethods.POST, attributes).then(data => {
@@ -39,6 +66,12 @@ class HttpAdapter {
     });
   }
 
+  /**
+   * Update entity.
+   * @param {number|string} id - Entity Id.
+   * @param {object} attributes - Data to update entity with.
+   * @returns {Promise} Promise for updated data.
+   */
   update(id, attributes) {
     return new RSVP.Promise((resolve, reject) => {
       this._ajax(id, HttpMethods.PUT, attributes).then(data => {
@@ -49,6 +82,11 @@ class HttpAdapter {
     });
   }
 
+  /**
+   * Destroy entity.
+   * @param {number|string} id - Entity Id.
+   * @returns {Promise} Promise for destroy.
+   */
   destroy(id) {
     return new RSVP.Promise((resolve, reject) => {
       this._ajax(id, HttpMethods.DELETE).then(() => {
