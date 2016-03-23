@@ -16,8 +16,10 @@ gulp.task('karma', function () {
 });
 
 gulp.task('browserify', function () {
-  var b = browserifyBundle();
-  return bundleShare(b);
+  var b = browserifyBundle('examples/simple/js/test.js');
+  bundleShare(b, 'dist/', 'simple.js');
+  b = browserifyBundle('examples/dashboard/js/index.js');
+  return bundleShare(b, 'dist/', 'dashboard.js');
 });
 
 gulp.task('watchify', function() {
@@ -35,8 +37,8 @@ gulp.task('watchify', function() {
   return bundleShare(w);
 });
 
-var browserifyBundle = function () {
-  var b = browserify('example/js/test.js', {
+var browserifyBundle = function (sourcePath) {
+  var b = browserify(sourcePath, {
     fullPaths: true,
     debug: true
   });
@@ -44,11 +46,11 @@ var browserifyBundle = function () {
   return b;
 };
 
-var bundleShare = function (b) {
+var bundleShare = function (b, outDir, outFile) {
   return b.bundle()
     .on('error', function(e) {
       console.log('ERROR: ' + e.message);
     })
-    .pipe(source('backbone-store.js'))
-    .pipe(gulp.dest('dist/'));
+    .pipe(source(outFile))
+    .pipe(gulp.dest(outDir));
 };
