@@ -37,7 +37,7 @@ describe('HTTP adapter', function () {
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
     this.adapter.create(attrs);
-    spy.should.have.been.called.with(null, HttpMethods.POST, attrs);
+    spy.should.have.been.called.with(null, HttpMethods.POST, this.adapter._parser.serialize(attrs));
   });
 
   it('calls AJAX put on update', function () {
@@ -50,7 +50,7 @@ describe('HTTP adapter', function () {
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
     this.adapter.update(id, attrs);
-    spy.should.have.been.called.with(id, HttpMethods.PUT, attrs);
+    spy.should.have.been.called.with(id, HttpMethods.PUT, this.adapter._parser.serialize(attrs));
   });
 
   it('calls AJAX delete on destroy', function () {
