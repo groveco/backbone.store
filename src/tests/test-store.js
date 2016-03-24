@@ -1,13 +1,16 @@
 import Backbone from 'backbone'
 import {FakeAdapter} from './test-classes/adapter'
+import {HttpAdapter} from '../http-adapter'
+import {JsonApiParser} from '../json-api-parser'
 import {Model} from './test-classes/model'
 import {RelationalModel} from './test-classes/relational-model'
 import {Repository} from '../repository'
-import {repositoryFactory} from '../repository-factory'
 import {Store} from '../store'
 
 let createRepository = function () {
-  return repositoryFactory(Model, '/api/model/')
+  let parser = new JsonApiParser();
+  let adapter = new HttpAdapter('/api/model/', parser);
+  return new Repository(Model, adapter);
 };
 
 let createFakeRepository = function () {
