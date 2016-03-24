@@ -58,7 +58,7 @@ class HttpAdapter {
    */
   create(attributes) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajax(null, HttpMethods.POST, attributes).then(data => {
+      this._ajax(null, HttpMethods.POST, this._parser.serialize(attributes)).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
@@ -74,7 +74,7 @@ class HttpAdapter {
    */
   update(id, attributes) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajax(id, HttpMethods.PUT, attributes).then(data => {
+      this._ajax(id, HttpMethods.PUT, this._parser.serialize(attributes)).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
