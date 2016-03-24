@@ -11,7 +11,7 @@ Backbone Store provides relational models structure. To define relations between
 
 For instance we have blogs with comments:
 
-```js
+```javascript
 import Backbone from 'backbone'
 
 let Blog = Backbone.Model.extend({
@@ -20,7 +20,7 @@ let Blog = Backbone.Model.extend({
   }
 });
 
-var Comment = Backbone.Model.extend({
+let Comment = Backbone.Model.extend({
   relatedModels: {
     blog: 'blog'
   }
@@ -44,14 +44,41 @@ there is JsonApiParser which parses data from [JSON API](http://jsonapi.org/) fo
 
 Repository is used to provide access to data and cache data on front-end to prevent same multiple requests.
 
+That's how you create a repository with adapter and parser:
+
+```javascript
+import BackboneStore from 'backbone.store'
+import BlogModel from './path/to/blog-model'
+
+let parser = new BackboneStore.JsonApiParser();
+let adapter = new BackboneStore.HttpAdapter('/api/blog/', parser);
+let repo = new BackboneStore.Repository(BlogModel, adapter);
+```
+
 ### Instantiating a Store
 
 Store is a singleton with 'private' constructor. To get a Store instance use `instance` static method:
 
-```js
+```javascript
 import BackboneStore from 'backbone.store'
 
-let store = BackboneStore.Store.instance()
+let store = BackboneStore.Store.instance();
+```
+
+Then you register you repositories in store:
+
+```javascript
+import BackboneStore from 'backbone.store'
+import BlogModel from './path/to/blog-model'
+
+let parser = new BackboneStore.JsonApiParser();
+let adapter = new BackboneStore.HttpAdapter('/api/blog/', parser);
+let repo = new BackboneStore.Repository(BlogModel, adapter);
+
+let store = BackboneStore.Store.instance();
+
+// model name is the same as in defining models
+store.register('blog', repo); 
 ```
 
 ### Putting everything together
