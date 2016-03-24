@@ -10,4 +10,4 @@ let BackboneStore = {
   Store
 };
 
-export {BackboneStore}
+export default BackboneStore
