@@ -42,12 +42,64 @@ describe('Repository', function () {
     spy.should.have.been.called.with(link);
   });
 
+  it('calls adapter\'s getByLink method once on multiple own get with Id and link', function (done) {
+    let id = 42;
+    let link = '/api/user/42/';
+    let spy = chai.spy.on(this.fakeRepository._adapter, 'getByLink');
+    this.fakeRepository.get(id, link).then(() => {
+      this.fakeRepository.get(id, link);
+      spy.should.have.been.called.once();
+      done();
+    });
+  });
+
   it('calls adapter\'s getByLink method on own getCollectionByLink', function () {
     let id = 42;
     let link = '/api/user/42/';
     let spy = chai.spy.on(this.fakeRepository._adapter, 'getByLink');
     this.fakeRepository.getCollectionByLink(link);
     spy.should.have.been.called.with(link);
+  });
+
+  it('calls adapter\'s getByLink method on own fetch with link', function () {
+    let id = 42;
+    let link = '/api/user/42/';
+    let spy = chai.spy.on(this.fakeRepository._adapter, 'getByLink');
+    this.fakeRepository.fetch(id, link);
+    spy.should.have.been.called.with(link);
+  });
+
+  it('calls adapter\'s getByLink method every time own fetch with link is called', function () {
+    let id = 42;
+    let link = '/api/user/42/';
+    let spy = chai.spy.on(this.fakeRepository._adapter, 'getByLink');
+    this.fakeRepository.fetch(id, link).then(() => {
+      this.fakeRepository.fetch(id, link);
+      spy.should.have.been.called.twice();
+    });
+  });
+
+  it('doesn\'t call any adapter\'s get method on own pluck call', function () {
+    let spyByLink = chai.spy.on(this.fakeRepository._adapter, 'getByLink');
+    let spyById = chai.spy.on(this.fakeRepository._adapter, 'getById');
+    this.fakeRepository.pluck(42);
+    spyByLink.should.not.have.been.called();
+    spyById.should.not.have.been.called();
+  });
+
+  it('pluck doesn\'t return not cached data', function () {
+    let model = this.fakeRepository.pluck(42);
+    assert.isUndefined(model);
+  });
+
+  it('pluck returns cached data', function (done) {
+    let id = 42;
+    let link = `/api/user/${id}/`;
+    this.fakeRepository.get(id, link).then(() => {
+      let model = this.fakeRepository.pluck(id);
+      assert.isObject(model);
+      done();
+    });
   });
 
   it('calls adapter\'s create method on own create', function () {
