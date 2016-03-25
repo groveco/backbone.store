@@ -124,20 +124,35 @@ class Repository {
 
   _get(func, id) {
     return new RSVP.Promise((resolve, reject) => {
-      let model = this.collection.get(id);
+      let model = this._pluck(id);
       if (model) {
         resolve(model);
       } else {
-        model = new this.modelClass();
-        func().then(data => {
-          model.set(data);
-          this.collection.set(model);
+        let fetchPromise = this._fetch(func);
+        fetchPromise.then((model) => {
           resolve(model);
         }, () => {
           reject();
         });
       }
     });
+  }
+
+  _fetch(func) {
+    return new RSVP.Promise((resolve, reject) => {
+      let model = new this.modelClass();
+      func().then(data => {
+        model.set(data);
+        this.collection.set(model);
+        resolve(model);
+      }, () => {
+        reject();
+      });
+    });
+  }
+
+  _pluck(id) {
+    return this.collection.get(id);
   }
 }
 
