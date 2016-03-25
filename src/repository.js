@@ -32,7 +32,7 @@ class Repository {
   }
 
   /**
-   * Get model by Id ot link. If model is cached on front-end it will be returned from cache, otherwise it will be
+   * Get model by Id or link. If model is cached on front-end it will be returned from cache, otherwise it will be
    * fetched.
    * @param {number} id - Model Id.
    * @param {string} [link] - Model link.
@@ -54,7 +54,7 @@ class Repository {
   }
 
   /**
-   * Fetch model by Id ot link from server.
+   * Fetch model by Id or link from server.
    * @param {number} id - Model Id.
    * @param {string} [link] - Model link.
    * @returns {Promise} Promise for requested model.

@@ -54,16 +54,16 @@ var deferred = repo.get(236, 'data/customer.json');
 deferred.then(function (model) {
   console.log('customer ->');
   console.log(model);
-  return model.getAsync('pantry')
+  return model.getRelated('pantry')
 }).then(function (pantry) {
   console.log('pantry ->');
   console.log(pantry);
-  return pantry.getAsync('shipments')
+  return pantry.getRelated('shipments')
 }).then(function (shipments) {
   console.log('shipments ->');
   console.log(shipments);
   var deferredShipmentItems = shipments.map(function (shipment) {
-    return shipment.getAsync('shipment-items');
+    return shipment.getRelated('shipment-items');
   });
   return RSVP.all(deferredShipmentItems)
 }).then(function (shipmentItemsCollections) {

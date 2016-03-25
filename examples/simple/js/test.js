@@ -42,7 +42,7 @@ var deferred = repo.get(12, 'data/user.json');
 deferred.then(function (model) {
   console.log('user ->');
   console.log(model);
-  model.getAsync('pantry').then(function (pantry) {
+  model.getRelated('pantry').then(function (pantry) {
     console.log('pantry ->');
     console.log(pantry);
   })
