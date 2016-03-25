@@ -1,0 +1,180 @@
+{
+  "data": {
+    "attributes": {
+      "has-valid-card": true,
+      "is-active": true
+    },
+    "id": 241,
+    "links": {
+      "self": "https://www.epantry.com/api/pantry/241"
+    },
+    "relationships": {
+      "brands": {
+        "data": [
+          {"id": 23, "type": "brand"},
+          {"id": 45, "type": "brand"},
+          {"id": 67, "type": "brand"}
+        ],
+        "links": {
+          "self": "https://www.epantry.com/api/pantry/241/relationship/brands",
+          "related": "https://www.epantry.com/api/pantry/241/brands"
+        }
+      },
+      "customers": {
+        "data": [
+          {"id": 236, "type": "customer"},
+          {"id": 1490, "type": "customer"}
+        ],
+        "links": {
+          "self": "https://www.epantry.com/api/pantry/241/relationship/customers",
+          "related": "https://www.epantry.com/api/pantry/241/customers"
+        }
+      },
+      "next-shipment": {
+        "data": {"id": 456739, "type": "shipment"},
+        "links": {
+          "self": "https://www.epantry.com/api/pantry/241/relationship/next-shipment",
+          "related": "https://www.epantry.com/api/pantry/241/next-shipment"
+        }
+      },
+      "owner": {
+        "data": {"id": 236, "type": "customer"},
+        "links": {
+          "self": "https://www.epantry.com/api/pantry/241/relationship/owner",
+          "related": "https://www.epantry.com/api/pantry/241/owner"
+        }
+      },
+      "previous-shipment": {
+        "data": {"id": 7893, "type": "shipment"},
+        "links": {
+          "self": "https://www.epantry.com/api/pantry/241/relationship/previous-shipment",
+          "related": "https://www.epantry.com/api/pantry/241/previous-shipment"
+        }
+      },
+      "products": {
+        "data": [
+          {"id": 1, "type": "product"},
+          {"id": 3, "type": "product"},
+          {"id": 8, "type": "product"},
+          {"id": 9, "type": "product"},
+          {"id": 10, "type": "product"},
+          {"id": 12, "type": "product"},
+          {"id": 14, "type": "product"},
+          {"id": 15, "type": "product"},
+          {"id": 24, "type": "product"},
+          {"id": 25, "type": "product"},
+          {"id": 27, "type": "product"},
+          {"id": 28, "type": "product"},
+          {"id": 40, "type": "product"},
+          {"id": 43, "type": "product"},
+          {"id": 44, "type": "product"},
+          {"id": 45, "type": "product"},
+          {"id": 47, "type": "product"},
+          {"id": 50, "type": "product"},
+          {"id": 52, "type": "product"},
+          {"id": 69, "type": "product"},
+          {"id": 70, "type": "product"},
+          {"id": 72, "type": "product"},
+          {"id": 77, "type": "product"},
+          {"id": 78, "type": "product"},
+          {"id": 79, "type": "product"},
+          {"id": 91, "type": "product"},
+          {"id": 98, "type": "product"},
+          {"id": 100, "type": "product"},
+          {"id": 132, "type": "product"},
+          {"id": 207, "type": "product"},
+          {"id": 395, "type": "product"},
+          {"id": 402, "type": "product"},
+          {"id": 420, "type": "product"},
+          {"id": 433, "type": "product"},
+          {"id": 436, "type": "product"},
+          {"id": 440, "type": "product"},
+          {"id": 441, "type": "product"},
+          {"id": 446, "type": "product"},
+          {"id": 456, "type": "product"},
+          {"id": 463, "type": "product"},
+          {"id": 465, "type": "product"},
+          {"id": 467, "type": "product"},
+          {"id": 480, "type": "product"},
+          {"id": 498, "type": "product"},
+          {"id": 508, "type": "product"},
+          {"id": 509, "type": "product"},
+          {"id": 510, "type": "product"},
+          {"id": 559, "type": "product"},
+          {"id": 563, "type": "product"}
+        ],
+        "links": {
+          "self": "https://www.epantry.com/api/pantry/241/relationship/products",
+          "related": "https://www.epantry.com/api/pantry/241/products"
+        }
+      },
+      "shipments": {
+        "data": [
+          {"id": 5606, "type": "shipment"},
+          {"id": 5607, "type": "shipment"},
+          {"id": 5608, "type": "shipment"},
+          {"id": 5609, "type": "shipment"},
+          {"id": 5610, "type": "shipment"},
+          {"id": 5611, "type": "shipment"},
+          {"id": 5612, "type": "shipment"},
+          {"id": 216209, "type": "shipment"},
+          {"id": 5613, "type": "shipment"},
+          {"id": 216222, "type": "shipment"},
+          {"id": 289425, "type": "shipment"},
+          {"id": 5614, "type": "shipment"},
+          {"id": 5615, "type": "shipment"},
+          {"id": 289462, "type": "shipment"},
+          {"id": 401699, "type": "shipment"},
+          {"id": 5616, "type": "shipment"},
+          {"id": 5617, "type": "shipment"},
+          {"id": 401766, "type": "shipment"},
+          {"id": 554190, "type": "shipment"},
+          {"id": 5618, "type": "shipment"},
+          {"id": 5619, "type": "shipment"},
+          {"id": 554265, "type": "shipment"},
+          {"id": 752607, "type": "shipment"},
+          {"id": 5620, "type": "shipment"},
+          {"id": 752679, "type": "shipment"},
+          {"id": 5621, "type": "shipment"},
+          {"id": 5622, "type": "shipment"},
+          {"id": 945001, "type": "shipment"},
+          {"id": 5623, "type": "shipment"},
+          {"id": 945002, "type": "shipment"},
+          {"id": 1274741, "type": "shipment"},
+          {"id": 5624, "type": "shipment"},
+          {"id": 1274824, "type": "shipment"},
+          {"id": 5625, "type": "shipment"},
+          {"id": 5626, "type": "shipment"},
+          {"id": 5627, "type": "shipment"},
+          {"id": 5628, "type": "shipment"},
+          {"id": 5629, "type": "shipment"},
+          {"id": 1350940, "type": "shipment"},
+          {"id": 1439411, "type": "shipment"},
+          {"id": 1439412, "type": "shipment"},
+          {"id": 1439413, "type": "shipment"},
+          {"id": 1439414, "type": "shipment"},
+          {"id": 1439415, "type": "shipment"},
+          {"id": 1439416, "type": "shipment"},
+          {"id": 1439417, "type": "shipment"},
+          {"id": 2564003, "type": "shipment"},
+          {"id": 1439418, "type": "shipment"},
+          {"id": 1439419, "type": "shipment"},
+          {"id": 1439420, "type": "shipment"},
+          {"id": 1439421, "type": "shipment"},
+          {"id": 1439422, "type": "shipment"},
+          {"id": 1439423, "type": "shipment"},
+          {"id": 1439424, "type": "shipment"},
+          {"id": 1676230, "type": "shipment"},
+          {"id": 1676305, "type": "shipment"},
+          {"id": 2071384, "type": "shipment"},
+          {"id": 2071456, "type": "shipment"}
+        ],
+        "links": {
+          "self": "https://www.epantry.com/api/pantry/241/relationship/shipments",
+          "related": "data/shipments.json"
+        }
+      }
+    },
+    "type": "pantry"
+  }
+}

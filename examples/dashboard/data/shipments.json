@@ -1,0 +1,131 @@
+{
+  "data": [{
+    "attributes": {
+      "arrival-date": "2016-01-04",
+      "charge-date": null,
+      "charge-price": 23736,
+      "credit": 1000,
+      "credit-value-discount": 1000,
+      "discount": 0,
+      "first-move-date": "2016-01-04",
+      "full-price": 24736,
+      "is-editable": true,
+      "is-gift": false,
+      "item-discount": 0,
+      "items-count": 32,
+      "last-move-date": "2016-01-29",
+      "list-price": 32200,
+      "lowest-price": 21798,
+      "offer-discount": 708,
+      "offer-percentage-discount": 0,
+      "offer-price": 22798,
+      "price": 23506,
+      "shipment-date": "2015-12-29",
+      "shipping-price": 0,
+      "status": 0,
+      "tax-price": 1938
+    },
+    "id": 1439418,
+    "links": {
+      "self": "https://www.epantry.com/api/shipment/1439419"
+    },
+    "relationships": {
+      "pantry": {
+        "data": {"id": 241, "type": "pantry"},
+        "links": {
+          "self": "https://www.epantry.com/api/shipment/1439419/relationship/pantry",
+          "related": "https://www.epantry.com/api/shipment/1439419/pantry"
+        }
+      },
+      "shipment-items": {
+        "data": [
+          {"id": 5909113, "type": "shipment-item"},
+          {"id": 5628849, "type": "shipment-item"},
+          {"id": 5628842, "type": "shipment-item"},
+          {"id": 5628840, "type": "shipment-item"},
+          {"id": 5628839, "type": "shipment-item"},
+          {"id": 5628837, "type": "shipment-item"},
+          {"id": 5628836, "type": "shipment-item"},
+          {"id": 5628833, "type": "shipment-item"},
+          {"id": 5628831, "type": "shipment-item"},
+          {"id": 5628830, "type": "shipment-item"},
+          {"id": 5628827, "type": "shipment-item"},
+          {"id": 5628826, "type": "shipment-item"},
+          {"id": 5628819, "type": "shipment-item"}
+        ],
+        "links": {
+          "self": "https://www.epantry.com/api/shipment/1439419/relationship/shipment-items",
+          "related": "data/shipment-items.json"
+        }
+      }
+    },
+    "type": "shipment"
+  }, {
+    "attributes": {
+      "arrival-date": "2016-01-04",
+      "charge-date": null,
+      "charge-price": 23736,
+      "credit": 1000,
+      "credit-value-discount": 1000,
+      "discount": 0,
+      "first-move-date": "2016-01-04",
+      "full-price": 24736,
+      "is-editable": true,
+      "is-gift": false,
+      "item-discount": 0,
+      "items-count": 32,
+      "last-move-date": "2016-01-29",
+      "list-price": 32200,
+      "lowest-price": 21798,
+      "offer-discount": 708,
+      "offer-percentage-discount": 0,
+      "offer-price": 22798,
+      "price": 23506,
+      "shipment-date": "2015-12-29",
+      "shipping-price": 0,
+      "status": 0,
+      "tax-price": 1938
+    },
+    "id": 1439419,
+    "links": {
+      "self": "https://www.epantry.com/api/shipment/1439419"
+    },
+    "relationships": {
+      "pantry": {
+        "data": {"id": 241, "type": "pantry"},
+        "links": {
+          "self": "https://www.epantry.com/api/shipment/1439419/relationship/pantry",
+          "related": "https://www.epantry.com/api/shipment/1439419/pantry"
+        }
+      },
+      "shipment-items": {
+        "data": [
+          {"id": 9526502, "type": "shipment-item"},
+          {"id": 9310126, "type": "shipment-item"},
+          {"id": 9285403, "type": "shipment-item"},
+          {"id": 9285299, "type": "shipment-item"},
+          {"id": 9285240, "type": "shipment-item"},
+          {"id": 9285191, "type": "shipment-item"},
+          {"id": 9283216, "type": "shipment-item"},
+          {"id": 6264122, "type": "shipment-item"},
+          {"id": 8629972, "type": "shipment-item"},
+          {"id": 8561361, "type": "shipment-item"},
+          {"id": 8559780, "type": "shipment-item"},
+          {"id": 8559745, "type": "shipment-item"},
+          {"id": 8559738, "type": "shipment-item"},
+          {"id": 5628834, "type": "shipment-item"},
+          {"id": 7798297, "type": "shipment-item"},
+          {"id": 7495045, "type": "shipment-item"},
+          {"id": 7230642, "type": "shipment-item"},
+          {"id": 7008217, "type": "shipment-item"},
+          {"id": 7008157, "type": "shipment-item"}
+        ],
+        "links": {
+          "self": "https://www.epantry.com/api/shipment/1439419/relationship/shipment-items",
+          "related": "data/shipment-items.json"
+        }
+      }
+    },
+    "type": "shipment"
+  }]
+}

@@ -83,4 +83,4 @@ store.register('blog', repo);
 
 ### Putting everything together
 
-You can see examples [here](https://github.com/groveco/backbone.store/tree/master/example).
+You can see examples [here](https://github.com/groveco/backbone.store/tree/master/examples).
