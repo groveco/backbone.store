@@ -32,19 +32,59 @@ class Repository {
   }
 
   /**
-   * Get model by link.
+   * Get model by Id ot link. If model is cached on front-end it will be returned from cache, otherwise it will be
+   * fetched.
    * @param {number} id - Model Id.
-   * @param {string} [link] - model link.
+   * @param {string} [link] - Model link.
    * @returns {Promise} Promise for requested model.
    */
   get(id, link) {
-    let func;
-    if (link) {
-      func = _.bind(this._adapter.getByLink, this._adapter, link);
-    } else {
-      func = _.bind(this._adapter.getById, this._adapter, id);
-    }
-    return this._get(func, id);
+    return new RSVP.Promise((resolve, reject) => {
+      let model = this.pluck(id);
+      if (model) {
+        resolve(model);
+      } else {
+        this.fetch(id, link).then((model) => {
+          resolve(model);
+        }, () => {
+          reject();
+        });
+      }
+    });
+  }
+
+  /**
+   * Fetch model by Id ot link from server.
+   * @param {number} id - Model Id.
+   * @param {string} [link] - Model link.
+   * @returns {Promise} Promise for requested model.
+   */
+  fetch(id, link) {
+    return new RSVP.Promise((resolve, reject) => {
+      let model = new this.modelClass();
+      let adapterPromise;
+      if (link) {
+        adapterPromise = this._adapter.getByLink(link);
+      } else {
+        adapterPromise = this._adapter.getById(id);
+      }
+      adapterPromise.then(data => {
+        model.set(data);
+        this.collection.set(model);
+        resolve(model);
+      }, () => {
+        reject();
+      });
+    });
+  }
+
+  /**
+   * Get model by Id from front-end cache.
+   * @param {number} id - Model Id.
+   * @returns {Promise} Promise for requested model.
+   */
+  pluck(id) {
+    return this.collection.get(id);
   }
 
   /**
@@ -120,39 +160,6 @@ class Repository {
         reject('Model does not exist');
       }
     });
-  }
-
-  _get(func, id) {
-    return new RSVP.Promise((resolve, reject) => {
-      let model = this._pluck(id);
-      if (model) {
-        resolve(model);
-      } else {
-        let fetchPromise = this._fetch(func);
-        fetchPromise.then((model) => {
-          resolve(model);
-        }, () => {
-          reject();
-        });
-      }
-    });
-  }
-
-  _fetch(func) {
-    return new RSVP.Promise((resolve, reject) => {
-      let model = new this.modelClass();
-      func().then(data => {
-        model.set(data);
-        this.collection.set(model);
-        resolve(model);
-      }, () => {
-        reject();
-      });
-    });
-  }
-
-  _pluck(id) {
-    return this.collection.get(id);
   }
 }
 
