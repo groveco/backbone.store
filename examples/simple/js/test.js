@@ -38,7 +38,7 @@ store.register('pantry', pantryRepository);
 store.register('shipment', shipmentRepository);
 
 var repo = store.getRepository('user');
-var deferred = repo.getByLink(12, 'data/user.json');
+var deferred = repo.get(12, 'data/user.json');
 deferred.then(function (model) {
   console.log('user ->');
   console.log(model);

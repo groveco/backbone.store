@@ -35,18 +35,18 @@ describe('Repository', function () {
     assert.equal(repo.modelClass, TestModel);
   });
 
-  it('calls adapter\'s getById method on own getById', function () {
+  it('calls adapter\'s getById method on own get with Id', function () {
     let id = 42;
     let spy = chai.spy.on(this.repository._adapter, 'getById');
-    this.repository.getById(id);
+    this.repository.get(id);
     spy.should.have.been.called.with(id);
   });
 
-  it('calls adapter\'s getByLink method on own getByLink', function () {
+  it('calls adapter\'s getByLink method on own get with Id and link', function () {
     let id = 42;
     let link = '/api/user/42/';
     let spy = chai.spy.on(this.repository._adapter, 'getByLink');
-    this.repository.getByLink(id, link);
+    this.repository.get(id, link);
     spy.should.have.been.called.with(link);
   });
 
@@ -100,15 +100,15 @@ describe('Repository', function () {
     spy.should.not.have.been.called();
   });
 
-  it('adds model to cache on getById', function () {
+  it('adds model to cache on get with Id', function () {
     let id = 42;
-    this.fakeRepository.getById(id);
+    this.fakeRepository.get(id);
     assert.include(this.fakeRepository.collection.pluck('id'), id);
   });
 
-  it('adds model to cache on getByLink', function () {
+  it('adds model to cache on get with Id and link', function () {
     let link = '/api/user/1/';
-    this.fakeRepository.getByLink(link);
+    this.fakeRepository.get(1, link);
     assert.lengthOf(this.fakeRepository.collection, 1);
   });
 

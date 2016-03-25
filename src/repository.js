@@ -32,23 +32,18 @@ class Repository {
   }
 
   /**
-   * Get model by Id.
-   * @param {number} id - Model Id.
-   * @returns {Promise} Promise for requested model.
-   */
-  getById(id) {
-    let func = _.bind(this._adapter.getById, this._adapter, id);
-    return this._get(func, id);
-  }
-
-  /**
    * Get model by link.
    * @param {number} id - Model Id.
-   * @param {string} link - model link.
+   * @param {string} [link] - model link.
    * @returns {Promise} Promise for requested model.
    */
-  getByLink(id, link) {
-    let func = _.bind(this._adapter.getByLink, this._adapter, link);
+  get(id, link) {
+    let func;
+    if (link) {
+      func = _.bind(this._adapter.getByLink, this._adapter, link);
+    } else {
+      func = _.bind(this._adapter.getById, this._adapter, id);
+    }
     return this._get(func, id);
   }
 

@@ -49,7 +49,7 @@ describe('Store', function () {
 
 describe('getAsync', function () {
 
-  it('calls getByLink in repository if link is provided', function () {
+  it('calls getwith link in repository if link is provided', function () {
     let id = 2;
     let link = '/api/test/2/';
     let model = new RelationalModel({
@@ -63,13 +63,13 @@ describe('getAsync', function () {
     });
     let store = Store.instance();
     let repo = createFakeRepository();
-    let spy = chai.spy.on(repo, 'getByLink');
+    let spy = chai.spy.on(repo, 'get');
     store.register('test', repo);
     model.getAsync('test');
     spy.should.have.been.called.with(id, link);
   });
 
-  it('calls getById in repository if link is not provided', function () {
+  it('calls get with Id in repository if link is not provided', function () {
     let id = 2;
     let model = new RelationalModel({
       id: 1,
@@ -81,7 +81,7 @@ describe('getAsync', function () {
     });
     let store = Store.instance();
     let repo = createFakeRepository();
-    let spy = chai.spy.on(repo, 'getById');
+    let spy = chai.spy.on(repo, 'get');
     store.register('test', repo);
     model.getAsync('test');
     spy.should.have.been.called.with(id);

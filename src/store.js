@@ -38,11 +38,7 @@ let addGetAsync = function (store) {
         throw new Error('Can\'t fetch collection of "' + modelName + '" without link.');
       }
     } else {
-      if (relationship.link) {
-        return repository.getByLink(relationship.id, relationship.link);
-      } else {
-        return repository.getById(relationship.id);
-      }
+      return repository.get(relationship.id, relationship.link);
     }
   }
 };
