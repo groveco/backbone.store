@@ -1,4 +1,5 @@
-import $ from 'jquery'
+import _ from 'underscore'
+import RSVP from 'rsvp'
 
 let data = {
   name: 'foo',
@@ -11,17 +12,18 @@ let data = {
 };
 
 let resolveWithData = function (id, attrs = {}) {
-  let deferred = $.Deferred();
-  let args = $.extend({}, data, attrs);
-  args.id = id;
-  deferred.resolve(args);
-  return deferred;
+  let args = _.extend({}, data, attrs, {
+    id
+  });
+  return new RSVP.Promise((resolve, reject) => {
+    resolve(args);
+  });
 };
 
 let resolve = function () {
-  let deferred = $.Deferred();
-  deferred.resolve();
-  return deferred;
+  return new RSVP.Promise((resolve, reject) => {
+    resolve();
+  });
 };
 
 class FakeAdapter {

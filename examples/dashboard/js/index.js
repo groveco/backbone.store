@@ -50,7 +50,7 @@ store.register('shipment', shipmentRepository);
 store.register('shipment-item', shipmentItemRepository);
 
 var repo = store.getRepository('user');
-var deferred = repo.get(12, 'data/customer.json');
+var deferred = repo.get(236, 'data/customer.json');
 deferred.then(function (model) {
   console.log('customer ->');
   console.log(model);
