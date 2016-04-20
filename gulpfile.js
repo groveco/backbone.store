@@ -1,7 +1,7 @@
 var babelify = require('babelify');
 var browserify = require('browserify');
+var browserifyShim = require('browserify-shim');
 var gulp = require('gulp');
-var remapify = require('remapify');
 var Server = require('karma').Server;
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
@@ -16,10 +16,8 @@ gulp.task('karma', function () {
 });
 
 gulp.task('browserify', function () {
-  var b = browserifyBundle('examples/simple/js/test.js');
-  bundleShare(b, 'dist/', 'simple.js');
-  b = browserifyBundle('examples/dashboard/js/index.js');
-  return bundleShare(b, 'dist/', 'dashboard.js');
+  var b = browserifyBundle('src/index.js');
+  bundleShare(b, 'dist/', 'main.js');
 });
 
 gulp.task('watchify', function() {
@@ -39,10 +37,14 @@ gulp.task('watchify', function() {
 
 var browserifyBundle = function (sourcePath) {
   var b = browserify(sourcePath, {
-    fullPaths: true,
-    debug: true
+    standalone: 'BackboneStore'
   });
+  b.exclude('jquery');
+  b.exclude('underscore');
+  b.exclude('backbone');
+  b.exclude('rsvp');
   b.transform(babelify, { presets: ['es2015'] });
+  b.transform(browserifyShim);
   return b;
 };
 
