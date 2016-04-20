@@ -1,6 +1,3 @@
-import Backbone from 'backbone'
-import BackboneStore from '../../../src/index'
-
 var Pantry = Backbone.Model.extend({
   relatedModels: {
     user: 'user'

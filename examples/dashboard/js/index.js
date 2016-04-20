@@ -1,7 +1,3 @@
-import Backbone from 'backbone'
-import BackboneStore from '../../../src/index'
-import RSVP from 'rsvp'
-
 var Customer = Backbone.Model.extend({
   relatedModels: {
     pantry: 'pantry'
