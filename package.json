@@ -1,6 +1,7 @@
 {
-  "name": "backbone-relational-proof-of-concept",
-  "version": "0.0.0",
+  "name": "backbone.store",
+  "main": "src/index.js",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "test": "./node_modules/.bin/karma start"
