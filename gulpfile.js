@@ -43,6 +43,7 @@ var browserifyBundle = function (sourcePath) {
   b.exclude('underscore');
   b.exclude('backbone');
   b.exclude('rsvp');
+  b.external('es6-symbol');
   b.transform(babelify, { presets: ['es2015'] });
   b.transform(browserifyShim);
   return b;
