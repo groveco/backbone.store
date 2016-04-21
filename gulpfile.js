@@ -2,6 +2,7 @@ var babelify = require('babelify');
 var browserify = require('browserify');
 var browserifyShim = require('browserify-shim');
 var gulp = require('gulp');
+var derequire = require('gulp-derequire');
 var Server = require('karma').Server;
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
@@ -43,7 +44,6 @@ var browserifyBundle = function (sourcePath) {
   b.exclude('underscore');
   b.exclude('backbone');
   b.exclude('rsvp');
-  b.external('es6-symbol');
   b.transform(babelify, { presets: ['es2015'] });
   b.transform(browserifyShim);
   return b;
@@ -55,5 +55,6 @@ var bundleShare = function (b, outDir, outFile) {
       console.log('ERROR: ' + e.message);
     })
     .pipe(source(outFile))
+    .pipe(derequire())
     .pipe(gulp.dest(outDir));
 };
