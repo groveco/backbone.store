@@ -3,7 +3,6 @@
  * @module
  */
 import Backbone from 'backbone'
-import Symbol from 'es6-symbol'
 
 let actions = {
   GET: 0,
@@ -89,7 +88,7 @@ let addRelatedMethods = function (store) {
 };
 
 let store = null;
-let privateEnforcer = Symbol();
+let privateEnforcer = Math.random();
 
 /**
  * Backbone Store class that manages all repositories.
@@ -98,7 +97,7 @@ class Store {
 
   /**
    * Create Store.
-   * @param {Symbol} enforcer - Symbol to make constructor private.
+   * @param {Number} enforcer - Symbol to make constructor private.
    */
   constructor(enforcer) {
     if (enforcer !== privateEnforcer) {

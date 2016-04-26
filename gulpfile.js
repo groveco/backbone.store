@@ -1,6 +1,5 @@
 var babelify = require('babelify');
 var browserify = require('browserify');
-var browserifyShim = require('browserify-shim');
 var gulp = require('gulp');
 var derequire = require('gulp-derequire');
 var Server = require('karma').Server;
@@ -40,12 +39,7 @@ var browserifyBundle = function (sourcePath) {
   var b = browserify(sourcePath, {
     standalone: 'BackboneStore'
   });
-  b.exclude('jquery');
-  b.exclude('underscore');
-  b.exclude('backbone');
-  b.exclude('rsvp');
   b.transform(babelify, { presets: ['es2015'] });
-  b.transform(browserifyShim);
   return b;
 };
 
