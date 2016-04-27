@@ -32,6 +32,8 @@ class HttpAdapter {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
+      }).catch(error => {
+        console.error(error);
       });
     });
   }
@@ -47,6 +49,8 @@ class HttpAdapter {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
+      }).catch(error => {
+        console.error(error);
       });
     });
   }
@@ -62,6 +66,8 @@ class HttpAdapter {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
+      }).catch(error => {
+        console.error(error);
       });
     });
   }
@@ -78,6 +84,8 @@ class HttpAdapter {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
+      }).catch(error => {
+        console.error(error);
       });
     });
   }
@@ -93,6 +101,8 @@ class HttpAdapter {
         resolve();
       }, () => {
         reject();
+      }).catch(error => {
+        console.error(error);
       });
     });
   }

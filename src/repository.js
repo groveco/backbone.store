@@ -48,6 +48,8 @@ class Repository {
           resolve(model);
         }, () => {
           reject();
+        }).catch(error => {
+          console.error(error);
         });
       }
     });
@@ -74,6 +76,8 @@ class Repository {
         resolve(model);
       }, () => {
         reject();
+      }).catch(error => {
+        console.error(error);
       });
     });
   }
@@ -101,6 +105,8 @@ class Repository {
         resolve(collection);
       }, () => {
         reject();
+      }).catch(error => {
+        console.error(error);
       });
     });
   }
@@ -119,6 +125,8 @@ class Repository {
         resolve(model);
       }, () => {
         reject();
+      }).catch(error => {
+        console.error(error);
       });
     });
   }
@@ -137,6 +145,8 @@ class Repository {
         resolve(model);
       }, () => {
         reject();
+      }).catch(error => {
+        console.error(error);
       });
     });
   }
@@ -155,6 +165,8 @@ class Repository {
           resolve();
         }, () => {
           reject();
+        }).catch(error => {
+          console.error(error);
         });
       } else {
         reject('Model does not exist');
