@@ -112,7 +112,10 @@ class HttpAdapter {
       let options = {
         url: this._url,
         type: type,
-        contentType: 'application/vnd.api+json',
+        headers: {
+          Accept: 'application/vnd.api+json',
+          'Content-Type': 'application/vnd.api+json'
+        },
         success: data => {
           resolve(data);
         },
@@ -139,7 +142,10 @@ class HttpAdapter {
       let options = {
         url: link,
         type: HttpMethods.GET,
-        contentType: 'application/vnd.api+json',
+        headers: {
+          Accept: 'application/vnd.api+json',
+          'Content-Type': 'application/vnd.api+json'
+        },
         success: data => {
           resolve(data);
         },
