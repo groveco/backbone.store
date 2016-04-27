@@ -67,7 +67,7 @@ class JsonApiParser {
     if (relationship.data instanceof Array) {
       result.id = relationship.data.map(item => item.id);
     } else {
-      result.id = relationship.data.id;
+      result.id = relationship.data ? relationship.data.id : null;
     }
     if (relationship.links && relationship.links.related) {
       result.link = relationship.links.related;
