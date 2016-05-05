@@ -5,4 +5,4 @@ let HttpMethods = {
   DELETE: 'DELETE'
 };
 
-export {HttpMethods}
+export default HttpMethods;

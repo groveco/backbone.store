@@ -98,4 +98,4 @@ class JsonApiParser {
   }
 }
 
-export {JsonApiParser};
+export default JsonApiParser;
