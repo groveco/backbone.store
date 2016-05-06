@@ -28,7 +28,7 @@ let resolve = function () {
 
 class FakeAdapter {
 
-  getById(id) {
+  getById(modelName, id) {
     return resolveWithData(id);
   }
 
@@ -36,17 +36,17 @@ class FakeAdapter {
     return resolveWithData(42);
   }
 
-  create(attributes) {
+  create(modelName, attributes) {
     return resolveWithData(42, attributes);
   }
 
-  update(id, attributes) {
+  update(modelName, id, attributes) {
     return resolveWithData(id, attributes);
   }
 
-  destroy(id) {
+  destroy(modelName, id) {
     return resolve();
   }
 }
 
-export {FakeAdapter};
+export default FakeAdapter;
