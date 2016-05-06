@@ -153,7 +153,7 @@ class Store {
    */
   fetch(modelName, id, link) {
     return new RSVP.Promise((resolve, reject) => {
-      let model = this._repositories[modelName].createModel();
+      let model = this._getRepository(modelName).createModel();
       let adapterPromise;
       if (link) {
         adapterPromise = this._adapter.getByLink(link);
@@ -162,7 +162,7 @@ class Store {
       }
       adapterPromise.then(data => {
         model.set(data);
-        this._repositories[modelName].set(model);
+        this._getRepository(modelName).set(model);
         resolve(model);
       }, () => {
         reject();
@@ -176,10 +176,10 @@ class Store {
    * Get model by Id from front-end cache.
    * @param {string} modelName - Entity class name.
    * @param {number} id - Model Id.
-   * @returns {Promise} Promise for requested model.
+   * @returns {Promise} Requested model.
    */
   pluck(modelName, id) {
-    return this._repositories[modelName].get(id);
+    return this._getRepository(modelName).get(id);
   }
 
   /**
@@ -190,7 +190,7 @@ class Store {
    */
   getCollectionByLink(modelName, link) {
     return new RSVP.Promise((resolve, reject) => {
-      let repository = this._repositories[modelName];
+      let repository = this._getRepository(modelName);
       let collection = repository.createCollection();
       this._adapter.getByLink(link).then(data => {
         collection.set(data);
@@ -212,7 +212,7 @@ class Store {
    */
   create(modelName, attributes = {}) {
     return new RSVP.Promise((resolve, reject) => {
-      let repository = this._repositories[modelName];
+      let repository = this._getRepository(modelName);
       let model = repository.createModel();
       this._adapter.create(modelName, attributes).then(data => {
         model.set(data);
@@ -235,7 +235,7 @@ class Store {
    */
   update(modelName, model, attributes) {
     return new RSVP.Promise((resolve, reject) => {
-      let repository = this._repositories[modelName];
+      let repository = this._getRepository(modelName);
       model.set(attributes);
       this._adapter.update(modelName, model.id, model.toJSON()).then((data) => {
         model.clear().set(data);
@@ -256,7 +256,7 @@ class Store {
    */
   destroy(modelName, id) {
     return new RSVP.Promise((resolve, reject) => {
-      let repository = this._repositories[modelName];
+      let repository = this._getRepository(modelName);
       let model = repository.get(id);
       if (model) {
         this._adapter.destroy(modelName, id).then(() => {
@@ -271,6 +271,14 @@ class Store {
         reject('Model does not exist');
       }
     });
+  }
+
+  _getRepository(modelName) {
+    let repository = this._repositories[modelName];
+    if (!repository) {
+      throw new Error('Can`t get repository for "' + modelName + '".');
+    }
+    return repository;
   }
 }
 
