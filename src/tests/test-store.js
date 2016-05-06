@@ -1,162 +1,222 @@
-import Backbone from 'backbone';
+import _ from 'underscore'
+import Backbone from 'backbone'
 import FakeAdapter from './test-classes/adapter';
-import HttpAdapter from '../http-adapter';
-import JsonApiParser from '../json-api-parser';
 import Model from './test-classes/model';
-import RelationalModel from './test-classes/relational-model';
-import Repository from '../repository';
+import RSVP from 'rsvp'
 import Store from '../store';
 
-let createRepository = function () {
-  let parser = new JsonApiParser();
-  let adapter = new HttpAdapter('/api/model/', parser);
-  return new Repository(Model, adapter);
-};
+let TestModel = Backbone.Model.extend({});
+let TestCollection = Backbone.Collection.extend({
+  model: TestModel
+});
+let modelName = 'foo';
 
-let createFakeRepository = function () {
-  return new Repository(Model, new FakeAdapter());
-};
+describe('Store', function () {
 
-// describe('Store', function () {
-//
-//   it('is added to Backbone model on first store instantiation', function () {
-//     assert.notProperty(Backbone.Model.prototype, 'getRelated');
-//     Store.instance();
-//     assert.property(Backbone.Model.prototype, 'getRelated');
-//   });
-//
-//   it('instance method instantiates only one instance', function () {
-//     let store1 = Store.instance();
-//     let store2 = Store.instance();
-//     assert.equal(store1, store2);
-//   });
-//
-//   it('can\'t be instantiated with "new"', function () {
-//     let func = function () {
-//       new Store();
-//     };
-//     assert.throws(func);
-//   });
-//
-//   it('registers repository', function () {
-//     let repo = createRepository();
-//     let store = Store.instance();
-//     let name = 'test';
-//     store.register('test', repo);
-//     assert(store.getRepository(name));
-//   });
-// });
-//
-// describe('getRelated', function () {
-//
-//   it('calls getwith link in repository if link is provided', function () {
-//     let id = 2;
-//     let link = '/api/test/2/';
-//     let model = new RelationalModel({
-//       id: 1,
-//       relationships: {
-//         test: {
-//           id: id,
-//           link: link
-//         }
-//       }
-//     });
-//     let store = Store.instance();
-//     let repo = createFakeRepository();
-//     let spy = chai.spy.on(repo, 'get');
-//     store.register('test', repo);
-//     model.getRelated('test');
-//     spy.should.have.been.called.with(id, link);
-//   });
-//
-//   it('calls get with Id in repository if link is not provided', function () {
-//     let id = 2;
-//     let model = new RelationalModel({
-//       id: 1,
-//       relationships: {
-//         test: {
-//           id: id
-//         }
-//       }
-//     });
-//     let store = Store.instance();
-//     let repo = createFakeRepository();
-//     let spy = chai.spy.on(repo, 'get');
-//     store.register('test', repo);
-//     model.getRelated('test');
-//     spy.should.have.been.called.with(id);
-//   });
-//
-//   it('calls getCollectionByLink in repository if collection relation name is passed', function () {
-//     let link = '/api/tests/';
-//     let model = new RelationalModel({
-//       id: 1,
-//       relationships: {
-//         tests: {
-//           link: link
-//         }
-//       }
-//     });
-//     let store = Store.instance();
-//     let repo = createFakeRepository();
-//     let spy = chai.spy.on(repo, 'getCollectionByLink');
-//     store.register('test', repo);
-//     model.fetchRelated('tests');
-//     spy.should.have.been.called.with(link);
-//   });
-//
-//   it('throws exception if related model with this name is not defined', function () {
-//     let relation = 'notexisting';
-//     let model = new RelationalModel();
-//     let func = function () {
-//       model.getRelated(relation);
-//     };
-//     assert.throws(func, 'Relation for "' + relation + '" is not defined in the model.');
-//   });
-//
-//   it('throws exception if there\'s no data in relation', function () {
-//     let relation = 'test';
-//     let model = new RelationalModel();
-//     let func = function () {
-//       model.getRelated(relation);
-//     };
-//     assert.throws(func, 'There is no related model "' + relation + '".');
-//   });
-//
-//   it('throws exception if repository is not registered for this model type', function () {
-//     let relation = 'test';
-//     let relationType = 'notexisting';
-//     let model = new RelationalModel({
-//       relationships: {
-//         test: {
-//           id: 1
-//         }
-//       }
-//     });
-//     model.relatedModels.test = relationType;
-//     let func = function () {
-//       model.getRelated(relation);
-//     };
-//     assert.throws(func, 'Can`t get repository for "' + relationType + '".');
-//   });
-//
-//   it('throws exception if link is not set for the collection', function () {
-//     let relation = 'tests';
-//     let model = new RelationalModel({
-//       id: 1,
-//       relationships: {
-//         tests: {
-//           id: [1, 2]
-//         }
-//       }
-//     });
-//     let store = Store.instance();
-//     let repo = createFakeRepository();
-//     let spy = chai.spy.on(repo, 'getCollectionByLink');
-//     store.register('test', repo);
-//     let func = function () {
-//       model.getRelated(relation);
-//     };
-//     assert.throws(func, 'Can\'t fetch collection of "' + model.relatedCollections[relation] + '" without link.');
-//   });
-// });
+  beforeEach(function () {
+    let adapter = new FakeAdapter();
+    this.store = new Store(adapter);
+    this.store.register(modelName, TestCollection);
+  });
+
+  it('registers repository', function () {
+    let name = 'test';
+    this.store.register('test', Model);
+    assert(this.store._repositories[name]);
+    assert.equal(this.store._repositories[name].modelClass, Model);
+  });
+
+  it('calls adapter\'s getById method on own get with Id', function () {
+    let id = 42;
+    let spy = chai.spy.on(this.store._adapter, 'getById');
+    this.store.get(modelName, id);
+    spy.should.have.been.called.with(modelName, id);
+  });
+
+  it('calls adapter\'s getByLink method on own get with Id and link', function () {
+    let id = 42;
+    let link = '/api/user/42/';
+    let spy = chai.spy.on(this.store._adapter, 'getByLink');
+    this.store.get(modelName, id, link);
+    spy.should.have.been.called.with(link);
+  });
+
+  it('calls adapter\'s getByLink method once on multiple own get with Id and link', function (done) {
+    let id = 42;
+    let link = '/api/user/42/';
+    let spy = chai.spy.on(this.store._adapter, 'getByLink');
+    this.store.get(modelName, id, link).then(() => {
+      this.store.get(modelName, id, link);
+      spy.should.have.been.called.once();
+      done();
+    });
+  });
+
+  it('calls adapter\'s getByLink method on own getCollectionByLink', function () {
+    let id = 42;
+    let link = '/api/user/42/';
+    let spy = chai.spy.on(this.store._adapter, 'getByLink');
+    this.store.getCollectionByLink(modelName, link);
+    spy.should.have.been.called.with(link);
+  });
+
+  it('calls adapter\'s getByLink method on own fetch with link', function () {
+    let id = 42;
+    let link = '/api/user/42/';
+    let spy = chai.spy.on(this.store._adapter, 'getByLink');
+    this.store.fetch(modelName, id, link);
+    spy.should.have.been.called.with(link);
+  });
+
+  it('calls adapter\'s getByLink method every time own fetch with link is called', function () {
+    let id = 42;
+    let link = '/api/user/42/';
+    let spy = chai.spy.on(this.store._adapter, 'getByLink');
+    this.store.fetch(modelName, id, link).then(() => {
+      this.store.fetch(modelName, id, link);
+      spy.should.have.been.called.twice();
+    });
+  });
+
+  it('doesn\'t call any adapter\'s get method on own pluck call', function () {
+    let spyByLink = chai.spy.on(this.store._adapter, 'getByLink');
+    let spyById = chai.spy.on(this.store._adapter, 'getById');
+    this.store.pluck(modelName, 42);
+    spyByLink.should.not.have.been.called();
+    spyById.should.not.have.been.called();
+  });
+
+  it('pluck doesn\'t return not cached data', function () {
+    let model = this.store.pluck(modelName, 42);
+    assert.isUndefined(model);
+  });
+
+  it('pluck returns cached data', function (done) {
+    let id = 42;
+    let link = `/api/user/${id}/`;
+    this.store.get(modelName, id, link).then(() => {
+      let model = this.store.pluck(modelName, id);
+      assert.isObject(model);
+      done();
+    });
+  });
+
+  it('calls adapter\'s create method on own create', function () {
+    let attrs = {
+      name: 'foo'
+    };
+    let spy = chai.spy.on(this.store._adapter, 'create');
+    this.store.create(modelName, attrs);
+    spy.should.have.been.called.with(modelName, attrs);
+  });
+
+  it('calls adapter\'s update method on own update', function () {
+    let model = new Backbone.Model({
+      id: 42,
+      slug: 'bar'
+    });
+    let initialAttrs = model.toJSON();
+    let attrs = {
+      name: 'foo'
+    };
+    let spy = chai.spy.on(this.store._adapter, 'update');
+    this.store.update(modelName, model, attrs);
+    _.extend(initialAttrs, attrs);
+    spy.should.have.been.called.with(modelName, model.id, initialAttrs);
+  });
+
+  it('calls adapter\'s destroy method on own destroy if model is cached', function () {
+    let id = 42;
+    let model = new Backbone.Model({
+      id: id
+    });
+    this.store._repositories[modelName].set(model);
+    let spy = chai.spy.on(this.store._adapter, 'destroy');
+    this.store.destroy(modelName, id);
+    spy.should.have.been.called.with(modelName, id);
+  });
+
+  it('does not call adapter\'s destroy method on own destroy if model is not cached', function () {
+    let id = 42;
+    let spy = chai.spy.on(this.store._adapter, 'destroy');
+    this.store.destroy(modelName, id);
+    spy.should.not.have.been.called();
+  });
+
+  it('adds model to cache on get with Id', function (done) {
+    let id = 42;
+    this.store.get(modelName, id).then(() => {
+      assert.include(this.store._repositories[modelName]._collection.pluck('id'), id);
+      done();
+    });
+  });
+
+  it('adds model to cache on get with Id and link', function (done) {
+    let link = '/api/user/1/';
+    this.store.get(modelName, 1, link).then(() => {
+      assert.lengthOf(this.store._repositories[modelName]._collection, 1);
+      done();
+    });
+  });
+
+  it('adds models to cache on getCollectionByLink', function (done) {
+    let link = '/api/user/1/';
+    let collection = [{
+      id: 1,
+      name: 'foo1'
+    }, {
+      id: 2,
+      name: 'foo2'
+    }, {
+      id: 3,
+      name: 'foo3'
+    }];
+    this.store._adapter.getByLink = function () {
+      return new RSVP.Promise((resolve, reject) => {
+        resolve(collection);
+      });
+    };
+    this.store.getCollectionByLink(modelName, link).then(() => {
+      assert.lengthOf(this.store._repositories[modelName]._collection, collection.length);
+      done();
+    });
+  });
+
+  it('adds model to cache on create', function (done) {
+    let attrs = {
+      name: 'foo'
+    };
+    this.store.create(modelName, attrs).then(() => {
+      assert.lengthOf(this.store._repositories[modelName]._collection, 1);
+      done();
+    });
+  });
+
+  it('updates model in cache on update', function (done) {
+    let attrs = {
+      name: 'foo'
+    };
+    this.store.create(modelName, attrs).then((model) => {
+      let newAttrs = {
+        name: 'foo2'
+      };
+      this.store.update(modelName, model, newAttrs).then((model) => {
+        assert.lengthOf(this.store._repositories[modelName]._collection, 1);
+        assert.equal(this.store._repositories[modelName]._collection.at(0).get('name'), newAttrs.name);
+        done();
+      });
+    });
+  });
+
+  it('removes model from cache on destroy', function (done) {
+    let attrs = {
+      name: 'foo'
+    };
+    this.store.create(modelName, attrs).then((model) => {
+      this.store.destroy(modelName, model.id).then((model) => {
+        assert.lengthOf(this.store._repositories[modelName]._collection, 0);
+        done();
+      });
+    });
+  });
+});

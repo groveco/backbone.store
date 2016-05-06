@@ -33,15 +33,11 @@ let addRelatedMethods = function (store) {
       throw new Error('There is no related model "' + modelName + '".');
     }
 
-    let repository = store.getRepository(modelName);
-    if (!repository) {
-      throw new Error('Can`t get repository for "' + modelName + '".');
-    }
 
     if (isCollection) {
       if (relationship.link) {
         if (action == actions.FETCH) {
-          return repository.getCollectionByLink(relationship.link);
+          return store.getCollectionByLink(modelName, relationship.link);
         } else {
           throw new Error('Collection should be fetched. Use "fetchRelated".');
         }
@@ -50,11 +46,11 @@ let addRelatedMethods = function (store) {
       }
     } else {
       if (action === actions.GET) {
-        return repository.get(relationship.id, relationship.link);
+        return store.get(modelName, relationship.id, relationship.link);
       } else if (action === actions.FETCH) {
-        return repository.fetch(relationship.id, relationship.link);
+        return store.fetch(modelName, relationship.id, relationship.link);
       } else if (action === actions.PLUCK) {
-        return repository.pluck(relationship.id);
+        return store.pluck(modelName, relationship.id);
       } else {
         throw new Error('Unknown action');
       }
@@ -89,6 +85,8 @@ let addRelatedMethods = function (store) {
   };
 };
 
+let methodsAdded = false;
+
 /**
  * Backbone Store class that manages all repositories.
  */
@@ -101,6 +99,15 @@ class Store {
   constructor(adapter) {
     this._adapter = adapter;
     this._repositories = {};
+  }
+
+  static addRelatedMethods(store) {
+    if (!methodsAdded) {
+      addRelatedMethods(store);
+      methodsAdded = true;
+    } else {
+      throw new Error('Cannot add related methods more than once');
+    }
   }
 
   /**
@@ -146,7 +153,7 @@ class Store {
    */
   fetch(modelName, id, link) {
     return new RSVP.Promise((resolve, reject) => {
-      let model = new this.modelClass();
+      let model = this._repositories[modelName].createModel();
       let adapterPromise;
       if (link) {
         adapterPromise = this._adapter.getByLink(link);
