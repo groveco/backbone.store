@@ -3,8 +3,9 @@
  * @module
  */
 import $ from 'jquery'
-import {HttpMethods} from './http-methods'
+import HttpMethods from './http-methods'
 import RSVP from 'rsvp'
+import urlResolver from './url-resolver'
 
 /**
  * Adapter which works with data over HTTP.
@@ -12,23 +13,24 @@ import RSVP from 'rsvp'
 class HttpAdapter {
 
   /**
-   * Create a HttpAdapter
-   * @param {string} url - Base resource url.
-   * @param parser - Parser which parses data from specified format to BackboneStore format
+   * Create a HttpAdapter.
+   * @param {JsonApiParser} parser - Parser which parses data from specified format to BackboneStore format.
+   * @param {string} [prefix] - URL prefix.
    */
-  constructor(url, parser) {
+  constructor(parser, prefix) {
     this._parser = parser;
-    this._url = url;
+    this._prefix = prefix || '';
   }
 
   /**
    * Get entity by Id.
+   * @param {string} modelName - Entity class name.
    * @param {number|string} id - Entity Id.
    * @returns {Promise} Promise for fetched data.
    */
-  getById(id) {
+  getById(modelName, id) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajax(id, HttpMethods.GET).then(data => {
+      this._ajax(urlResolver.getUrl(modelName), id, HttpMethods.GET).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
@@ -57,12 +59,13 @@ class HttpAdapter {
 
   /**
    * Create entity.
+   * @param {string} modelName - Entity class name.
    * @param {object} attributes - Data to create entity with.
    * @returns {Promise} Promise for created data.
    */
-  create(attributes) {
+  create(modelName, attributes) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajax(null, HttpMethods.POST, this._parser.serialize(attributes)).then(data => {
+      this._ajax(urlResolver.getUrl(modelName), null, HttpMethods.POST, this._parser.serialize(attributes)).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
@@ -74,13 +77,14 @@ class HttpAdapter {
 
   /**
    * Update entity.
+   * @param {string} modelName - Entity class name.
    * @param {number|string} id - Entity Id.
    * @param {object} attributes - Data to update entity with.
    * @returns {Promise} Promise for updated data.
    */
-  update(id, attributes) {
+  update(modelName, id, attributes) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajax(id, HttpMethods.PUT, this._parser.serialize(attributes)).then(data => {
+      this._ajax(urlResolver.getUrl(modelName), id, HttpMethods.PUT, this._parser.serialize(attributes)).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
@@ -92,12 +96,13 @@ class HttpAdapter {
 
   /**
    * Destroy entity.
+   * @param {string} modelName - Entity class name.
    * @param {number|string} id - Entity Id.
    * @returns {Promise} Promise for destroy.
    */
-  destroy(id) {
+  destroy(modelName, id) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajax(id, HttpMethods.DELETE).then(() => {
+      this._ajax(urlResolver.getUrl(modelName), id, HttpMethods.DELETE).then(() => {
         resolve();
       }, () => {
         reject();
@@ -107,10 +112,10 @@ class HttpAdapter {
     });
   }
 
-  _ajax(id, type, data) {
+  _ajax(url, id, type, data) {
     return new RSVP.Promise((resolve, reject) => {
       let options = {
-        url: this._url,
+        url: this._prefix + url,
         type: type,
         headers: {
           Accept: 'application/vnd.api+json',
@@ -123,6 +128,9 @@ class HttpAdapter {
           reject();
         }
       };
+      if (options.url.substr(options.url.length - 1) != '/') {
+        options.url += '/';
+      }
       if (id) {
         options.url += id + '/';
       }
@@ -159,4 +167,4 @@ class HttpAdapter {
 
 }
 
-export {HttpAdapter};
+export default HttpAdapter;

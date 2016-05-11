@@ -9,4 +9,4 @@ let RelationalModel = Backbone.Model.extend({
   }
 });
 
-export {RelationalModel};
+export default RelationalModel;
