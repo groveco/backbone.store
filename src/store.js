@@ -153,16 +153,16 @@ class Store {
    */
   fetch(modelName, id, link) {
     return new RSVP.Promise((resolve, reject) => {
-      let model = this._getRepository(modelName).createModel();
       let adapterPromise;
       if (link) {
         adapterPromise = this._adapter.getByLink(link);
       } else {
         adapterPromise = this._adapter.getById(modelName, id);
       }
-      adapterPromise.then(data => {
-        model.set(data);
-        this._getRepository(modelName).set(model);
+      adapterPromise.then(response => {
+        let repository = this._getRepository(modelName);
+        let model = repository.createModel(response.data);
+        repository.set(model);
         resolve(model);
       }, () => {
         reject();
@@ -212,10 +212,9 @@ class Store {
    */
   create(modelName, attributes = {}) {
     return new RSVP.Promise((resolve, reject) => {
-      let repository = this._getRepository(modelName);
-      let model = repository.createModel();
-      this._adapter.create(modelName, attributes).then(data => {
-        model.set(data);
+      this._adapter.create(modelName, attributes).then(response => {
+        let repository = this._getRepository(modelName);
+        let model = repository.createModel(response.data);
         repository.set(model);
         resolve(model);
       }, () => {
@@ -235,10 +234,11 @@ class Store {
    */
   update(modelName, model, attributes) {
     return new RSVP.Promise((resolve, reject) => {
-      let repository = this._getRepository(modelName);
       model.set(attributes);
-      this._adapter.update(modelName, model.id, model.toJSON()).then((data) => {
-        model.clear().set(data);
+      this._adapter.update(modelName, model.id, model.toJSON()).then((response) => {
+        let repository = this._getRepository(modelName);
+        let model = repository.createModel(response.data);
+        repository.set(model);
         resolve(model);
       }, () => {
         reject();
@@ -279,6 +279,19 @@ class Store {
       throw new Error('Can`t get repository for "' + modelName + '".');
     }
     return repository;
+  }
+
+  _setModels(response) {
+    let data = response.data;
+    let repository = this._getRepository(data._type);
+    let model = repository.createModel(response.data);
+    repository.set(model);
+    for (let included of response.included) {
+      let includedRepository = this._getRepository(included._type);
+      let includedModel = includedRepository.createModel(included);
+      includedRepository.set(includedModel);
+    }
+    return model;
   }
 }
 

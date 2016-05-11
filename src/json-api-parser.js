@@ -15,12 +15,18 @@ class JsonApiParser {
    * @returns {object} Data in BackboneStore format.
    */
   parse(jsonApiData) {
-    let result = null;
+    let result = {};
     let data = jsonApiData.data;
     if (data instanceof Array) {
-      result = data.map(elem => this._parseSingleObject(elem));
+      result.data = data.map(elem => this._parseSingleObject(elem));
     } else {
-      result = this._parseSingleObject(data);
+      result.data = this._parseSingleObject(data);
+    }
+    let included = jsonApiData.included;
+    if (included instanceof Array) {
+      result.included = included.map(elem => this._parseSingleObject(elem));
+    } else {
+      result.included = [];
     }
     return result;
   }
@@ -52,6 +58,7 @@ class JsonApiParser {
     let result = {};
     _.extend(result, object.attributes);
     result.id = object.id;
+    result._type = object.type;
     if (object.relationships) {
       result.relationships = {};
       Object.keys(object.relationships).forEach((key) => {
