@@ -32,9 +32,11 @@ describe('HTTP adapter', function () {
   it('calls AJAX post on create', function () {
     let modelName = 'foo';
     let attrs = {
-      foo: 'bar',
-      foo2: {
-        foo3: 42
+      data: {
+        foo: 'bar',
+        foo2: {
+          foo3: 42
+        }
       }
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
@@ -46,9 +48,11 @@ describe('HTTP adapter', function () {
     let modelName = 'foo';
     let id = 42;
     let attrs = {
-      foo: 'bar',
-      foo2: {
-        foo3: 42
+      data: {
+        foo: 'bar',
+        foo2: {
+          foo3: 42
+        }
       }
     };
     let spy = chai.spy.on(this.adapter, '_ajax');

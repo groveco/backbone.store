@@ -15,7 +15,10 @@ class JsonApiParser {
    * @returns {object} Data in BackboneStore format.
    */
   parse(jsonApiData) {
-    let result = {};
+    let result = {
+      data: {},
+      included: []
+    };
     let data = jsonApiData.data;
     if (data instanceof Array) {
       result.data = data.map(elem => this._parseSingleObject(elem));
@@ -25,8 +28,6 @@ class JsonApiParser {
     let included = jsonApiData.included;
     if (included instanceof Array) {
       result.included = included.map(elem => this._parseSingleObject(elem));
-    } else {
-      result.included = [];
     }
     return result;
   }
@@ -39,16 +40,17 @@ class JsonApiParser {
   serialize(obj) {
     let result = {
       data: {
-        id: obj.id,
+        id: obj.data.id,
+        type: obj.data._type,
         attributes: {}
       }
     };
-    if (obj.relationships) {
-      result.data.relationships = this._serializeRelationships(obj.relationships);
+    if (obj.data.relationships) {
+      result.data.relationships = obj.data.relationships;
     }
-    Object.keys(obj).forEach((key, index) => {
-      if (key !== 'relationships' && key !== 'id') {
-        result.data.attributes[key] = obj[key];
+    Object.keys(obj.data).forEach((key, index) => {
+      if (key !== 'relationships' && key !== 'id' && key !== '_type') {
+        result.data.attributes[key] = obj.data[key];
       }
     });
     return result;
@@ -60,47 +62,8 @@ class JsonApiParser {
     result.id = object.id;
     result._type = object.type;
     if (object.relationships) {
-      result.relationships = {};
-      Object.keys(object.relationships).forEach((key) => {
-        let relationship = object.relationships[key];
-        result.relationships[key] = this._parseRelationship(relationship);
-      });
+      result.relationships = object.relationships;
     }
-    return result;
-  }
-
-  _parseRelationship(relationship) {
-    let result = {};
-    if (relationship.data instanceof Array) {
-      result.id = relationship.data.map(item => item.id);
-    } else {
-      result.id = relationship.data ? relationship.data.id : null;
-    }
-    if (relationship.links && relationship.links.related) {
-      result.link = relationship.links.related;
-    }
-    return result;
-  }
-
-  _serializeRelationships(relationships) {
-    let result = {};
-    Object.keys(relationships).forEach((key, index) => {
-      if (relationships[key].id instanceof Array) {
-        result[key] ={
-          data: relationships[key].id.map(id => {
-            return {
-              id: id
-            }
-          })
-        };
-      } else {
-        result[key] = {
-          data: {
-            id: relationships[key].id
-          }
-        }
-      }
-    });
     return result;
   }
 }
