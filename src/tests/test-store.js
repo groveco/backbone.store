@@ -52,11 +52,11 @@ describe('Store', function () {
     });
   });
 
-  it('calls adapter\'s getByLink method on own getCollectionByLink', function () {
+  it('calls adapter\'s getByLink method on own getCollection', function () {
     let id = 42;
     let link = '/api/user/42/';
     let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.getCollectionByLink(modelName, link);
+    this.store.getCollection(modelName, link);
     spy.should.have.been.called.with(link);
   });
 
@@ -159,7 +159,7 @@ describe('Store', function () {
     });
   });
 
-  it('adds models to cache on getCollectionByLink', function (done) {
+  it('adds models to cache on getCollection', function (done) {
     let link = '/api/user/1/';
     let collection = [{
       id: 1,
@@ -176,7 +176,7 @@ describe('Store', function () {
         resolve(collection);
       });
     };
-    this.store.getCollectionByLink(modelName, link).then(() => {
+    this.store.getCollection(modelName, link).then(() => {
       assert.lengthOf(this.store._repositories[modelName]._collection, collection.length);
       done();
     });

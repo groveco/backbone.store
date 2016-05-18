@@ -37,7 +37,7 @@ let addRelatedMethods = function (store) {
     if (isCollection) {
       if (relationship.link) {
         if (action == actions.FETCH) {
-          return store.getCollectionByLink(modelName, relationship.link);
+          return store.getCollection(modelName, relationship.link);
         } else {
           throw new Error('Collection should be fetched. Use "fetchRelated".');
         }
@@ -188,7 +188,7 @@ class Store {
    * @param {string} link - Collection link.
    * @returns {Promise} Promise for requested collection.
    */
-  getCollectionByLink(modelName, link) {
+  getCollection(modelName, link) {
     return new RSVP.Promise((resolve, reject) => {
       let repository = this._getRepository(modelName);
       let collection = repository.createCollection();
