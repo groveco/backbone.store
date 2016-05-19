@@ -152,6 +152,96 @@ let parsedCollection = {
   included: []
 };
 
+let jsonApiDataIncluded = {
+  data: {
+    id: 12,
+    type: 'user',
+    attributes: {
+      name: 'foo'
+    },
+    relationships: {
+      pantry: {
+        data: {
+          id: 42,
+          type: 'pantry'
+        },
+        links: {
+          related: '/api/pantry/42'
+        }
+      }
+    }
+  },
+  included: [{
+    id: 42,
+    type: 'pantry',
+    attributes: {
+      name: 'bar'
+    },
+    relationships: {
+      addresses: {
+        data: [
+          {
+            id: 1,
+            type: 'address'
+          }, {
+            id: 2,
+            type: 'address'
+          }, {
+            id: 3,
+            type: 'address'
+          }
+        ],
+        links: {
+          related: '/api/address'
+        }
+      }
+    }
+  }]
+};
+
+let parsedIncludedData = {
+  data: {
+    name: 'foo',
+    id: 12,
+    _type: 'user',
+    relationships: {
+      pantry: {
+        data: {
+          id: 42,
+          type: 'pantry'
+        },
+        links: {
+          related: '/api/pantry/42'
+        }
+      }
+    }
+  },
+  included: [{
+    name: 'bar',
+    id: 42,
+    _type: 'pantry',
+    relationships: {
+      addresses: {
+        data: [
+          {
+            id: 1,
+            type: 'address'
+          }, {
+            id: 2,
+            type: 'address'
+          }, {
+            id: 3,
+            type: 'address'
+          }
+        ],
+        links: {
+          related: '/api/address'
+        }
+      }
+    }
+  }]
+};
+
 describe('JSON API parser', () => {
 
   before(function () {
@@ -171,5 +261,10 @@ describe('JSON API parser', () => {
   it('parses collection', function () {
     let parsed = this.parser.parse(jsonApiCollection);
     assert.deepEqual(parsed, parsedCollection);
+  });
+
+  it('parses with included', function () {
+    let parsed = this.parser.parse(jsonApiDataIncluded);
+    assert.deepEqual(parsed, parsedIncludedData);
   });
 });
