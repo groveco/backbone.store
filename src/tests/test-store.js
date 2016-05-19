@@ -161,23 +161,29 @@ describe('Store', function () {
 
   it('adds models to cache on getCollection', function (done) {
     let link = '/api/user/1/';
-    let collection = [{
-      id: 1,
-      name: 'foo1'
-    }, {
-      id: 2,
-      name: 'foo2'
-    }, {
-      id: 3,
-      name: 'foo3'
-    }];
+    let response = {
+      data: [{
+        id: 1,
+        _type: modelName,
+        name: 'foo1'
+      }, {
+        id: 2,
+        _type: modelName,
+        name: 'foo2'
+      }, {
+        id: 3,
+        _type: modelName,
+        name: 'foo3'
+      }],
+      included: []
+    };
     this.store._adapter.getByLink = function () {
       return new RSVP.Promise((resolve, reject) => {
-        resolve(collection);
+        resolve(response);
       });
     };
     this.store.getCollection(modelName, link).then(() => {
-      assert.lengthOf(this.store._repositories[modelName]._collection, collection.length);
+      assert.lengthOf(this.store._repositories[modelName]._collection, response.data.length);
       done();
     });
   });

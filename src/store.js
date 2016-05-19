@@ -188,11 +188,8 @@ class Store {
    */
   getCollection(modelName, link) {
     return new RSVP.Promise((resolve, reject) => {
-      let repository = this._getRepository(modelName);
-      let collection = repository.createCollection();
-      this._adapter.getByLink(link).then(data => {
-        collection.set(data);
-        repository.set(collection.models);
+      this._adapter.getByLink(link).then(response => {
+        let collection = this._setModels(response);
         resolve(collection);
       }, () => {
         reject();
@@ -277,15 +274,27 @@ class Store {
 
   _setModels(response) {
     let data = response.data;
-    let repository = this._getRepository(data._type);
-    let model = repository.createModel(response.data);
-    repository.set(model);
+    let entity;
+    if (data instanceof Array) {
+      let repository;
+      if (data.length) {
+        repository = this._getRepository(data[0]._type);
+        entity = repository.createCollection(data);
+        repository.set(entity.models);
+      } else {
+        entity = new Backbone.Collection();
+      }
+    } else {
+      let repository = this._getRepository(data._type);
+      entity = repository.createModel(data);
+      repository.set(entity);
+    }
     response.included.forEach(included => {
       let includedRepository = this._getRepository(included._type);
       let includedModel = includedRepository.createModel(included);
       includedRepository.set(includedModel);
     });
-    return model;
+    return entity;
   }
 }
 
