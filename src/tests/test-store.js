@@ -219,4 +219,44 @@ describe('Store', function () {
       });
     });
   });
+
+  it('chaches included models as well', function (done) {
+    let store = new Store({
+      getById() {
+        return new RSVP.Promise((resolve, reject) => {
+          resolve({
+            data: {
+              id: 12,
+              _type: 'user',
+              name: 'foo',
+              relationships: {
+                pantry: {
+                  data: {
+                    id: 42,
+                    type: 'pantry'
+                  },
+                  links: {
+                    related: '/api/pantry/42'
+                  }
+                }
+              }
+            },
+            included: [{
+              id: 42,
+              _type: 'pantry',
+              name: 'bar'
+            }]
+          });
+        })
+      }
+    });
+    store.register('user', TestCollection);
+    store.register('pantry', TestCollection);
+
+    store.get('user', 12).then(() => {
+      assert.include(store._repositories['user']._collection.pluck('id'), 12);
+      assert.include(store._repositories['pantry']._collection.pluck('id'), 42);
+      done();
+    });
+  });
 });

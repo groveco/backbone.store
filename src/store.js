@@ -160,9 +160,7 @@ class Store {
         adapterPromise = this._adapter.getById(modelName, id);
       }
       adapterPromise.then(response => {
-        let repository = this._getRepository(modelName);
-        let model = repository.createModel(response.data);
-        repository.set(model);
+        let model = this._setModels(response);
         resolve(model);
       }, () => {
         reject();
@@ -213,9 +211,7 @@ class Store {
   create(modelName, attributes = {}) {
     return new RSVP.Promise((resolve, reject) => {
       this._adapter.create(modelName, attributes).then(response => {
-        let repository = this._getRepository(modelName);
-        let model = repository.createModel(response.data);
-        repository.set(model);
+        let model = this._setModels(response);
         resolve(model);
       }, () => {
         reject();
@@ -236,7 +232,7 @@ class Store {
     return new RSVP.Promise((resolve, reject) => {
       model.set(attributes);
       this._adapter.update(modelName, model.id, model.toJSON()).then((response) => {
-        this._setModels(response);
+        let model = this._setModels(response);
         resolve(model);
       }, () => {
         reject();
