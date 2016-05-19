@@ -2,21 +2,33 @@ import _ from 'underscore'
 import RSVP from 'rsvp'
 
 let data = {
-  name: 'foo',
-  relationships: {
-    user: {
-      id: 10,
-      link: '/api/user/10/'
+  data: {
+    name: 'foo',
+    _type: 'foo',
+    relationships: {
+      user: {
+        data: {
+          id: 10,
+          type: 'user'
+        },
+        links: {
+          related: '/api/user/10/'
+        }
+      }
     }
-  }
+  },
+  included: []
 };
 
 let resolveWithData = function (id, attrs = {}) {
-  let args = _.extend({}, data, attrs, {
+  let args = _.extend({}, data.data, attrs, {
     id
   });
   return new RSVP.Promise((resolve, reject) => {
-    resolve(args);
+    resolve({
+      data: args,
+      included: []
+    });
   });
 };
 

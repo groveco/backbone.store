@@ -34,10 +34,12 @@ let addRelatedMethods = function (store) {
     }
 
 
+    let id = relationship.data && relationship.data.id;
+    let link = relationship.links && relationship.links.related;
     if (isCollection) {
-      if (relationship.link) {
+      if (link) {
         if (action == actions.FETCH) {
-          return store.getCollectionByLink(modelName, relationship.link);
+          return store.getCollection(modelName, link);
         } else {
           throw new Error('Collection should be fetched. Use "fetchRelated".');
         }
@@ -46,11 +48,11 @@ let addRelatedMethods = function (store) {
       }
     } else {
       if (action === actions.GET) {
-        return store.get(modelName, relationship.id, relationship.link);
+        return store.get(modelName, id, link);
       } else if (action === actions.FETCH) {
-        return store.fetch(modelName, relationship.id, relationship.link);
+        return store.fetch(modelName, id, link);
       } else if (action === actions.PLUCK) {
-        return store.pluck(modelName, relationship.id);
+        return store.pluck(modelName, id);
       } else {
         throw new Error('Unknown action');
       }
@@ -153,16 +155,14 @@ class Store {
    */
   fetch(modelName, id, link) {
     return new RSVP.Promise((resolve, reject) => {
-      let model = this._getRepository(modelName).createModel();
       let adapterPromise;
       if (link) {
         adapterPromise = this._adapter.getByLink(link);
       } else {
         adapterPromise = this._adapter.getById(modelName, id);
       }
-      adapterPromise.then(data => {
-        model.set(data);
-        this._getRepository(modelName).set(model);
+      adapterPromise.then(response => {
+        let model = this._setModels(response);
         resolve(model);
       }, () => {
         reject();
@@ -188,13 +188,10 @@ class Store {
    * @param {string} link - Collection link.
    * @returns {Promise} Promise for requested collection.
    */
-  getCollectionByLink(modelName, link) {
+  getCollection(modelName, link) {
     return new RSVP.Promise((resolve, reject) => {
-      let repository = this._getRepository(modelName);
-      let collection = repository.createCollection();
-      this._adapter.getByLink(link).then(data => {
-        collection.set(data);
-        repository.set(collection.models);
+      this._adapter.getByLink(link).then(response => {
+        let collection = this._setModels(response);
         resolve(collection);
       }, () => {
         reject();
@@ -212,11 +209,8 @@ class Store {
    */
   create(modelName, attributes = {}) {
     return new RSVP.Promise((resolve, reject) => {
-      let repository = this._getRepository(modelName);
-      let model = repository.createModel();
-      this._adapter.create(modelName, attributes).then(data => {
-        model.set(data);
-        repository.set(model);
+      this._adapter.create(modelName, attributes).then(response => {
+        let model = this._setModels(response);
         resolve(model);
       }, () => {
         reject();
@@ -235,10 +229,9 @@ class Store {
    */
   update(modelName, model, attributes) {
     return new RSVP.Promise((resolve, reject) => {
-      let repository = this._getRepository(modelName);
       model.set(attributes);
-      this._adapter.update(modelName, model.id, model.toJSON()).then((data) => {
-        model.clear().set(data);
+      this._adapter.update(modelName, model.id, model.toJSON()).then((response) => {
+        let model = this._setModels(response);
         resolve(model);
       }, () => {
         reject();
@@ -279,6 +272,31 @@ class Store {
       throw new Error('Can`t get repository for "' + modelName + '".');
     }
     return repository;
+  }
+
+  _setModels(response) {
+    let data = response.data;
+    let entity;
+    if (data instanceof Array) {
+      let repository;
+      if (data.length) {
+        repository = this._getRepository(data[0]._type);
+        entity = repository.createCollection(data);
+        repository.set(entity.models);
+      } else {
+        entity = new Backbone.Collection();
+      }
+    } else {
+      let repository = this._getRepository(data._type);
+      entity = repository.createModel(data);
+      repository.set(entity);
+    }
+    response.included.forEach(included => {
+      let includedRepository = this._getRepository(included._type);
+      let includedModel = includedRepository.createModel(included);
+      includedRepository.set(includedModel);
+    });
+    return entity;
   }
 }
 

@@ -21,8 +21,12 @@ describe('getRelated', function () {
       id: 1,
       relationships: {
         test: {
-          id: id,
-          link: link
+          data: {
+            id: id
+          },
+          links: {
+            related: link
+          }
         }
       }
     });
@@ -39,7 +43,9 @@ describe('getRelated', function () {
       id: 1,
       relationships: {
         test: {
-          id: id
+          data: {
+            id: id
+          }
         }
       }
     });
@@ -50,18 +56,20 @@ describe('getRelated', function () {
     spy.should.have.been.called.with('test', id);
   });
 
-  it('calls getCollectionByLink in repository if collection relation name is passed', function () {
+  it('calls getCollection in repository if collection relation name is passed', function () {
     let link = '/api/tests/';
     let model = new RelationalModel({
       id: 1,
       relationships: {
         tests: {
-          link: link
+          links: {
+            related: link
+          }
         }
       }
     });
     let store = getStore();
-    let spy = chai.spy.on(store, 'getCollectionByLink');
+    let spy = chai.spy.on(store, 'getCollection');
     store.register('test', RelationalModel);
     model.fetchRelated('tests');
     spy.should.have.been.called.with('test', link);
@@ -113,7 +121,7 @@ describe('getRelated', function () {
       }
     });
     let store = getStore();
-    let spy = chai.spy.on(store, 'getCollectionByLink');
+    let spy = chai.spy.on(store, 'getCollection');
     store.register('test', RelationalModel);
     let func = function () {
       model.getRelated(relation);

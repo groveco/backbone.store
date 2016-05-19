@@ -52,14 +52,14 @@ describe('Store', function () {
     });
   });
 
-  it('calls adapter\'s getByLink method on own getCollectionByLink', function () {
+  it('calls adapter\'s getByLink method on own getCollection', function () {
     let id = 42;
     let link = '/api/user/42/';
     let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.getCollectionByLink(modelName, link);
+    this.store.getCollection(modelName, link);
     spy.should.have.been.called.with(link);
   });
-
+  
   it('calls adapter\'s getByLink method on own fetch with link', function () {
     let id = 42;
     let link = '/api/user/42/';
@@ -67,7 +67,7 @@ describe('Store', function () {
     this.store.fetch(modelName, id, link);
     spy.should.have.been.called.with(link);
   });
-
+  
   it('calls adapter\'s getByLink method every time own fetch with link is called', function () {
     let id = 42;
     let link = '/api/user/42/';
@@ -85,12 +85,12 @@ describe('Store', function () {
     spyByLink.should.not.have.been.called();
     spyById.should.not.have.been.called();
   });
-
+  
   it('pluck doesn\'t return not cached data', function () {
     let model = this.store.pluck(modelName, 42);
     assert.isUndefined(model);
   });
-
+  
   it('pluck returns cached data', function (done) {
     let id = 42;
     let link = `/api/user/${id}/`;
@@ -100,7 +100,7 @@ describe('Store', function () {
       done();
     });
   });
-
+  
   it('calls adapter\'s create method on own create', function () {
     let attrs = {
       name: 'foo'
@@ -109,7 +109,7 @@ describe('Store', function () {
     this.store.create(modelName, attrs);
     spy.should.have.been.called.with(modelName, attrs);
   });
-
+  
   it('calls adapter\'s update method on own update', function () {
     let model = new Backbone.Model({
       id: 42,
@@ -124,7 +124,7 @@ describe('Store', function () {
     _.extend(initialAttrs, attrs);
     spy.should.have.been.called.with(modelName, model.id, initialAttrs);
   });
-
+  
   it('calls adapter\'s destroy method on own destroy if model is cached', function () {
     let id = 42;
     let model = new Backbone.Model({
@@ -135,14 +135,14 @@ describe('Store', function () {
     this.store.destroy(modelName, id);
     spy.should.have.been.called.with(modelName, id);
   });
-
+  
   it('does not call adapter\'s destroy method on own destroy if model is not cached', function () {
     let id = 42;
     let spy = chai.spy.on(this.store._adapter, 'destroy');
     this.store.destroy(modelName, id);
     spy.should.not.have.been.called();
   });
-
+  
   it('adds model to cache on get with Id', function (done) {
     let id = 42;
     this.store.get(modelName, id).then(() => {
@@ -159,25 +159,31 @@ describe('Store', function () {
     });
   });
 
-  it('adds models to cache on getCollectionByLink', function (done) {
+  it('adds models to cache on getCollection', function (done) {
     let link = '/api/user/1/';
-    let collection = [{
-      id: 1,
-      name: 'foo1'
-    }, {
-      id: 2,
-      name: 'foo2'
-    }, {
-      id: 3,
-      name: 'foo3'
-    }];
+    let response = {
+      data: [{
+        id: 1,
+        _type: modelName,
+        name: 'foo1'
+      }, {
+        id: 2,
+        _type: modelName,
+        name: 'foo2'
+      }, {
+        id: 3,
+        _type: modelName,
+        name: 'foo3'
+      }],
+      included: []
+    };
     this.store._adapter.getByLink = function () {
       return new RSVP.Promise((resolve, reject) => {
-        resolve(collection);
+        resolve(response);
       });
     };
-    this.store.getCollectionByLink(modelName, link).then(() => {
-      assert.lengthOf(this.store._repositories[modelName]._collection, collection.length);
+    this.store.getCollection(modelName, link).then(() => {
+      assert.lengthOf(this.store._repositories[modelName]._collection, response.data.length);
       done();
     });
   });
@@ -217,6 +223,44 @@ describe('Store', function () {
         assert.lengthOf(this.store._repositories[modelName]._collection, 0);
         done();
       });
+    });
+  });
+
+  it('caches included models as well', function (done) {
+    this.store._adapter.getById = () => {
+      return new RSVP.Promise((resolve, reject) => {
+        resolve({
+          data: {
+            id: 12,
+            _type: 'user',
+            name: 'foo',
+            relationships: {
+              pantry: {
+                data: {
+                  id: 42,
+                  type: 'pantry'
+                },
+                links: {
+                  related: '/api/pantry/42'
+                }
+              }
+            }
+          },
+          included: [{
+            id: 42,
+            _type: 'pantry',
+            name: 'bar'
+          }]
+        });
+      })
+    };
+    this.store.register('user', TestCollection);
+    this.store.register('pantry', TestCollection);
+
+    this.store.get('user', 12).then(() => {
+      assert.include(this.store._repositories['user']._collection.pluck('id'), 12);
+      assert.include(this.store._repositories['pantry']._collection.pluck('id'), 42);
+      done();
     });
   });
 });
