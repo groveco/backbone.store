@@ -34,10 +34,12 @@ let addRelatedMethods = function (store) {
     }
 
 
+    let id = relationship.data && relationship.data.id;
+    let link = relationship.links && relationship.links.related;
     if (isCollection) {
-      if (relationship.link) {
+      if (link) {
         if (action == actions.FETCH) {
-          return store.getCollection(modelName, relationship.link);
+          return store.getCollection(modelName, link);
         } else {
           throw new Error('Collection should be fetched. Use "fetchRelated".');
         }
@@ -46,11 +48,11 @@ let addRelatedMethods = function (store) {
       }
     } else {
       if (action === actions.GET) {
-        return store.get(modelName, relationship.id, relationship.link);
+        return store.get(modelName, id, link);
       } else if (action === actions.FETCH) {
-        return store.fetch(modelName, relationship.id, relationship.link);
+        return store.fetch(modelName, id, link);
       } else if (action === actions.PLUCK) {
-        return store.pluck(modelName, relationship.id);
+        return store.pluck(modelName, id);
       } else {
         throw new Error('Unknown action');
       }

@@ -21,8 +21,12 @@ describe('getRelated', function () {
       id: 1,
       relationships: {
         test: {
-          id: id,
-          link: link
+          data: {
+            id: id
+          },
+          links: {
+            related: link
+          }
         }
       }
     });
@@ -39,7 +43,9 @@ describe('getRelated', function () {
       id: 1,
       relationships: {
         test: {
-          id: id
+          data: {
+            id: id
+          }
         }
       }
     });
@@ -56,7 +62,9 @@ describe('getRelated', function () {
       id: 1,
       relationships: {
         tests: {
-          link: link
+          links: {
+            related: link
+          }
         }
       }
     });
