@@ -226,42 +226,40 @@ describe('Store', function () {
     });
   });
 
-  it('chaches included models as well', function (done) {
-    let store = new Store({
-      getById() {
-        return new RSVP.Promise((resolve, reject) => {
-          resolve({
-            data: {
-              id: 12,
-              _type: 'user',
-              name: 'foo',
-              relationships: {
-                pantry: {
-                  data: {
-                    id: 42,
-                    type: 'pantry'
-                  },
-                  links: {
-                    related: '/api/pantry/42'
-                  }
+  it('caches included models as well', function (done) {
+    this.store._adapter.getById = () => {
+      return new RSVP.Promise((resolve, reject) => {
+        resolve({
+          data: {
+            id: 12,
+            _type: 'user',
+            name: 'foo',
+            relationships: {
+              pantry: {
+                data: {
+                  id: 42,
+                  type: 'pantry'
+                },
+                links: {
+                  related: '/api/pantry/42'
                 }
               }
-            },
-            included: [{
-              id: 42,
-              _type: 'pantry',
-              name: 'bar'
-            }]
-          });
-        })
-      }
-    });
-    store.register('user', TestCollection);
-    store.register('pantry', TestCollection);
+            }
+          },
+          included: [{
+            id: 42,
+            _type: 'pantry',
+            name: 'bar'
+          }]
+        });
+      })
+    };
+    this.store.register('user', TestCollection);
+    this.store.register('pantry', TestCollection);
 
-    store.get('user', 12).then(() => {
-      assert.include(store._repositories['user']._collection.pluck('id'), 12);
-      assert.include(store._repositories['pantry']._collection.pluck('id'), 42);
+    this.store.get('user', 12).then(() => {
+      assert.include(this.store._repositories['user']._collection.pluck('id'), 12);
+      assert.include(this.store._repositories['pantry']._collection.pluck('id'), 42);
       done();
     });
   });
