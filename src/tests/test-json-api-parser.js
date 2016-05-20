@@ -7,6 +7,9 @@ let jsonApiData = {
     attributes: {
       name: 'foo'
     },
+    links: {
+      self: '/api/user/12/'
+    },
     relationships: {
       pantry: {
         data: {
@@ -43,6 +46,7 @@ let parsedData = {
     name: 'foo',
     id: 12,
     _type: 'user',
+    _self: '/api/user/12/',
     relationships: {
       pantry: {
         data: {
@@ -82,6 +86,9 @@ let serializedData = {
     attributes: {
       name: 'foo'
     },
+    links: {
+      self: '/api/user/12/'
+    },
     relationships: {
       pantry: {
         data: {
@@ -119,18 +126,27 @@ let jsonApiCollection = {
     type: 'foo',
     attributes: {
       name: 'foo1'
+    },
+    links: {
+      self: '/api/foo/1/'
     }
   },{
     id: 2,
     type: 'foo',
     attributes: {
       name: 'foo2'
+    },
+    links: {
+      self: '/api/foo/2/'
     }
   }, {
     id: 3,
     type: 'foo',
     attributes: {
       name: 'foo3'
+    },
+    links: {
+      self: '/api/foo/3/'
     }
   }]
 };
@@ -139,15 +155,18 @@ let parsedCollection = {
   data: [{
     id: 1,
     _type: 'foo',
-    name: 'foo1'
+    name: 'foo1',
+    _self: '/api/foo/1/'
   }, {
     id: 2,
     _type: 'foo',
-    name: 'foo2'
+    name: 'foo2',
+    _self: '/api/foo/2/'
   }, {
     id: 3,
     _type: 'foo',
-    name: 'foo3'
+    name: 'foo3',
+    _self: '/api/foo/3/'
   }],
   included: []
 };
@@ -158,6 +177,9 @@ let jsonApiDataIncluded = {
     type: 'user',
     attributes: {
       name: 'foo'
+    },
+    links: {
+      self: '/api/user/12/'
     },
     relationships: {
       pantry: {
@@ -176,6 +198,9 @@ let jsonApiDataIncluded = {
     type: 'pantry',
     attributes: {
       name: 'bar'
+    },
+    links: {
+      self: '/api/pantry/42/'
     },
     relationships: {
       addresses: {
@@ -204,6 +229,7 @@ let parsedIncludedData = {
     name: 'foo',
     id: 12,
     _type: 'user',
+    _self: '/api/user/12/',
     relationships: {
       pantry: {
         data: {
@@ -220,6 +246,7 @@ let parsedIncludedData = {
     name: 'bar',
     id: 42,
     _type: 'pantry',
+    _self: '/api/pantry/42/',
     relationships: {
       addresses: {
         data: [

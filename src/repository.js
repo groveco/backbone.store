@@ -45,11 +45,11 @@ class Repository {
 
   /**
    * Get entity from cache by id.
-   * @param {number|string} id - Entity id.
+   * @param {string} link - Entity self link.
    * @returns {object} Entity with given id if it exists.
    */
-  get(id) {
-    return this._collection.get(id);
+  get(link) {
+    return this._collection.findWhere({ _self: link });
   }
 
   /**
@@ -62,10 +62,13 @@ class Repository {
 
   /**
    * Remove model from cache.
-   * @param {number|string} id - Entity id.
+   * @param {string} link - Entity self link.
    */
-  remove(id) {
-    this._collection.remove(id);
+  remove(link) {
+    let model = this._collection.findWhere({ _self: link });
+    if (model) {
+      this._collection.remove(model);
+    }
   }
 }
 

@@ -125,17 +125,16 @@ class Store {
    * Get model by Id or link. If model is cached on front-end it will be returned from cache, otherwise it will be
    * fetched.
    * @param {string} modelName - Entity class name.
-   * @param {number} id - Model Id.
-   * @param {string} [link] - Model link.
+   * @param {string} link - Model link.
    * @returns {Promise} Promise for requested model.
    */
-  get(modelName, id, link) {
+  get(modelName, link) {
     return new RSVP.Promise((resolve, reject) => {
-      let model = this.pluck(modelName, id);
+      let model = this.pluck(modelName, link);
       if (model) {
         resolve(model);
       } else {
-        this.fetch(modelName, id, link).then((model) => {
+        this.fetch(modelName, link).then((model) => {
           resolve(model);
         }, () => {
           reject();
@@ -149,19 +148,12 @@ class Store {
   /**
    * Fetch model by Id or link from server.
    * @param {string} modelName - Entity class name.
-   * @param {number} id - Model Id.
-   * @param {string} [link] - Model link.
+   * @param {string} link - Model link.
    * @returns {Promise} Promise for requested model.
    */
-  fetch(modelName, id, link) {
+  fetch(modelName, link) {
     return new RSVP.Promise((resolve, reject) => {
-      let adapterPromise;
-      if (link) {
-        adapterPromise = this._adapter.getByLink(link);
-      } else {
-        adapterPromise = this._adapter.getById(modelName, id);
-      }
-      adapterPromise.then(response => {
+      this._adapter.getByLink(link).then(response => {
         let model = this._setModels(response);
         resolve(model);
       }, () => {
@@ -175,20 +167,19 @@ class Store {
   /**
    * Get model by Id from front-end cache.
    * @param {string} modelName - Entity class name.
-   * @param {number} id - Model Id.
+   * @param {string} link - Model self link.
    * @returns {Promise} Requested model.
    */
-  pluck(modelName, id) {
-    return this._getRepository(modelName).get(id);
+  pluck(modelName, link) {
+    return this._getRepository(modelName).get(link);
   }
 
   /**
    * Get collection by link.
-   * @param {string} modelName - Entity class name.
    * @param {string} link - Collection link.
    * @returns {Promise} Promise for requested collection.
    */
-  getCollection(modelName, link) {
+  getCollection(link) {
     return new RSVP.Promise((resolve, reject) => {
       this._adapter.getByLink(link).then(response => {
         let collection = this._setModels(response);
@@ -244,16 +235,16 @@ class Store {
   /**
    * Destroy model.
    * @param {string} modelName - Entity class name.
-   * @param {number} id - Id of model to destroy.
+   * @param {string} link - Self link of model to destroy.
    * @returns {Promise} Promise for destroy.
    */
-  destroy(modelName, id) {
+  destroy(modelName, link) {
     return new RSVP.Promise((resolve, reject) => {
       let repository = this._getRepository(modelName);
-      let model = repository.get(id);
+      let model = repository.get(link);
       if (model) {
-        this._adapter.destroy(modelName, id).then(() => {
-          repository.remove(model);
+        this._adapter.destroy(modelName, link).then(() => {
+          repository.remove(link);
           resolve();
         }, () => {
           reject();

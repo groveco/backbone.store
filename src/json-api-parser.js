@@ -42,6 +42,9 @@ class JsonApiParser {
       data: {
         id: obj.data.id,
         type: obj.data._type,
+        links: {
+          self: obj.data._self
+        },
         attributes: {}
       }
     };
@@ -49,7 +52,7 @@ class JsonApiParser {
       result.data.relationships = obj.data.relationships;
     }
     Object.keys(obj.data).forEach((key, index) => {
-      if (key !== 'relationships' && key !== 'id' && key !== '_type') {
+      if (key !== 'relationships' && key !== 'id' && key !== '_type' && key !== '_self') {
         result.data.attributes[key] = obj.data[key];
       }
     });
@@ -61,6 +64,7 @@ class JsonApiParser {
     _.extend(result, object.attributes);
     result.id = object.id;
     result._type = object.type;
+    result._self = object.links.self;
     if (object.relationships) {
       result.relationships = object.relationships;
     }

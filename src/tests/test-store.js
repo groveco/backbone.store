@@ -26,45 +26,34 @@ describe('Store', function () {
     assert.equal(this.store._repositories[name].modelClass, Model);
   });
 
-  it('calls adapter\'s getById method on own get with Id', function () {
-    let id = 42;
-    let spy = chai.spy.on(this.store._adapter, 'getById');
-    this.store.get(modelName, id);
-    spy.should.have.been.called.with(modelName, id);
-  });
-
-  it('calls adapter\'s getByLink method on own get with Id and link', function () {
-    let id = 42;
+  it('calls adapter\'s getByLink method on own get with link', function () {
     let link = '/api/user/42/';
     let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.get(modelName, id, link);
+    this.store.get(modelName, link);
     spy.should.have.been.called.with(link);
   });
 
-  it('calls adapter\'s getByLink method once on multiple own get with Id and link', function (done) {
-    let id = 42;
-    let link = '/api/user/42/';
+  it('calls adapter\'s getByLink method once on multiple own get with link', function (done) {
+    let link = '/foo';
     let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.get(modelName, id, link).then(() => {
-      this.store.get(modelName, id, link);
+    this.store.get(modelName, link).then(() => {
+      this.store.get(modelName, link);
       spy.should.have.been.called.once();
       done();
     });
   });
 
   it('calls adapter\'s getByLink method on own getCollection', function () {
-    let id = 42;
     let link = '/api/user/42/';
     let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.getCollection(modelName, link);
+    this.store.getCollection(link);
     spy.should.have.been.called.with(link);
   });
   
   it('calls adapter\'s getByLink method on own fetch with link', function () {
-    let id = 42;
     let link = '/api/user/42/';
     let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.fetch(modelName, id, link);
+    this.store.fetch(modelName, link);
     spy.should.have.been.called.with(link);
   });
   
@@ -127,13 +116,15 @@ describe('Store', function () {
   
   it('calls adapter\'s destroy method on own destroy if model is cached', function () {
     let id = 42;
+    let self = '/foo';
     let model = new Backbone.Model({
-      id: id
+      id: id,
+      _self: self
     });
     this.store._repositories[modelName].set(model);
     let spy = chai.spy.on(this.store._adapter, 'destroy');
-    this.store.destroy(modelName, id);
-    spy.should.have.been.called.with(modelName, id);
+    this.store.destroy(modelName, self);
+    spy.should.have.been.called.with(modelName, self);
   });
   
   it('does not call adapter\'s destroy method on own destroy if model is not cached', function () {
@@ -142,18 +133,10 @@ describe('Store', function () {
     this.store.destroy(modelName, id);
     spy.should.not.have.been.called();
   });
-  
-  it('adds model to cache on get with Id', function (done) {
-    let id = 42;
-    this.store.get(modelName, id).then(() => {
-      assert.include(this.store._repositories[modelName]._collection.pluck('id'), id);
-      done();
-    });
-  });
 
-  it('adds model to cache on get with Id and link', function (done) {
+  it('adds model to cache on get with link', function (done) {
     let link = '/api/user/1/';
-    this.store.get(modelName, 1, link).then(() => {
+    this.store.get(modelName, link).then(() => {
       assert.lengthOf(this.store._repositories[modelName]._collection, 1);
       done();
     });
@@ -215,25 +198,32 @@ describe('Store', function () {
   });
 
   it('removes model from cache on destroy', function (done) {
+    let self = '/foo';
     let attrs = {
+      _self: self,
       name: 'foo'
     };
     this.store.create(modelName, attrs).then((model) => {
-      this.store.destroy(modelName, model.id).then((model) => {
+      this.store.destroy(modelName, self).then((model) => {
         assert.lengthOf(this.store._repositories[modelName]._collection, 0);
         done();
+      }).catch(e => {
+        console.log(e);
       });
     });
   });
 
   it('caches included models as well', function (done) {
-    this.store._adapter.getById = () => {
+    let userLink = '/api/user/12/';
+    let pantryLink = '/api/pantry/42/';
+    this.store._adapter.getByLink = () => {
       return new RSVP.Promise((resolve, reject) => {
         resolve({
           data: {
             id: 12,
             _type: 'user',
             name: 'foo',
+            _self: userLink,
             relationships: {
               pantry: {
                 data: {
@@ -249,18 +239,21 @@ describe('Store', function () {
           included: [{
             id: 42,
             _type: 'pantry',
-            name: 'bar'
+            name: 'bar',
+            _self: pantryLink
           }]
         });
       })
     };
     this.store.register('user', TestCollection);
     this.store.register('pantry', TestCollection);
-
-    this.store.get('user', 12).then(() => {
+    
+    this.store.get('user', userLink).then(() => {
       assert.include(this.store._repositories['user']._collection.pluck('id'), 12);
       assert.include(this.store._repositories['pantry']._collection.pluck('id'), 42);
       done();
+    }).catch(e => {
+      console.log(e);
     });
   });
 });

@@ -81,22 +81,26 @@ describe('Repository', function () {
 
   it('gets model from cache collection', function () {
     let id = 42;
+    let self = '/foo';
     let model = new TestModel({
-      id: id
+      id: id,
+      _self: self
     });
     this.repository.set(model);
-    let got = this.repository.get(id);
+    let got = this.repository.get(self);
     assert.equal(model, got);
   });
 
   it('removes model from cache collection', function () {
     let id = 42;
+    let self = '/foo';
     let model = new TestModel({
-      id: id
+      id: id,
+      _self: self
     });
     this.repository.set(model);
     assert.equal(this.repository._collection.length, 1);
-    this.repository.remove(id);
+    this.repository.remove(self);
     assert.equal(this.repository._collection.length, 0);
   });
 });

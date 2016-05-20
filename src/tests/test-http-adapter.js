@@ -14,14 +14,6 @@ describe('HTTP adapter', function () {
     $.ajax.restore()
   });
 
-  it('calls AJAX get on findById', function () {
-    let id = 42;
-    let modelName = 'foo';
-    let spy = chai.spy.on(this.adapter, '_ajax');
-    this.adapter.getById(modelName, id);
-    spy.should.have.been.called.with(modelName, id, HttpMethods.GET);
-  });
-
   it('calls AJAX get by link on findByLink', function () {
     let url = '/api/user/42/';
     let spy = chai.spy.on(this.adapter, '_ajaxByLink');
@@ -61,10 +53,10 @@ describe('HTTP adapter', function () {
   });
 
   it('calls AJAX delete on destroy', function () {
-    let id = 42;
-    let spy = chai.spy.on(this.adapter, '_ajax');
-    this.adapter.destroy(id);
-    spy.should.have.been.called.with(id, HttpMethods.DELETE);
+    let self = '/foo';
+    let spy = chai.spy.on(this.adapter, '_ajaxByLink');
+    this.adapter.destroy(self);
+    spy.should.have.been.called.with(self, HttpMethods.DELETE);
   });
 
   it('calls AJAX get with correct data', function () {

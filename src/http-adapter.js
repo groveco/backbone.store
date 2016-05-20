@@ -23,31 +23,13 @@ class HttpAdapter {
   }
 
   /**
-   * Get entity by Id.
-   * @param {string} modelName - Entity class name.
-   * @param {number|string} id - Entity Id.
-   * @returns {Promise} Promise for fetched data.
-   */
-  getById(modelName, id) {
-    return new RSVP.Promise((resolve, reject) => {
-      this._ajax(urlResolver.getUrl(modelName), id, HttpMethods.GET).then(data => {
-        resolve(this._parser.parse(data));
-      }, () => {
-        reject();
-      }).catch(error => {
-        console.error(error);
-      });
-    });
-  }
-
-  /**
    * Get entity by link.
    * @param {string} link - Link to entity.
    * @returns {Promise} Promise for fetched data.
    */
   getByLink(link) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajaxByLink(link).then(data => {
+      this._ajaxByLink(link, HttpMethods.GET).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
@@ -96,13 +78,12 @@ class HttpAdapter {
 
   /**
    * Destroy entity.
-   * @param {string} modelName - Entity class name.
-   * @param {number|string} id - Entity Id.
+   * @param {string} link - Entity self link.
    * @returns {Promise} Promise for destroy.
    */
-  destroy(modelName, id) {
+  destroy(link) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajax(urlResolver.getUrl(modelName), id, HttpMethods.DELETE).then(() => {
+      this._ajaxByLink(link, HttpMethods.DELETE).then(() => {
         resolve();
       }, () => {
         reject();
@@ -145,11 +126,11 @@ class HttpAdapter {
     });
   }
 
-  _ajaxByLink(link) {
+  _ajaxByLink(link, type) {
     return new RSVP.Promise((resolve, reject) => {
       let options = {
         url: link,
-        type: HttpMethods.GET,
+        type: type,
         headers: {
           Accept: 'application/vnd.api+json',
           'Content-Type': 'application/vnd.api+json'
