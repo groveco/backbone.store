@@ -5,7 +5,6 @@
 import $ from 'jquery'
 import HttpMethods from './http-methods'
 import RSVP from 'rsvp'
-import urlResolver from './url-resolver'
 
 /**
  * Adapter which works with data over HTTP.
@@ -15,11 +14,9 @@ class HttpAdapter {
   /**
    * Create a HttpAdapter.
    * @param {JsonApiParser} parser - Parser which parses data from specified format to BackboneStore format.
-   * @param {string} [prefix] - URL prefix.
    */
-  constructor(parser, prefix) {
+  constructor(parser) {
     this._parser = parser;
-    this._prefix = prefix || '';
   }
 
   /**
@@ -27,9 +24,9 @@ class HttpAdapter {
    * @param {string} link - Link to entity.
    * @returns {Promise} Promise for fetched data.
    */
-  getByLink(link) {
+  get(link) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajaxByLink(link, HttpMethods.GET).then(data => {
+      this._ajax(link, HttpMethods.GET).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
@@ -41,13 +38,15 @@ class HttpAdapter {
 
   /**
    * Create entity.
-   * @param {string} modelName - Entity class name.
+   * @param {string} link - Entity url.
    * @param {object} attributes - Data to create entity with.
    * @returns {Promise} Promise for created data.
    */
-  create(modelName, attributes) {
+  create(link, attributes) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajax(urlResolver.getUrl(modelName), null, HttpMethods.POST, this._parser.serialize(attributes)).then(data => {
+      this._ajax(link, HttpMethods.POST, this._parser.serialize({
+        data: attributes
+      })).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
@@ -59,14 +58,15 @@ class HttpAdapter {
 
   /**
    * Update entity.
-   * @param {string} modelName - Entity class name.
-   * @param {number|string} id - Entity Id.
+   * @param {string} link - Entity url.
    * @param {object} attributes - Data to update entity with.
    * @returns {Promise} Promise for updated data.
    */
-  update(modelName, id, attributes) {
+  update(link, attributes) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajax(urlResolver.getUrl(modelName), id, HttpMethods.PUT, this._parser.serialize(attributes)).then(data => {
+      this._ajax(link, HttpMethods.PUT, this._parser.serialize({
+        data: attributes
+      })).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
         reject();
@@ -83,7 +83,7 @@ class HttpAdapter {
    */
   destroy(link) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajaxByLink(link, HttpMethods.DELETE).then(() => {
+      this._ajax(link, HttpMethods.DELETE).then(() => {
         resolve();
       }, () => {
         reject();
@@ -93,40 +93,7 @@ class HttpAdapter {
     });
   }
 
-  _ajax(url, id, type, data) {
-    return new RSVP.Promise((resolve, reject) => {
-      let options = {
-        url: this._prefix + url,
-        type: type,
-        headers: {
-          Accept: 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json'
-        },
-        success: data => {
-          resolve(data);
-        },
-        error: () => {
-          reject();
-        }
-      };
-      if (options.url.substr(options.url.length - 1) != '/') {
-        options.url += '/';
-      }
-      if (id) {
-        options.url += id + '/';
-      }
-      if (data) {
-        if ([HttpMethods.POST, HttpMethods.PUT].indexOf(type) > -1) {
-          options.data = JSON.stringify(data);
-        } else {
-          options.data = data;
-        }
-      }
-      $.ajax(options);
-    });
-  }
-
-  _ajaxByLink(link, type) {
+  _ajax(link, type, data) {
     return new RSVP.Promise((resolve, reject) => {
       let options = {
         url: link,
@@ -142,6 +109,13 @@ class HttpAdapter {
           reject();
         }
       };
+      if (data) {
+        if ([HttpMethods.POST, HttpMethods.PUT].indexOf(type) > -1) {
+          options.data = JSON.stringify(data);
+        } else {
+          options.data = data;
+        }
+      }
       $.ajax(options);
     });
   }

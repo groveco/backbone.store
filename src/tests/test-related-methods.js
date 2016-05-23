@@ -74,23 +74,6 @@ describe('getRelated', function () {
     assert.throws(func, 'There is no related model "' + relation + '".');
   });
 
-  it('throws exception if repository is not registered for this model type', function (done) {
-    let relation = 'test';
-    let relationType = 'notexisting';
-    let model = new RelationalModel({
-      relationships: {
-        test: {
-          id: 1
-        }
-      }
-    });
-    model.relatedModels.test = relationType;
-    model.getRelated(relation).catch(function (error) {
-      assert.equal(error.message, 'Can`t get repository for "' + relationType + '".');
-      done();
-    });
-  });
-
   it('throws exception if link is not set for the collection', function () {
     let relation = 'tests';
     let model = new RelationalModel({

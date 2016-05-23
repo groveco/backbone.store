@@ -14,60 +14,58 @@ describe('HTTP adapter', function () {
     $.ajax.restore()
   });
 
-  it('calls AJAX get by link on findByLink', function () {
+  it('calls AJAX on get', function () {
     let url = '/api/user/42/';
-    let spy = chai.spy.on(this.adapter, '_ajaxByLink');
-    this.adapter.getByLink(url);
+    let spy = chai.spy.on(this.adapter, '_ajax');
+    this.adapter.get(url);
     spy.should.have.been.called.with(url);
   });
 
   it('calls AJAX post on create', function () {
-    let modelName = 'foo';
+    let link = '/foo';
     let attrs = {
-      data: {
-        foo: 'bar',
-        foo2: {
-          foo3: 42
-        }
+      foo: 'bar',
+      foo2: {
+        foo3: 42
       }
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
-    this.adapter.create(modelName, attrs);
-    spy.should.have.been.called.with(modelName, null, HttpMethods.POST, this.adapter._parser.serialize(attrs));
+    this.adapter.create(link, attrs);
+    spy.should.have.been.called.with(link, HttpMethods.POST, this.adapter._parser.serialize({
+      data: attrs
+    }));
   });
 
   it('calls AJAX put on update', function () {
-    let modelName = 'foo';
-    let id = 42;
+    let link = '/foo';
     let attrs = {
-      data: {
-        foo: 'bar',
-        foo2: {
-          foo3: 42
-        }
+      foo: 'bar',
+      foo2: {
+        foo3: 42
       }
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
-    this.adapter.update(modelName, id, attrs);
-    spy.should.have.been.called.with(modelName, id, HttpMethods.PUT, this.adapter._parser.serialize(attrs));
+    this.adapter.update(link, attrs);
+    spy.should.have.been.called.with(link, HttpMethods.PUT, this.adapter._parser.serialize({
+      data: attrs
+    }));
   });
 
   it('calls AJAX delete on destroy', function () {
     let self = '/foo';
-    let spy = chai.spy.on(this.adapter, '_ajaxByLink');
+    let spy = chai.spy.on(this.adapter, '_ajax');
     this.adapter.destroy(self);
     spy.should.have.been.called.with(self, HttpMethods.DELETE);
   });
 
   it('calls AJAX get with correct data', function () {
-    let modelName = 'foo';
-    let id = 42;
+    let link = '/foo';
     let data = {
       foo: 'bar'
     };
-    this.adapter._ajax(modelName, id, HttpMethods.GET, data);
+    this.adapter._ajax(link, HttpMethods.GET, data);
     assert($.ajax.calledWithMatch({
-      url: this.adapter._prefix + modelName + '/' + id + '/',
+      url: link,
       type: HttpMethods.GET,
       headers: {
         Accept: 'application/vnd.api+json',
@@ -78,33 +76,19 @@ describe('HTTP adapter', function () {
   });
 
   it('calls AJAX post with stringified data', function () {
-    let modelName = 'foo';
-    let id = 42;
+    let link = '/foo';
     let data = {
       foo: 'bar'
     };
-    this.adapter._ajax(modelName, id, HttpMethods.POST, data);
+    this.adapter._ajax(link, HttpMethods.POST, data);
     assert($.ajax.calledWithMatch({
-      url: this.adapter._prefix + modelName + '/' + id + '/',
+      url: link,
       type: HttpMethods.POST,
       headers: {
         Accept: 'application/vnd.api+json',
         'Content-Type': 'application/vnd.api+json'
       },
       data: JSON.stringify(data)
-    }));
-  });
-
-  it('calls AJAX getByLink with correct data', function () {
-    let url = '/api/user/42/';
-    this.adapter._ajaxByLink(url);
-    assert($.ajax.calledWithMatch({
-      url: url,
-      type: HttpMethods.GET,
-      headers: {
-        Accept: 'application/vnd.api+json',
-        'Content-Type': 'application/vnd.api+json'
-      }
     }));
   });
 });

@@ -6,133 +6,145 @@ import RSVP from 'rsvp'
 import Store from '../store';
 
 let TestModel = Backbone.Model.extend({});
-let TestCollection = Backbone.Collection.extend({
-  model: TestModel
-});
 let modelName = 'foo';
+
+let createStore = function () {
+  let adapter = new FakeAdapter();
+  let store = new Store(adapter);
+  store.register(modelName, TestModel);
+  return store;
+};
 
 describe('Store', function () {
 
-  beforeEach(function () {
-    let adapter = new FakeAdapter();
-    this.store = new Store(adapter);
-    this.store.register(modelName, TestCollection);
-  });
-
-  it('registers repository', function () {
+  it('registers model class', function () {
+    let store = createStore();
     let name = 'test';
-    this.store.register('test', Model);
-    assert(this.store._repositories[name]);
-    assert.equal(this.store._repositories[name].modelClass, Model);
+    store.register('test', Model);
+    assert.equal(store._modelClasses[name], Model);
   });
 
-  it('calls adapter\'s getByLink method on own get with link', function () {
+  it('calls adapter\'s get method on own get', function () {
+    let store = createStore();
     let link = '/api/user/42/';
-    let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.get(modelName, link);
+    let spy = chai.spy.on(store._adapter, 'get');
+    store.get(link);
     spy.should.have.been.called.with(link);
   });
 
-  it('calls adapter\'s getByLink method once on multiple own get with link', function (done) {
+  it('calls adapter\'s get method once on multiple own get', function (done) {
+    let store = createStore();
     let link = '/foo';
-    let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.get(modelName, link).then(() => {
-      this.store.get(modelName, link);
+    let spy = chai.spy.on(store._adapter, 'get');
+    store.get(link).then(() => {
+      store.get(link);
       spy.should.have.been.called.once();
       done();
     });
   });
 
-  it('calls adapter\'s getByLink method on own getCollection', function () {
+  it('calls adapter\'s get method on own getCollection', function () {
+    let store = createStore();
     let link = '/api/user/42/';
-    let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.getCollection(link);
+    let spy = chai.spy.on(store._adapter, 'get');
+    store.getCollection(link);
     spy.should.have.been.called.with(link);
   });
 
-  it('calls adapter\'s getByLink method on own fetch with link', function () {
+  it('calls adapter\'s get method on own fetch', function () {
+    let store = createStore();
     let link = '/api/user/42/';
-    let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.fetch(link);
+    let spy = chai.spy.on(store._adapter, 'get');
+    store.fetch(link);
     spy.should.have.been.called.with(link);
   });
 
-  it('calls adapter\'s getByLink method every time own fetch with link is called', function () {
+  it('calls adapter\'s get method every time own fetch is called', function () {
+    let store = createStore();
     let id = 42;
     let link = '/api/user/42/';
-    let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.fetch(modelName, id, link).then(() => {
-      this.store.fetch(modelName, id, link);
+    let spy = chai.spy.on(store._adapter, 'get');
+    store.fetch(link).then(() => {
+      store.fetch(link);
       spy.should.have.been.called.twice();
     });
   });
 
-  it('doesn\'t call any adapter\'s get method on own pluck call', function () {
-    let spyByLink = chai.spy.on(this.store._adapter, 'getByLink');
-    let spyById = chai.spy.on(this.store._adapter, 'getById');
-    this.store.pluck(modelName, 42);
-    spyByLink.should.not.have.been.called();
-    spyById.should.not.have.been.called();
+  it('doesn\'t call adapter\'s get method on own pluck call', function () {
+    let store = createStore();
+    let spy = chai.spy.on(store._adapter, 'get');
+    store.pluck('/foo');
+    spy.should.not.have.been.called();
   });
 
   it('pluck doesn\'t return not cached data', function () {
-    let model = this.store.pluck(modelName, '/foo');
+    let store = createStore();
+    let model = store.pluck('/foo');
     assert.isUndefined(model);
   });
   
   it('calls adapter\'s create method on own create', function () {
+    let store = createStore();
+    let link = '/foo';
     let attrs = {
       name: 'foo'
     };
-    let spy = chai.spy.on(this.store._adapter, 'create');
-    this.store.create(modelName, attrs);
-    spy.should.have.been.called.with(modelName, attrs);
+    let spy = chai.spy.on(store._adapter, 'create');
+    store.create(link, attrs);
+    spy.should.have.been.called.with(link, attrs);
   });
 
   it('calls adapter\'s update method on own update', function () {
+    let store = createStore();
+    let link = '/foo';
     let model = new Backbone.Model({
       id: 42,
-      slug: 'bar'
+      slug: 'bar',
+      _self: link
     });
     let initialAttrs = model.toJSON();
     let attrs = {
       name: 'foo'
     };
-    let spy = chai.spy.on(this.store._adapter, 'update');
-    this.store.update(modelName, model, attrs);
+    let spy = chai.spy.on(store._adapter, 'update');
+    store.update(model, attrs);
     _.extend(initialAttrs, attrs);
-    spy.should.have.been.called.with(modelName, model.id, initialAttrs);
+    spy.should.have.been.called.with(link, initialAttrs);
   });
 
   it('calls adapter\'s destroy method on own destroy if model is cached', function () {
+    let store = createStore();
     let id = 42;
     let self = '/foo';
     let model = new Backbone.Model({
       id: id,
       _self: self
     });
-    this.store._repositories[modelName].set(model);
-    let spy = chai.spy.on(this.store._adapter, 'destroy');
-    this.store.destroy(modelName, self);
-    spy.should.have.been.called.with(modelName, self);
+    store._repository.set(model);
+    let spy = chai.spy.on(store._adapter, 'destroy');
+    store.destroy(self);
+    spy.should.have.been.called.with(self);
   });
 
   it('does not call adapter\'s destroy method on own destroy if model is not cached', function () {
-    let id = 42;
-    let spy = chai.spy.on(this.store._adapter, 'destroy');
-    this.store.destroy(modelName, id);
+    let store = createStore();
+    let link = '/foo';
+    let spy = chai.spy.on(store._adapter, 'destroy');
+    store.destroy(link);
     spy.should.not.have.been.called();
   });
 
   it('adds model to cache on get with link', function (done) {
+    let store = createStore();
     let link = '/api/user/1/';
-    this.store.get(modelName, link).then(() => {
-      assert.lengthOf(this.store._repositories[modelName]._collection, 1);
+    store.get(link).then(() => {
+      assert.lengthOf(store._repository._collection, 1);
       done();
     });
   });
 
   it('adds models to cache on getCollection', function (done) {
+    let store = createStore();
     let link = '/api/user/1/';
     let response = {
       data: [{
@@ -150,61 +162,71 @@ describe('Store', function () {
       }],
       included: []
     };
-    this.store._adapter.getByLink = function () {
+    store._adapter.get = function () {
       return new RSVP.Promise((resolve, reject) => {
         resolve(response);
       });
     };
-    this.store.getCollection(modelName, link).then(() => {
-      assert.lengthOf(this.store._repositories[modelName]._collection, response.data.length);
+    store.getCollection(link).then(() => {
+      assert.lengthOf(store._repository._collection, response.data.length);
       done();
     });
   });
 
   it('adds model to cache on create', function (done) {
+    let store = createStore();
+    let link = '/foo';
     let attrs = {
       name: 'foo'
     };
-    this.store.create(modelName, attrs).then(() => {
-      assert.lengthOf(this.store._repositories[modelName]._collection, 1);
+    store.create(link, attrs).then(() => {
+      assert.lengthOf(store._repository._collection, 1);
       done();
     });
   });
 
   it('updates model in cache on update', function (done) {
+    let store = createStore();
+    let link = '/foo';
     let attrs = {
       name: 'foo'
     };
-    this.store.create(modelName, attrs).then((model) => {
+    store.create(link, attrs).then((model) => {
       let newAttrs = {
         name: 'foo2'
       };
-      this.store.update(modelName, model, newAttrs).then((model) => {
-        assert.lengthOf(this.store._repositories[modelName]._collection, 1);
-        assert.equal(this.store._repositories[modelName]._collection.at(0).get('name'), newAttrs.name);
+      store.update(model, newAttrs).then((model) => {
+        assert.lengthOf(store._repository._collection, 1);
+        assert.equal(store._repository._collection.at(0).get('name'), newAttrs.name);
         done();
+      }).catch(e => {
+        console.log(e);
       });
+    }).catch(e => {
+      console.log(e);
     });
   });
 
   it('removes model from cache on destroy', function (done) {
+    let store = createStore();
     let self = '/foo';
     let attrs = {
       _self: self,
       name: 'foo'
     };
-    this.store.create(modelName, attrs).then((model) => {
-      this.store.destroy(modelName, self).then((model) => {
-        assert.lengthOf(this.store._repositories[modelName]._collection, 0);
+    store.create(self, attrs).then((model) => {
+      store.destroy(self).then((model) => {
+        assert.lengthOf(store._repository._collection, 0);
         done();
       });
     });
   });
 
   it('caches included models as well', function (done) {
+    let store = createStore();
     let userLink = '/api/user/12/';
     let pantryLink = '/api/pantry/42/';
-    this.store._adapter.getByLink = () => {
+    store._adapter.get = () => {
       return new RSVP.Promise((resolve, reject) => {
         resolve({
           data: {
@@ -219,7 +241,7 @@ describe('Store', function () {
                   type: 'pantry'
                 },
                 links: {
-                  related: '/api/pantry/42'
+                  related: pantryLink
                 }
               }
             }
@@ -233,20 +255,21 @@ describe('Store', function () {
         });
       })
     };
-    this.store.register('user', TestCollection);
-    this.store.register('pantry', TestCollection);
+    store.register('user', TestModel);
+    store.register('pantry', TestModel);
 
-    this.store.get('user', userLink).then(() => {
-      assert.include(this.store._repositories['user']._collection.pluck('id'), 12);
-      assert.include(this.store._repositories['pantry']._collection.pluck('id'), 42);
+    store.get(userLink).then((model) => {
+      assert.include(store._repository._collection.pluck('_self'), userLink);
+      assert.include(store._repository._collection.pluck('_self'), pantryLink);
       done();
     });
   });
 
   it('pluck returns cached data', function (done) {
+    let store = createStore();
     let link = '/api/user/42/';
-    this.store.get(modelName, link).then(() => {
-      let model = this.store.pluck(modelName, link);
+    store.get(link).then(() => {
+      let model = store.pluck(link);
       assert.isObject(model);
       done();
     });

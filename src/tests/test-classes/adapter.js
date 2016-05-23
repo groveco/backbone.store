@@ -40,20 +40,19 @@ let resolve = function () {
 
 class FakeAdapter {
 
-  getByLink(link) {
-    
+  get(link) {
     return resolveWithData(link);
   }
 
-  create(modelName, attributes) {
-    return resolveWithData(attributes._self, attributes);
+  create(link, attributes) {
+    return resolveWithData(link, attributes);
   }
 
-  update(modelName, id, attributes) {
-    return resolveWithData(id, attributes);
+  update(link, attributes) {
+    return resolveWithData(link, attributes);
   }
 
-  destroy(modelName, id) {
+  destroy(link) {
     return resolve();
   }
 }

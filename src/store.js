@@ -98,7 +98,8 @@ class Store {
    */
   constructor(adapter) {
     this._adapter = adapter;
-    this._repositories = {};
+    this._repository = new Repository();
+    this._modelClasses = {};
   }
 
   static addRelatedMethods(store) {
@@ -116,19 +117,18 @@ class Store {
    * @param {Function} modelClass - Model or collection class.
    */
   register(modelName, modelClass) {
-    this._repositories[modelName] = new Repository(modelClass);
+    this._modelClasses[modelName] = modelClass;
   }
 
   /**
    * Get model by Id or link. If model is cached on front-end it will be returned from cache, otherwise it will be
    * fetched.
-   * @param {string} modelName - Entity class name.
    * @param {string} link - Model link.
    * @returns {Promise} Promise for requested model.
    */
-  get(modelName, link) {
+  get(link) {
     return new RSVP.Promise((resolve, reject) => {
-      let model = this.pluck(modelName, link);
+      let model = this.pluck(link);
       if (model) {
         resolve(model);
       } else {
@@ -150,7 +150,7 @@ class Store {
    */
   fetch(link) {
     return new RSVP.Promise((resolve, reject) => {
-      this._adapter.getByLink(link).then(response => {
+      this._adapter.get(link).then(response => {
         let model = this._setModels(response);
         resolve(model);
       }, () => {
@@ -163,12 +163,11 @@ class Store {
 
   /**
    * Get model by Id from front-end cache.
-   * @param {string} modelName - Entity class name.
    * @param {string} link - Model self link.
-   * @returns {Promise} Requested model.
+   * @returns {object} Requested model.
    */
-  pluck(modelName, link) {
-    return this._getRepository(modelName).get(link);
+  pluck(link) {
+    return this._repository.get(link);
   }
 
   /**
@@ -178,7 +177,7 @@ class Store {
    */
   getCollection(link) {
     return new RSVP.Promise((resolve, reject) => {
-      this._adapter.getByLink(link).then(response => {
+      this._adapter.get(link).then(response => {
         let collection = this._setModels(response);
         resolve(collection);
       }, () => {
@@ -191,13 +190,13 @@ class Store {
 
   /**
    * Create model.
-   * @param {string} modelName - Entity class name.
+   * @param {string} link - Url for POST request.
    * @param {object} attributes - Data to create model with.
    * @returns {Promise} Promise for created model.
    */
-  create(modelName, attributes = {}) {
+  create(link, attributes = {}) {
     return new RSVP.Promise((resolve, reject) => {
-      this._adapter.create(modelName, attributes).then(response => {
+      this._adapter.create(link, attributes).then(response => {
         let model = this._setModels(response);
         resolve(model);
       }, () => {
@@ -210,15 +209,14 @@ class Store {
 
   /**
    * Create model.
-   * @param {string} modelName - Entity class name.
    * @param {Backbone.Model} model - Model to update.
    * @param {object} attributes - Data to update model with.
    * @returns {Promise} Promise for updated model.
    */
-  update(modelName, model, attributes) {
+  update(model, attributes) {
     return new RSVP.Promise((resolve, reject) => {
       model.set(attributes);
-      this._adapter.update(modelName, model.id, model.toJSON()).then((response) => {
+      this._adapter.update(model.get('_self'), model.toJSON()).then((response) => {
         let model = this._setModels(response);
         resolve(model);
       }, () => {
@@ -231,17 +229,15 @@ class Store {
 
   /**
    * Destroy model.
-   * @param {string} modelName - Entity class name.
    * @param {string} link - Self link of model to destroy.
    * @returns {Promise} Promise for destroy.
    */
-  destroy(modelName, link) {
+  destroy(link) {
     return new RSVP.Promise((resolve, reject) => {
-      let repository = this._getRepository(modelName);
-      let model = repository.get(link);
+      let model = this._repository.get(link);
       if (model) {
-        this._adapter.destroy(modelName, link).then(() => {
-          repository.remove(link);
+        this._adapter.destroy(link).then(() => {
+          this._repository.remove(link);
           resolve();
         }, () => {
           reject();
@@ -254,35 +250,33 @@ class Store {
     });
   }
 
-  _getRepository(modelName) {
-    let repository = this._repositories[modelName];
-    if (!repository) {
-      throw new Error('Can`t get repository for "' + modelName + '".');
+  _getModelClass(modelName) {
+    let modelClass = this._modelClasses[modelName];
+    if (!modelClass) {
+      throw new Error(`"${modelName}" is not registered.`);
     }
-    return repository;
+    return modelClass;
   }
 
   _setModels(response) {
     let data = response.data;
     let entity;
     if (data instanceof Array) {
-      let repository;
       if (data.length) {
-        repository = this._getRepository(data[0]._type);
-        entity = repository.createCollection(data);
-        repository.set(entity.models);
+        entity = new Backbone.Collection(data);
+        this._repository.set(entity.models);
       } else {
         entity = new Backbone.Collection();
       }
     } else {
-      let repository = this._getRepository(data._type);
-      entity = repository.createModel(data);
-      repository.set(entity);
+      let modelClass = this._getModelClass(data._type);
+      entity = new modelClass(data);
+      this._repository.set(entity);
     }
     response.included.forEach(included => {
-      let includedRepository = this._getRepository(included._type);
-      let includedModel = includedRepository.createModel(included);
-      includedRepository.set(includedModel);
+      let modelClass = this._getModelClass(data._type);
+      let includedModel = new modelClass(included);
+      this._repository.set(includedModel);
     });
     return entity;
   }

@@ -2,45 +2,15 @@
  * Repository.
  * @module
  */
-import Backbone from 'backbone'
+import RepositoryCollection from './repository-collection'
 
 /**
  * Repository class which provides access to entities and stores them.
  */
 class Repository {
 
-  /**
-   * Creates Repository.
-   * @param {Function} entityClass - Model or collection class of repository model.
-   */
-  constructor(entityClass) {
-    let collection = new entityClass();
-    if (collection instanceof Backbone.Model) {
-      this.modelClass = entityClass;
-      this.collectionClass = Backbone.Collection.extend({
-        model: this.modelClass
-      });
-    } else {
-      this.collectionClass = entityClass;
-      this.modelClass = entityClass.prototype.model;
-    }
-    this._collection = new this.collectionClass();
-  }
-
-  /**
-   * Create a model.
-   * @param {object} [attributes] - Data to create model with.
-   */
-  createModel(attributes = {}) {
-    return new this.modelClass(attributes);
-  }
-
-  /**
-   * Create a collection.
-   * @param {object} [models] - Data to create model with.
-   */
-  createCollection(models = []) {
-    return new this.collectionClass(models);
+  constructor() {
+    this._collection = new RepositoryCollection();
   }
 
   /**
@@ -57,7 +27,9 @@ class Repository {
    * @param {object|array} models - Model or array of models to add/update in cache.
    */
   set(models) {
-    this._collection.set(models);
+    this._collection.add(models, {
+      merge: true
+    });
   }
 
   /**
