@@ -14,7 +14,7 @@ describe('getRelated', function () {
     assert.property(Backbone.Model.prototype, 'fetchRelated');
   });
 
-  it('calls get with link in store if link is provided', function () {
+  it('calls get with link in store', function () {
     let id = 2;
     let link = '/api/test/2/';
     let model = new RelationalModel({
@@ -34,7 +34,7 @@ describe('getRelated', function () {
     let spy = chai.spy.on(store, 'get');
     store.register('test', RelationalModel);
     model.getRelated('test');
-    spy.should.have.been.called.with('test', link);
+    spy.should.have.been.called.with(link);
   });
 
   it('calls getCollection in repository if collection relation name is passed', function () {

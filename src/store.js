@@ -46,11 +46,11 @@ let addRelatedMethods = function (store) {
       }
     } else {
       if (action === actions.GET) {
-        return store.get(modelName, link);
+        return store.get(link);
       } else if (action === actions.FETCH) {
         return store.fetch(link);
       } else if (action === actions.PLUCK) {
-        return store.pluck(modelName, link);
+        return store.pluck(link);
       } else {
         throw new Error('Unknown action');
       }
