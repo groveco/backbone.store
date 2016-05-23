@@ -199,11 +199,7 @@ describe('Store', function () {
         assert.lengthOf(store._repository._collection, 1);
         assert.equal(store._repository._collection.at(0).get('name'), newAttrs.name);
         done();
-      }).catch(e => {
-        console.log(e);
       });
-    }).catch(e => {
-      console.log(e);
     });
   });
 

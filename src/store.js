@@ -136,8 +136,6 @@ class Store {
           resolve(model);
         }, () => {
           reject();
-        }).catch(error => {
-          console.error(error);
         });
       }
     });
@@ -155,8 +153,6 @@ class Store {
         resolve(model);
       }, () => {
         reject();
-      }).catch(error => {
-        console.error(error);
       });
     });
   }
@@ -182,8 +178,6 @@ class Store {
         resolve(collection);
       }, () => {
         reject();
-      }).catch(error => {
-        console.error(error);
       });
     });
   }
@@ -201,8 +195,6 @@ class Store {
         resolve(model);
       }, () => {
         reject();
-      }).catch(error => {
-        console.error(error);
       });
     });
   }
@@ -221,8 +213,6 @@ class Store {
         resolve(model);
       }, () => {
         reject();
-      }).catch(error => {
-        console.error(error);
       });
     });
   }
@@ -241,8 +231,6 @@ class Store {
           resolve();
         }, () => {
           reject();
-        }).catch(error => {
-          console.error(error);
         });
       } else {
         reject('Model does not exist');
