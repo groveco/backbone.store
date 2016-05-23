@@ -251,8 +251,12 @@ class Store {
     let entity;
     if (data instanceof Array) {
       if (data.length) {
-        entity = new Backbone.Collection(data);
-        this._repository.set(entity.models);
+        let models = data.map(item => {
+          let modelClass = this._getModelClass(item._type);
+          return new modelClass(item);
+        });
+        entity = new Backbone.Collection(models);
+        this._repository.set(models);
       } else {
         entity = new Backbone.Collection();
       }
