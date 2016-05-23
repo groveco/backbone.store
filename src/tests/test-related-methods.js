@@ -34,26 +34,7 @@ describe('getRelated', function () {
     let spy = chai.spy.on(store, 'get');
     store.register('test', RelationalModel);
     model.getRelated('test');
-    spy.should.have.been.called.with('test', id, link);
-  });
-
-  it('calls get with Id in repository if link is not provided', function () {
-    let id = 2;
-    let model = new RelationalModel({
-      id: 1,
-      relationships: {
-        test: {
-          data: {
-            id: id
-          }
-        }
-      }
-    });
-    let store = getStore();
-    let spy = chai.spy.on(store, 'get');
-    store.register('test', RelationalModel);
-    model.getRelated('test');
-    spy.should.have.been.called.with('test', id);
+    spy.should.have.been.called.with('test', link);
   });
 
   it('calls getCollection in repository if collection relation name is passed', function () {
@@ -72,7 +53,7 @@ describe('getRelated', function () {
     let spy = chai.spy.on(store, 'getCollection');
     store.register('test', RelationalModel);
     model.fetchRelated('tests');
-    spy.should.have.been.called.with('test', link);
+    spy.should.have.been.called.with(link);
   });
 
   it('throws exception if related model with this name is not defined', function () {

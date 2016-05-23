@@ -33,13 +33,11 @@ let addRelatedMethods = function (store) {
       throw new Error('There is no related model "' + modelName + '".');
     }
 
-
-    let id = relationship.data && relationship.data.id;
     let link = relationship.links && relationship.links.related;
     if (isCollection) {
       if (link) {
         if (action == actions.FETCH) {
-          return store.getCollection(modelName, link);
+          return store.getCollection(link);
         } else {
           throw new Error('Collection should be fetched. Use "fetchRelated".');
         }
@@ -48,11 +46,11 @@ let addRelatedMethods = function (store) {
       }
     } else {
       if (action === actions.GET) {
-        return store.get(modelName, id, link);
+        return store.get(modelName, link);
       } else if (action === actions.FETCH) {
-        return store.fetch(modelName, id, link);
+        return store.fetch(link);
       } else if (action === actions.PLUCK) {
-        return store.pluck(modelName, id);
+        return store.pluck(modelName, link);
       } else {
         throw new Error('Unknown action');
       }
@@ -134,7 +132,7 @@ class Store {
       if (model) {
         resolve(model);
       } else {
-        this.fetch(modelName, link).then((model) => {
+        this.fetch(link).then((model) => {
           resolve(model);
         }, () => {
           reject();
@@ -147,11 +145,10 @@ class Store {
 
   /**
    * Fetch model by Id or link from server.
-   * @param {string} modelName - Entity class name.
    * @param {string} link - Model link.
    * @returns {Promise} Promise for requested model.
    */
-  fetch(modelName, link) {
+  fetch(link) {
     return new RSVP.Promise((resolve, reject) => {
       this._adapter.getByLink(link).then(response => {
         let model = this._setModels(response);

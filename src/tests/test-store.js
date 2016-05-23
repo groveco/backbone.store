@@ -49,14 +49,14 @@ describe('Store', function () {
     this.store.getCollection(link);
     spy.should.have.been.called.with(link);
   });
-  
+
   it('calls adapter\'s getByLink method on own fetch with link', function () {
     let link = '/api/user/42/';
     let spy = chai.spy.on(this.store._adapter, 'getByLink');
-    this.store.fetch(modelName, link);
+    this.store.fetch(link);
     spy.should.have.been.called.with(link);
   });
-  
+
   it('calls adapter\'s getByLink method every time own fetch with link is called', function () {
     let id = 42;
     let link = '/api/user/42/';
@@ -74,20 +74,10 @@ describe('Store', function () {
     spyByLink.should.not.have.been.called();
     spyById.should.not.have.been.called();
   });
-  
+
   it('pluck doesn\'t return not cached data', function () {
-    let model = this.store.pluck(modelName, 42);
+    let model = this.store.pluck(modelName, '/foo');
     assert.isUndefined(model);
-  });
-  
-  it('pluck returns cached data', function (done) {
-    let id = 42;
-    let link = `/api/user/${id}/`;
-    this.store.get(modelName, id, link).then(() => {
-      let model = this.store.pluck(modelName, id);
-      assert.isObject(model);
-      done();
-    });
   });
   
   it('calls adapter\'s create method on own create', function () {
@@ -98,7 +88,7 @@ describe('Store', function () {
     this.store.create(modelName, attrs);
     spy.should.have.been.called.with(modelName, attrs);
   });
-  
+
   it('calls adapter\'s update method on own update', function () {
     let model = new Backbone.Model({
       id: 42,
@@ -113,7 +103,7 @@ describe('Store', function () {
     _.extend(initialAttrs, attrs);
     spy.should.have.been.called.with(modelName, model.id, initialAttrs);
   });
-  
+
   it('calls adapter\'s destroy method on own destroy if model is cached', function () {
     let id = 42;
     let self = '/foo';
@@ -126,7 +116,7 @@ describe('Store', function () {
     this.store.destroy(modelName, self);
     spy.should.have.been.called.with(modelName, self);
   });
-  
+
   it('does not call adapter\'s destroy method on own destroy if model is not cached', function () {
     let id = 42;
     let spy = chai.spy.on(this.store._adapter, 'destroy');
@@ -207,8 +197,6 @@ describe('Store', function () {
       this.store.destroy(modelName, self).then((model) => {
         assert.lengthOf(this.store._repositories[modelName]._collection, 0);
         done();
-      }).catch(e => {
-        console.log(e);
       });
     });
   });
@@ -247,13 +235,20 @@ describe('Store', function () {
     };
     this.store.register('user', TestCollection);
     this.store.register('pantry', TestCollection);
-    
+
     this.store.get('user', userLink).then(() => {
       assert.include(this.store._repositories['user']._collection.pluck('id'), 12);
       assert.include(this.store._repositories['pantry']._collection.pluck('id'), 42);
       done();
-    }).catch(e => {
-      console.log(e);
+    });
+  });
+
+  it('pluck returns cached data', function (done) {
+    let link = '/api/user/42/';
+    this.store.get(modelName, link).then(() => {
+      let model = this.store.pluck(modelName, link);
+      assert.isObject(model);
+      done();
     });
   });
 });

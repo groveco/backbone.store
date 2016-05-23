@@ -41,6 +41,7 @@ let resolve = function () {
 class FakeAdapter {
 
   getByLink(link) {
+    
     return resolveWithData(link);
   }
 
