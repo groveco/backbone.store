@@ -34,26 +34,33 @@ let addRelatedMethods = function (store) {
     }
 
     let link = relationship.links && relationship.links.related;
-    if (isCollection) {
-      if (link) {
-        if (action == actions.FETCH) {
-          return store.getCollection(link);
+    if (link) {
+      if (isCollection) {
+        if (link) {
+          if (action == actions.FETCH) {
+            return store.getCollection(link);
+          } else {
+            throw new Error('Collection should be fetched. Use "fetchRelated".');
+          }
         } else {
-          throw new Error('Collection should be fetched. Use "fetchRelated".');
+          throw new Error('Can\'t fetch collection of "' + modelName + '" without link.');
         }
       } else {
-        throw new Error('Can\'t fetch collection of "' + modelName + '" without link.');
+        if (action === actions.GET) {
+          return store.get(link);
+        } else if (action === actions.FETCH) {
+          return store.fetch(link);
+        } else if (action === actions.PLUCK) {
+          return store.pluck(link);
+        } else {
+          throw new Error('Unknown action');
+        }
       }
-    } else {
-      if (action === actions.GET) {
-        return store.get(link);
-      } else if (action === actions.FETCH) {
-        return store.fetch(link);
-      } else if (action === actions.PLUCK) {
-        return store.pluck(link);
-      } else {
-        throw new Error('Unknown action');
-      }
+    }
+    else {
+      return new RSVP.Promise(resolve => {
+        resolve(null);
+      })
     }
   };
 
