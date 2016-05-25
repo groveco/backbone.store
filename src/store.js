@@ -127,15 +127,13 @@ class Store {
    * @returns {Promise} Promise for requested model.
    */
   get(link) {
-    return new RSVP.Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve) => {
       let model = this.pluck(link);
       if (model) {
         resolve(model);
       } else {
         this.fetch(link).then((model) => {
           resolve(model);
-        }, () => {
-          reject();
         });
       }
     });
@@ -147,12 +145,12 @@ class Store {
    * @returns {Promise} Promise for requested model.
    */
   fetch(link) {
-    return new RSVP.Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve) => {
       this._adapter.get(link).then(response => {
         let model = this._setModels(response);
         resolve(model);
       }, () => {
-        reject();
+        resolve(null);
       });
     });
   }
@@ -172,12 +170,12 @@ class Store {
    * @returns {Promise} Promise for requested collection.
    */
   getCollection(link) {
-    return new RSVP.Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve) => {
       this._adapter.get(link).then(response => {
         let collection = this._setModels(response);
         resolve(collection);
       }, () => {
-        reject();
+        resolve(null);
       });
     });
   }
@@ -189,12 +187,12 @@ class Store {
    * @returns {Promise} Promise for created model.
    */
   create(link, attributes = {}) {
-    return new RSVP.Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve) => {
       this._adapter.create(link, attributes).then(response => {
         let model = this._setModels(response);
         resolve(model);
       }, () => {
-        reject();
+        throw new Error('Couldn\'t create entity.');
       });
     });
   }
@@ -206,13 +204,13 @@ class Store {
    * @returns {Promise} Promise for updated model.
    */
   update(model, attributes) {
-    return new RSVP.Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve) => {
       model.set(attributes);
       this._adapter.update(model.get('_self'), model.toJSON()).then((response) => {
         let model = this._setModels(response);
         resolve(model);
       }, () => {
-        reject();
+        throw new Error('Couldn\'t update entity.');
       });
     });
   }
@@ -223,17 +221,17 @@ class Store {
    * @returns {Promise} Promise for destroy.
    */
   destroy(link) {
-    return new RSVP.Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve) => {
       let model = this._repository.get(link);
       if (model) {
         this._adapter.destroy(link).then(() => {
           this._repository.remove(link);
           resolve();
         }, () => {
-          reject();
+          throw new Error('Couldn\'t destroy entity.');
         });
       } else {
-        reject('Model does not exist');
+        throw new Error('Model does not exist');
       }
     });
   }
