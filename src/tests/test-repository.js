@@ -27,6 +27,7 @@ describe('Repository', function () {
     let model = new TestModel({
       id: id,
       foo: 'bar',
+      removed: 'foo',
       _self: self
     });
     this.repository.set(model);
@@ -38,7 +39,7 @@ describe('Repository', function () {
     });
     this.repository.set(model2);
     assert.equal(this.repository._collection.length, 1);
-    assert.equal(this.repository._collection.pluck('foo')[0], foo);
+    assert.deepEqual(this.repository._collection.at(0).toJSON(), model2.toJSON());
   });
 
   it('gets model from cache collection', function () {

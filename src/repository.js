@@ -27,9 +27,11 @@ class Repository {
    * @param {object|array} models - Model or array of models to add/update in cache.
    */
   set(models) {
-    this._collection.add(models, {
-      merge: true
-    });
+    if (models instanceof Array) {
+      models.forEach(model => this._setModel(model));
+    } else {
+      this._setModel(models);
+    }
   }
 
   /**
@@ -40,6 +42,15 @@ class Repository {
     let model = this._collection.findWhere({ _self: link });
     if (model) {
       this._collection.remove(model);
+    }
+  }
+
+  _setModel(model) {
+    let existingModel = this.get(model.get('_self'));
+    if (existingModel) {
+      existingModel.clear().set(model.toJSON());
+    } else {
+      this._collection.add(model);
     }
   }
 }
