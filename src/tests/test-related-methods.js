@@ -74,7 +74,7 @@ describe('getRelated', function () {
     assert.throws(func, 'There is no related model "' + relation + '".');
   });
 
-  it('throws exception if link is not set for the collection', function () {
+  it('throws exception if link is not set for the collection', function (done) {
     let relation = 'tests';
     let model = new RelationalModel({
       id: 1,
@@ -85,11 +85,10 @@ describe('getRelated', function () {
       }
     });
     let store = getStore();
-    let spy = chai.spy.on(store, 'getCollection');
     store.register('test', RelationalModel);
-    let func = function () {
-      model.getRelated(relation);
-    };
-    assert.throws(func, 'Can\'t fetch collection of "' + model.relatedCollections[relation] + '" without link.');
+    model.getRelated(relation).then(collection => {
+      assert.isNull(collection);
+      done();
+    });
   });
 });
