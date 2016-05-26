@@ -102,14 +102,16 @@ describe('Store', function () {
       slug: 'bar',
       _self: link
     });
-    let initialAttrs = model.toJSON();
     let attrs = {
       name: 'foo'
     };
     let spy = chai.spy.on(store._adapter, 'update');
     store.update(model, attrs);
-    _.extend(initialAttrs, attrs);
-    spy.should.have.been.called.with(link, initialAttrs);
+    let expected = _.extend({
+      id: model.id,
+      _type: model.get('_type')
+    }, attrs);
+    spy.should.have.been.called.with(link, expected);
   });
 
   it('calls adapter\'s destroy method on own destroy if model is cached', function () {

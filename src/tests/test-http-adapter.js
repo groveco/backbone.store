@@ -46,7 +46,7 @@ describe('HTTP adapter', function () {
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
     this.adapter.update(link, attrs);
-    spy.should.have.been.called.with(link, HttpMethods.PUT, this.adapter._parser.serialize({
+    spy.should.have.been.called.with(link, HttpMethods.PATCH, this.adapter._parser.serialize({
       data: attrs
     }));
   });

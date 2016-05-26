@@ -2,6 +2,7 @@
  * Store.
  * @module
  */
+import _ from 'underscore';
 import Backbone from 'backbone';
 import Repository from './repository';
 import RSVP from 'rsvp';
@@ -207,9 +208,12 @@ class Store {
    * @returns {Promise} Promise for updated model.
    */
   update(model, attributes) {
+    let patchAttributes = _.extend({
+      id: model.id,
+      _type: model.get('_type')
+    }, attributes);
     return new RSVP.Promise((resolve) => {
-      model.set(attributes);
-      this._adapter.update(model.get('_self'), model.toJSON()).then((response) => {
+      this._adapter.update(model.get('_self'), patchAttributes).then((response) => {
         let model = this._setModels(response);
         resolve(model);
       }, () => {

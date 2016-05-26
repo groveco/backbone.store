@@ -60,7 +60,7 @@ class HttpAdapter {
    */
   update(link, attributes) {
     return new RSVP.Promise((resolve, reject) => {
-      this._ajax(link, HttpMethods.PUT, this._parser.serialize({
+      this._ajax(link, HttpMethods.PATCH, this._parser.serialize({
         data: attributes
       })).then(data => {
         resolve(this._parser.parse(data));
