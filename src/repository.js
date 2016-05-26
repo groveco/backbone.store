@@ -46,11 +46,14 @@ class Repository {
   }
 
   _setModel(model) {
-    let existingModel = this.get(model.get('_self'));
-    if (existingModel) {
-      existingModel.clear().set(model.toJSON());
-    } else {
-      this._collection.add(model);
+    let self = model.get('_self');
+    if (self) {
+      let existingModel = this.get(self);
+      if (existingModel) {
+        existingModel.clear().set(model.toJSON());
+      } else {
+        this._collection.add(model);
+      }
     }
   }
 }

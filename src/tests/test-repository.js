@@ -13,12 +13,23 @@ describe('Repository', function () {
 
   it('sets model to cache collection', function () {
     let id = 42;
+    let self = '/foo';
     let model = new TestModel({
-      id: id
+      id: id,
+      _self: self
     });
     this.repository.set(model);
-    assert.equal(this.repository._collection.length, 1);
+    assert.lengthOf(this.repository._collection, 1);
     assert.equal(this.repository._collection.pluck('id')[0], id);
+    assert.equal(this.repository._collection.pluck('_self')[0], self);
+  });
+
+  it('doesn\'t set model to cache collection if it doesn\'t have _self', function () {
+    let model = new TestModel({
+      id: 42
+    });
+    this.repository.set(model);
+    assert.lengthOf(this.repository._collection, 0);
   });
 
   it('updates model in cache collection', function () {

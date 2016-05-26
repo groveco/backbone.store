@@ -152,15 +152,18 @@ describe('Store', function () {
       data: [{
         id: 1,
         _type: modelName,
-        name: 'foo1'
+        name: 'foo1',
+        _self: '/foo/1/'
       }, {
         id: 2,
         _type: modelName,
-        name: 'foo2'
+        name: 'foo2',
+        _self: '/foo/2/'
       }, {
         id: 3,
         _type: modelName,
-        name: 'foo3'
+        name: 'foo3',
+        _self: '/foo/3/'
       }],
       included: []
     };
