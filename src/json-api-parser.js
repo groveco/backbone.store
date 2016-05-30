@@ -55,7 +55,7 @@ class JsonApiParser {
     }
     Object.keys(obj.data).forEach((key, index) => {
       if (key !== 'relationships' && key !== 'id' && key !== '_type' && key !== '_self') {
-        result.data.attributes[key] = obj.data[key];
+        result.data.attributes[this._decamelize(key)] = obj.data[key];
       }
     });
     return result;
@@ -63,7 +63,11 @@ class JsonApiParser {
 
   _parseSingleObject(object) {
     let result = {};
-    _.extend(result, object.attributes);
+    if (object.attributes) {
+      Object.keys(object.attributes).forEach((key, index) => {
+        result[this._camelize(key)] = object.attributes[key];
+      });
+    }
     result.id = object.id;
     result._type = object.type;
     if (object.links && object.links.self) {
@@ -73,6 +77,14 @@ class JsonApiParser {
       result.relationships = object.relationships;
     }
     return result;
+  }
+
+  _camelize(str) {
+    return str.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
+  }
+
+  _decamelize(str) {
+    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
   }
 }
 
