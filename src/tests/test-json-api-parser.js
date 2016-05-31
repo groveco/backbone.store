@@ -275,7 +275,12 @@ let dashData = {
     id: 12,
     type: 'user',
     attributes: {
-      'first-name': 'foo'
+      'first-name': 'foo',
+      deep: {
+        'foo-bar': [{
+          'bar-foo': 'foobar'
+        }]
+      }
     },
     links: {
       self: '/api/user/12/'
@@ -288,6 +293,11 @@ let parsedDashData = {
     id: 12,
     _type: 'user',
     firstName: 'foo',
+    deep: {
+      fooBar: [{
+        barFoo: 'foobar'
+      }]
+    },
     _self: '/api/user/12/'
   },
   included: []
@@ -327,6 +337,7 @@ describe('JSON API parser', () => {
 
   it('serializes with camelCase attributes', function () {
     let serialized = this.parser.serialize(parsedDashData);
+    console.log(serialized);
     assert.deepEqual(serialized, dashData);
   });
 });
