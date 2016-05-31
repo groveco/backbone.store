@@ -1,3 +1,4 @@
+import CamelCaseDashConverter from '../camelcase-dash'
 import JsonApiParser from '../json-api-parser'
 
 let jsonApiData = {
@@ -269,10 +270,34 @@ let parsedIncludedData = {
   }]
 };
 
+let dashData = {
+  data: {
+    id: 12,
+    type: 'user',
+    attributes: {
+      'first-name': 'foo'
+    },
+    links: {
+      self: '/api/user/12/'
+    }
+  }
+};
+
+let parsedDashData = {
+  data: {
+    id: 12,
+    _type: 'user',
+    firstName: 'foo',
+    _self: '/api/user/12/'
+  },
+  included: []
+};
+
 describe('JSON API parser', () => {
 
   before(function () {
-    this.parser = new JsonApiParser();
+    let converter = new CamelCaseDashConverter();
+    this.parser = new JsonApiParser(converter);
   });
 
   it('parses data', function () {
@@ -293,5 +318,15 @@ describe('JSON API parser', () => {
   it('parses with included', function () {
     let parsed = this.parser.parse(jsonApiDataIncluded);
     assert.deepEqual(parsed, parsedIncludedData);
+  });
+
+  it('parses with dash attributes', function () {
+    let parsed = this.parser.parse(dashData);
+    assert.deepEqual(parsed, parsedDashData);
+  });
+
+  it('serializes with camelCase attributes', function () {
+    let serialized = this.parser.serialize(parsedDashData);
+    assert.deepEqual(serialized, dashData);
   });
 });

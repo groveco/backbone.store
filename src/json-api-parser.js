@@ -2,12 +2,15 @@
  * JsonApiParser.
  * @module
  */
-import _ from 'underscore'
 
 /**
  * Parser that parses data in JSON API format to BackboneStore format.
  */
 class JsonApiParser {
+
+  constructor(converter) {
+    this._converter = converter;
+  }
 
   /**
    * Parses data from JSON API format to BackboneStore format.
@@ -55,7 +58,7 @@ class JsonApiParser {
     }
     Object.keys(obj.data).forEach((key, index) => {
       if (key !== 'relationships' && key !== 'id' && key !== '_type' && key !== '_self') {
-        result.data.attributes[this._decamelize(key)] = obj.data[key];
+        result.data.attributes[this._converter.decamelize(key)] = obj.data[key];
       }
     });
     return result;
@@ -65,7 +68,7 @@ class JsonApiParser {
     let result = {};
     if (object.attributes) {
       Object.keys(object.attributes).forEach((key, index) => {
-        result[this._camelize(key)] = object.attributes[key];
+        result[this._converter.camelize(key)] = object.attributes[key];
       });
     }
     result.id = object.id;
@@ -77,14 +80,6 @@ class JsonApiParser {
       result.relationships = object.relationships;
     }
     return result;
-  }
-
-  _camelize(str) {
-    return str.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
-  }
-
-  _decamelize(str) {
-    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
   }
 }
 
