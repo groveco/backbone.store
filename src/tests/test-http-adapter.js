@@ -1,4 +1,5 @@
 import $ from 'jquery'
+import CamelCaseDashConverter from '../camelcase-dash'
 import HttpAdapter from '../http-adapter'
 import HttpMethods from '../http-methods'
 import JsonApiParser from '../json-api-parser'
@@ -6,7 +7,9 @@ import JsonApiParser from '../json-api-parser'
 describe('HTTP adapter', function () {
 
   before(function () {
-    this.adapter = new HttpAdapter(new JsonApiParser());
+    let converter = new CamelCaseDashConverter();
+    let parser = new JsonApiParser(converter);
+    this.adapter = new HttpAdapter(parser);
     sinon.stub($, "ajax");
   });
 

@@ -9,6 +9,10 @@ import _ from 'underscore'
  */
 class JsonApiParser {
 
+  constructor(converter) {
+    this._converter = converter;
+  }
+
   /**
    * Parses data from JSON API format to BackboneStore format.
    * @param {object} jsonApiData - Data in JSON API format.
@@ -53,17 +57,15 @@ class JsonApiParser {
     if (obj.data.relationships) {
       result.data.relationships = obj.data.relationships;
     }
-    Object.keys(obj.data).forEach((key, index) => {
-      if (key !== 'relationships' && key !== 'id' && key !== '_type' && key !== '_self') {
-        result.data.attributes[key] = obj.data[key];
-      }
-    });
+    _.extend(result.data.attributes, this._serializeWithNames(obj.data));
     return result;
   }
 
   _parseSingleObject(object) {
     let result = {};
-    _.extend(result, object.attributes);
+    if (object.attributes) {
+      _.extend(result, this._parseWithNames(object.attributes));
+    }
     result.id = object.id;
     result._type = object.type;
     if (object.links && object.links.self) {
@@ -73,6 +75,64 @@ class JsonApiParser {
       result.relationships = object.relationships;
     }
     return result;
+  }
+
+  _parseWithNames(obj) {
+    let result = {};
+    Object.keys(obj).forEach((key, index) => {
+      let value = obj[key];
+      let newKey = this._converter.camelize(key);
+      if (JsonApiParser._isArray(value)) {
+        value = value.map(item => {
+          let mapped = item;
+          if (JsonApiParser._isObject(item)) {
+            mapped = this._parseWithNames(item);
+          }
+          return mapped;
+        });
+      }
+      if (JsonApiParser._isObject(value)) {
+        value = this._parseWithNames(value);
+      }
+      result[newKey] = value;
+    });
+    return result;
+  }
+
+  _serializeWithNames(obj) {
+    let result = {};
+    Object.keys(obj).forEach((key, index) => {
+      if (key !== 'relationships' && key !== 'id' && key !== '_type' && key !== '_self') {
+        let value = obj[key];
+        let newKey = this._converter.decamelize(key);
+        if (JsonApiParser._isArray(value)) {
+          value = value.map(item => {
+            let mapped = item;
+            if (JsonApiParser._isObject(item)) {
+              mapped = this._serializeWithNames(item);
+            }
+            return mapped;
+          });
+        }
+        if (JsonApiParser._isObject(value)) {
+          value = this._serializeWithNames(value);
+        }
+        result[newKey] = value;
+      }
+    });
+    return result;
+  }
+
+  static _isObject(value) {
+    return value !== null && !JsonApiParser._isArray(value) && typeof value === 'object';
+  }
+
+  static _isArray(value) {
+    if (Array.isArray) {
+      return Array.isArray(value);
+    } else {
+      return Object.prototype.toString.call(value) === '[object Array]';
+    }
   }
 }
 
