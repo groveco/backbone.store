@@ -29,29 +29,38 @@ let addRelatedMethods = function (store) {
     }
 
     let link = relationship.links && relationship.links.related;
-    if (link) {
-      if (isCollection) {
+    let type = relationship.data && relationship.data.type;
+    let id = relationship.data && relationship.data.id;
+    if (isCollection) {
+      if (link) {
         if (action == actions.FETCH) {
           return store.getCollection(link);
         } else {
           throw new Error('Collection should be fetched. Use "fetchRelated".');
         }
       } else {
+        return new RSVP.Promise(resolve => {
+          resolve(null);
+        })
+      }
+    } else {
+      if (link && action === actions.FETCH) {
+        return store.fetch(link);
+      } else if (type && id) {
         if (action === actions.GET) {
-          return store.get(link);
+          return store.get(type, id);
         } else if (action === actions.FETCH) {
-          return store.fetch(link);
+          return store.fetch(type, id);
         } else if (action === actions.PLUCK) {
-          return store.pluck(link);
+          return store.pluck(type, id);
         } else {
           throw new Error('Unknown action');
         }
+      } else {
+        return new RSVP.Promise(resolve => {
+          resolve(null);
+        })
       }
-    }
-    else {
-      return new RSVP.Promise(resolve => {
-        resolve(null);
-      })
     }
   };
 

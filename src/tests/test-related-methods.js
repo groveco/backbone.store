@@ -16,16 +16,17 @@ describe('getRelated', function () {
 
   it('calls get with link in store', function () {
     let id = 2;
-    let link = '/api/test/2/';
+    let modelName = 'test';
     let model = new RelationalModel({
       id: 1,
       relationships: {
         test: {
           data: {
-            id: id
+            id: id,
+            type: modelName
           },
           links: {
-            related: link
+            related: 'foo'
           }
         }
       }
@@ -34,7 +35,7 @@ describe('getRelated', function () {
     let spy = chai.spy.on(store, 'get');
     store.register('test', RelationalModel);
     model.getRelated('test');
-    spy.should.have.been.called.with(link);
+    spy.should.have.been.called.with(modelName, id);
   });
 
   it('calls getCollection in repository if collection relation name is passed', function () {

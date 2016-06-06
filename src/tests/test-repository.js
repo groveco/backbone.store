@@ -14,67 +14,63 @@ describe('Repository', function () {
   it('sets model to cache collection', function () {
     let id = 42;
     let self = '/foo';
+    let key = 'foo-1';
     let model = new TestModel({
       id: id,
       _self: self
     });
-    this.repository.set(model);
-    assert.lengthOf(this.repository._collection, 1);
-    assert.equal(this.repository._collection.pluck('id')[0], id);
-    assert.equal(this.repository._collection.pluck('_self')[0], self);
-  });
-
-  it('doesn\'t set model to cache collection if it doesn\'t have _self', function () {
-    let model = new TestModel({
-      id: 42
-    });
-    this.repository.set(model);
-    assert.lengthOf(this.repository._collection, 0);
+    this.repository.set(key, model);
+    assert.lengthOf(Object.keys(this.repository._collection), 1);
+    assert.equal(this.repository._collection[key].id, id);
+    assert.equal(this.repository._collection[key].get('_self'), self);
   });
 
   it('updates model in cache collection', function () {
     let id = 42;
     let self = '/foo';
+    let key = 'foo-1';
     let model = new TestModel({
       id: id,
       foo: 'bar',
       removed: 'foo',
       _self: self
     });
-    this.repository.set(model);
+    this.repository.set(key, model);
     let foo = 'bar2';
     let model2 = new TestModel({
       id: id,
       foo: foo,
       _self: self
     });
-    this.repository.set(model2);
-    assert.equal(this.repository._collection.length, 1);
-    assert.deepEqual(this.repository._collection.at(0).toJSON(), model2.toJSON());
+    this.repository.set(key, model2);
+    assert.lengthOf(Object.keys(this.repository._collection), 1);
+    assert.deepEqual(this.repository._collection[key].toJSON(), model2.toJSON());
   });
 
   it('gets model from cache collection', function () {
     let id = 42;
     let self = '/foo';
+    let key = 'foo-1';
     let model = new TestModel({
       id: id,
       _self: self
     });
-    this.repository.set(model);
-    let got = this.repository.get(self);
+    this.repository.set(key, model);
+    let got = this.repository.get(key, self);
     assert.equal(model, got);
   });
 
   it('removes model from cache collection', function () {
     let id = 42;
     let self = '/foo';
+    let key = 'foo-1';
     let model = new TestModel({
       id: id,
       _self: self
     });
-    this.repository.set(model);
-    assert.equal(this.repository._collection.length, 1);
-    this.repository.remove(self);
-    assert.equal(this.repository._collection.length, 0);
+    this.repository.set(key, model);
+    assert.lengthOf(Object.keys(this.repository._collection), 1);
+    this.repository.remove(key);
+    assert.lengthOf(Object.keys(this.repository._collection), 0);
   });
 });

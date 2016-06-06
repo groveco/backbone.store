@@ -2,7 +2,6 @@
  * Repository.
  * @module
  */
-import RepositoryCollection from './repository-collection'
 
 /**
  * Repository class which provides access to entities and stores them.
@@ -10,51 +9,38 @@ import RepositoryCollection from './repository-collection'
 class Repository {
 
   constructor() {
-    this._collection = new RepositoryCollection();
+    this._collection = {};
   }
 
   /**
    * Get entity from cache by id.
-   * @param {string} link - Entity self link.
+   * @param {string} id - Entity identifier.
    * @returns {object} Entity with given id if it exists.
    */
-  get(link) {
-    return this._collection.findWhere({ _self: link });
+  get(id) {
+    return this._collection[id];
   }
 
   /**
    * Add ot update model(s) in cache.
-   * @param {object|array} models - Model or array of models to add/update in cache.
+   * * @param {string} id - Entity identifier.
+   * @param {object} model - Model to add/update in cache.
    */
-  set(models) {
-    if (models instanceof Array) {
-      models.forEach(model => this._setModel(model));
+  set(id, model) {
+    let existingModel = this.get(id);
+    if (existingModel) {
+      existingModel.clear().set(model.toJSON());
     } else {
-      this._setModel(models);
+      this._collection[id] = model;
     }
   }
 
   /**
    * Remove model from cache.
-   * @param {string} link - Entity self link.
+   * @param {string} id - Entity identifier.
    */
-  remove(link) {
-    let model = this._collection.findWhere({ _self: link });
-    if (model) {
-      this._collection.remove(model);
-    }
-  }
-
-  _setModel(model) {
-    let self = model.get('_self');
-    if (self) {
-      let existingModel = this.get(self);
-      if (existingModel) {
-        existingModel.clear().set(model.toJSON());
-      } else {
-        this._collection.add(model);
-      }
-    }
+  remove(id) {
+    delete this._collection[id];
   }
 }
 
