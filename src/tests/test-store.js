@@ -4,13 +4,15 @@ import FakeAdapter from './test-classes/adapter';
 import Model from './test-classes/model';
 import RSVP from 'rsvp'
 import Store from '../store';
+import UrlResolver from '../url-resolver'
 
 let TestModel = Backbone.Model.extend({});
 let modelName = 'foo';
 
 let createStore = function () {
   let adapter = new FakeAdapter();
-  let store = new Store(adapter);
+  let urlResolver = new UrlResolver();
+  let store = new Store(adapter, urlResolver);
   store.register(modelName, TestModel);
   return store;
 };
@@ -26,18 +28,20 @@ describe('Store', function () {
 
   it('calls adapter\'s get method on own get', function () {
     let store = createStore();
-    let link = '/api/user/42/';
+    let id = '42';
     let spy = chai.spy.on(store._adapter, 'get');
-    store.get(link);
+    store.get(modelName, id);
+    let link = store._urlResolver.getUrl(modelName, id);
     spy.should.have.been.called.with(link);
   });
 
   it('calls adapter\'s get method once on multiple own get', function (done) {
     let store = createStore();
-    let link = '/foo';
+    let modelName = 'foo';
+    let id = 1;
     let spy = chai.spy.on(store._adapter, 'get');
-    store.get(link).then(() => {
-      store.get(link);
+    store.get(modelName, id).then(() => {
+      store.get(modelName, id);
       spy.should.have.been.called.once();
       done();
     });
@@ -85,12 +89,12 @@ describe('Store', function () {
   
   it('calls adapter\'s create method on own create', function () {
     let store = createStore();
-    let link = '/foo';
     let attrs = {
       name: 'foo'
     };
     let spy = chai.spy.on(store._adapter, 'create');
-    store.create(link, attrs);
+    store.create(modelName, attrs);
+    let link = store._urlResolver.getUrl(modelName);
     spy.should.have.been.called.with(link, attrs);
   });
 
@@ -117,14 +121,17 @@ describe('Store', function () {
   it('calls adapter\'s destroy method on own destroy if model is cached', function () {
     let store = createStore();
     let id = 42;
+    let type = 'foo';
     let self = '/foo';
     let model = new Backbone.Model({
       id: id,
+      _type: type,
       _self: self
     });
-    store._repository.set(model);
+    let identifier = store.identifier(modelName, id);
+    store._repository.set(identifier, model);
     let spy = chai.spy.on(store._adapter, 'destroy');
-    store.destroy(self);
+    store.destroy(modelName, id);
     spy.should.have.been.called.with(self);
   });
 
@@ -136,11 +143,11 @@ describe('Store', function () {
     spy.should.not.have.been.called();
   });
 
-  it('adds model to cache on get with link', function (done) {
+  it('adds model to cache on fetch with link', function (done) {
     let store = createStore();
     let link = '/api/user/1/';
-    store.get(link).then(() => {
-      assert.lengthOf(store._repository._collection, 1);
+    store.fetch(link).then(() => {
+      assert.lengthOf(Object.keys(store._repository._collection), 1);
       done();
     });
   });
@@ -173,7 +180,7 @@ describe('Store', function () {
       });
     };
     store.getCollection(link).then(() => {
-      assert.lengthOf(store._repository._collection, response.data.length);
+      assert.lengthOf(Object.keys(store._repository._collection), response.data.length);
       done();
     });
   });
@@ -184,8 +191,8 @@ describe('Store', function () {
     let attrs = {
       name: 'foo'
     };
-    store.create(link, attrs).then(() => {
-      assert.lengthOf(store._repository._collection, 1);
+    store.create(modelName, attrs).then(() => {
+      assert.lengthOf(Object.keys(store._repository._collection), 1);
       done();
     });
   });
@@ -196,13 +203,14 @@ describe('Store', function () {
     let attrs = {
       name: 'foo'
     };
-    store.create(link, attrs).then((model) => {
+    store.create(modelName, attrs).then((model) => {
       let newAttrs = {
         name: 'foo2'
       };
       store.update(model, newAttrs).then((model) => {
-        assert.lengthOf(store._repository._collection, 1);
-        assert.equal(store._repository._collection.at(0).get('name'), newAttrs.name);
+        assert.lengthOf(Object.keys(store._repository._collection), 1);
+        let item = store._repository._collection[Object.keys(store._repository._collection)[0]];
+        assert.equal(item.get('name'), newAttrs.name);
         done();
       });
     });
@@ -215,9 +223,9 @@ describe('Store', function () {
       _self: self,
       name: 'foo'
     };
-    store.create(self, attrs).then((model) => {
-      store.destroy(self).then((model) => {
-        assert.lengthOf(store._repository._collection, 0);
+    store.create(modelName, attrs).then((model) => {
+      store.destroy(model.get('_type'), model.id).then((model) => {
+        assert.lengthOf(Object.keys(store._repository._collection), 0);
         done();
       });
     });
@@ -260,17 +268,18 @@ describe('Store', function () {
     store.register('pantry', TestModel);
 
     store.get(userLink).then((model) => {
-      assert.include(store._repository._collection.pluck('_self'), userLink);
-      assert.include(store._repository._collection.pluck('_self'), pantryLink);
+      let selfLinks = Object.keys(store._repository._collection).map(key => store._repository._collection[key].get('_self'));
+      assert.include(selfLinks, userLink);
+      assert.include(selfLinks, pantryLink);
       done();
     });
   });
 
   it('pluck returns cached data', function (done) {
     let store = createStore();
-    let link = '/api/user/42/';
-    store.get(link).then(() => {
-      let model = store.pluck(link);
+    let id = '42';
+    store.get(modelName, id).then(() => {
+      let model = store.pluck(modelName, id);
       assert.isObject(model);
       done();
     });

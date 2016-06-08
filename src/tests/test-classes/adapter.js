@@ -20,8 +20,9 @@ let data = {
   included: []
 };
 
-let resolveWithData = function (link, attrs = {}) {
+let resolveWithData = function (id, link, attrs = {}) {
   let args = _.extend({}, data.data, attrs, {
+    id: id,
     _self: link
   });
   return new RSVP.Promise((resolve, reject) => {
@@ -38,18 +39,25 @@ let resolve = function () {
   });
 };
 
+let idFromLink = function(link) {
+  return link.split('/').filter(item => Boolean(item)).pop();
+};
+
 class FakeAdapter {
 
   get(link) {
-    return resolveWithData(link);
+    let id = idFromLink(link);
+    return resolveWithData(id, link);
   }
 
   create(link, attributes) {
-    return resolveWithData(link, attributes);
+    let id = 42;
+    return resolveWithData(id, link + `${id}/`, attributes);
   }
 
   update(link, attributes) {
-    return resolveWithData(link, attributes);
+    let id = idFromLink(link);
+    return resolveWithData(id, link, attributes);
   }
 
   destroy(link) {
