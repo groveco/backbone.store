@@ -24,6 +24,7 @@ class Store {
     this._adapter = adapter;
     this._urlResolver = urlResolver;
     this._repository = new Repository();
+    this._pending = {};
     this._modelClasses = {};
   }
 
@@ -73,19 +74,38 @@ class Store {
    */
   fetch(modelNameOrLink, id) {
     let link;
+    let identifier;
     if (id) {
       link = this._urlResolver.getUrl(modelNameOrLink, id);
+      identifier = this.identifier(modelNameOrLink, id);
     } else {
       link = modelNameOrLink;
     }
-    return new RSVP.Promise((resolve) => {
-      this._adapter.get(link).then(response => {
-        let model = this._setModels(response);
-        resolve(model);
-      }, () => {
-        resolve(null);
-      });
+    let promise = new RSVP.Promise((resolve) => {
+      let existingPromise;
+      if (id) {
+        existingPromise = this._pending[identifier];
+      }
+      if (existingPromise) {
+        existingPromise.then(model => {
+          resolve(model);
+        });
+      } else {
+        this._adapter.get(link).then(response => {
+          let model = this._setModels(response);
+          if (id) {
+            delete this._pending[identifier];
+          }
+          resolve(model);
+        }, () => {
+          resolve(null);
+        });
+      }
     });
+    if (id) {
+      this._pending[identifier] = promise;
+    }
+    return promise;
   }
 
   /**
