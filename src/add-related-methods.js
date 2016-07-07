@@ -29,6 +29,8 @@ let addRelatedMethods = function (store) {
     }
 
     let link = relationship.links && relationship.links.related;
+    let type = relationship.data && relationship.data.type;
+    let id = relationship.data && relationship.data.id;
     if (link) {
       if (isCollection) {
         if (action == actions.FETCH) {
@@ -36,23 +38,27 @@ let addRelatedMethods = function (store) {
         } else {
           throw new Error('Collection should be fetched. Use "fetchRelated".');
         }
-      } else {
+      } else if (type && id) {
         if (action === actions.GET) {
-          return store.get(link);
+          let existing = store.pluckByTypeId(type, id);
+          if (existing) {
+            return new RSVP.Promise(resolve => {
+              resolve(existing);
+            })
+          }
+          return store.fetch(link);
         } else if (action === actions.FETCH) {
           return store.fetch(link);
         } else if (action === actions.PLUCK) {
-          return store.pluck(link);
+          return store.pluckByTypeId(type, id);
         } else {
           throw new Error('Unknown action');
         }
       }
     }
-    else {
-      return new RSVP.Promise(resolve => {
-        resolve(null);
-      })
-    }
+    return new RSVP.Promise(resolve => {
+      resolve(null);
+    });
   };
 
   /**

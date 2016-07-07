@@ -79,12 +79,22 @@ class Store {
   }
 
   /**
-   * Get model by Id from front-end cache.
+   * Get model by link from front-end cache.
    * @param {string} link - Model self link.
    * @returns {object} Requested model.
    */
   pluck(link) {
     return this._repository.get(link);
+  }
+
+  /**
+   * Get model by Type and Id from front-end cache.
+   * @param {string} type - Model type.
+   * @param {string|number} id - Model id.
+   * @returns {object} Requested model.
+   */
+  pluckByTypeId(type, id) {
+    return this._repository.get(`${type}__${id}`);
   }
 
   /**
