@@ -22,6 +22,7 @@ class Store {
   constructor(adapter) {
     this._adapter = adapter;
     this._repository = new Repository();
+    this._pending = {};
     this._modelClasses = {};
   }
 
@@ -68,14 +69,23 @@ class Store {
    * @returns {Promise} Promise for requested model.
    */
   fetch(link) {
-    return new RSVP.Promise((resolve) => {
-      this._adapter.get(link).then(response => {
-        let model = this._setModels(response);
-        resolve(model);
-      }, () => {
-        resolve(null);
+    let existingPromise = this._pending[link];
+    if (existingPromise) {
+      return existingPromise;
+    } else {
+      let promise = new RSVP.Promise((resolve) => {
+        this._adapter.get(link).then(response => {
+          let model = this._setModels(response);
+          resolve(model);
+        }, () => {
+          resolve(null);
+        }).finally(() => {
+          this._pending[link] = null;
+        });
       });
-    });
+      this._pending[link] = promise;
+      return promise;
+    }
   }
 
   /**
