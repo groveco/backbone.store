@@ -15,11 +15,17 @@ class Repository {
 
   /**
    * Get entity from cache by id.
-   * @param {string} link - Entity self link.
+   * @param {string} identifier - Entity self link if type-id identifier.
    * @returns {object} Entity with given id if it exists.
    */
-  get(link) {
-    return this._collection.findWhere({ _self: link });
+  get(identifier) {
+    let result = this._collection.findWhere({ _self: identifier });
+    if (!result) {
+      result = this._collection.find((elem) => {
+        return `${elem.get('_type')}__${elem.id}` == identifier;
+      })
+    }
+    return result;
   }
 
   /**

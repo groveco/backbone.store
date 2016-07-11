@@ -1,8 +1,8 @@
 import Backbone from 'backbone';
 
 let Collection = Backbone.Collection.extend({
-  modelId(attrs) {
-    return attrs._self;
+  modelId(attributes) {
+    return `${attributes._type}__${attributes.id}`;
   }
 });
 

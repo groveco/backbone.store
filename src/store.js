@@ -22,6 +22,7 @@ class Store {
   constructor(adapter) {
     this._adapter = adapter;
     this._repository = new Repository();
+    this._pending = {};
     this._modelClasses = {};
   }
 
@@ -68,23 +69,42 @@ class Store {
    * @returns {Promise} Promise for requested model.
    */
   fetch(link) {
-    return new RSVP.Promise((resolve) => {
-      this._adapter.get(link).then(response => {
-        let model = this._setModels(response);
-        resolve(model);
-      }, () => {
-        resolve(null);
+    let existingPromise = this._pending[link];
+    if (existingPromise) {
+      return existingPromise;
+    } else {
+      let promise = new RSVP.Promise((resolve) => {
+        this._adapter.get(link).then(response => {
+          let model = this._setModels(response);
+          resolve(model);
+        }, () => {
+          resolve(null);
+        }).finally(() => {
+          this._pending[link] = null;
+        });
       });
-    });
+      this._pending[link] = promise;
+      return promise;
+    }
   }
 
   /**
-   * Get model by Id from front-end cache.
+   * Get model by link from front-end cache.
    * @param {string} link - Model self link.
    * @returns {object} Requested model.
    */
   pluck(link) {
     return this._repository.get(link);
+  }
+
+  /**
+   * Get model by Type and Id from front-end cache.
+   * @param {string} type - Model type.
+   * @param {string|number} id - Model id.
+   * @returns {object} Requested model.
+   */
+  pluckByTypeId(type, id) {
+    return this._repository.get(`${type}__${id}`);
   }
 
   /**

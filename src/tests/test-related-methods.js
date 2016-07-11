@@ -14,15 +14,17 @@ describe('getRelated', function () {
     assert.property(Backbone.Model.prototype, 'fetchRelated');
   });
 
-  it('calls get with link in store', function () {
+  it('calls pluckByLink and fetch with link in store', function () {
     let id = 2;
+    let type = 'foo';
     let link = '/api/test/2/';
     let model = new RelationalModel({
       id: 1,
       relationships: {
         test: {
           data: {
-            id: id
+            id,
+            type
           },
           links: {
             related: link
@@ -31,10 +33,12 @@ describe('getRelated', function () {
       }
     });
     let store = getStore();
-    let spy = chai.spy.on(store, 'get');
-    store.register('test', RelationalModel);
+    let spyPluck = chai.spy.on(store, 'pluckByTypeId');
+    let spyFetch = chai.spy.on(store, 'fetch');
+    store.register(type, RelationalModel);
     model.getRelated('test');
-    spy.should.have.been.called.with(link);
+    spyPluck.should.have.been.called.with(type, id);
+    spyFetch.should.have.been.called.with(link);
   });
 
   it('calls getCollection in repository if collection relation name is passed', function () {
