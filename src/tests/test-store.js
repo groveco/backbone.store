@@ -19,8 +19,8 @@ describe('Store', function () {
   it('registers model class', function () {
     let store = createStore();
     let name = 'test';
-    let Model = Backbone.Model.extend()
-    store.register('test', Model);
+    let model = {}
+    store.register('test', model);
     assert.equal(store._modelClasses[name], Model);
   });
 
