@@ -1,7 +1,6 @@
 import _ from 'underscore'
 import Backbone from 'backbone'
 import FakeAdapter from './test-classes/adapter';
-import Model from './test-classes/model';
 import RSVP from 'rsvp'
 import Store from '../store';
 
@@ -20,6 +19,7 @@ describe('Store', function () {
   it('registers model class', function () {
     let store = createStore();
     let name = 'test';
+    let Model = Backbone.Model.extend()
     store.register('test', Model);
     assert.equal(store._modelClasses[name], Model);
   });
@@ -82,7 +82,7 @@ describe('Store', function () {
     let model = store.pluck('/foo');
     assert.isUndefined(model);
   });
-  
+
   it('calls adapter\'s create method on own create', function () {
     let store = createStore();
     let link = '/foo';
