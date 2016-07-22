@@ -24,7 +24,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for fetched data.
    */
   get(link) {
-    return this._ajax('GET', link).then(data => this._parser.parse(data));
+    return this._ajax('GET', link).then(this._parser.parse);
   }
 
   /**
@@ -38,7 +38,7 @@ class HttpAdapter {
       data: attributes
     })
 
-    return this._ajax('POST', link, payload).then(data => this._parser.parse(data));
+    return this._ajax('POST', link, payload).then(this._parser.parse);
   }
 
   /**
@@ -52,7 +52,7 @@ class HttpAdapter {
       data: attributes
     })
 
-    return this._ajax('PATCH', link, payload).then(data => this._parser.parse(data));
+    return this._ajax('PATCH', link, payload).then(this._parser.parse);
   }
 
   /**
