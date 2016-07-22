@@ -24,7 +24,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for fetched data.
    */
   get(link) {
-    return this._ajax(link, 'GET').then(data => this._parser.parse(data));
+    return this._ajax('GET', link).then(data => this._parser.parse(data));
   }
 
   /**
@@ -38,7 +38,7 @@ class HttpAdapter {
       data: attributes
     })
 
-    return this._ajax(link, 'POST', payload).then(data => this._parser.parse(data));
+    return this._ajax('POST', link, payload).then(data => this._parser.parse(data));
   }
 
   /**
@@ -52,7 +52,7 @@ class HttpAdapter {
       data: attributes
     })
 
-    return this._ajax(link, 'PATCH', payload).then(data => this._parser.parse(data));
+    return this._ajax('PATCH', link, payload).then(data => this._parser.parse(data));
   }
 
   /**
@@ -61,10 +61,10 @@ class HttpAdapter {
    * @returns {Promise} Promise for destroy.
    */
   destroy(link) {
-    return this._ajax(link, 'DELETE')
+    return this._ajax('DELETE', link)
   }
 
-  _ajax(link, type, data) {
+  _ajax(type, link, data) {
     return new RSVP.Promise((resolve, reject) => {
       let options = {
         url: link,

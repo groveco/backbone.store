@@ -33,7 +33,7 @@ describe('HTTP adapter', function () {
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
     this.adapter.create(link, attrs);
-    spy.should.have.been.called.with(link, 'POST', this.adapter._parser.serialize({
+    spy.should.have.been.called.with('POST', link, this.adapter._parser.serialize({
       data: attrs
     }));
   });
@@ -48,16 +48,16 @@ describe('HTTP adapter', function () {
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
     this.adapter.update(link, attrs);
-    spy.should.have.been.called.with(link, 'PATCH', this.adapter._parser.serialize({
+    spy.should.have.been.called.with('PATCH', link, this.adapter._parser.serialize({
       data: attrs
     }));
   });
 
   it('calls AJAX delete on destroy', function () {
-    let self = '/foo';
+    let link = '/foo';
     let spy = chai.spy.on(this.adapter, '_ajax');
-    this.adapter.destroy(self);
-    spy.should.have.been.called.with(self, 'DELETE');
+    this.adapter.destroy(link);
+    spy.should.have.been.called.with(link, 'DELETE');
   });
 
   it('calls AJAX get with correct data', function () {
@@ -65,7 +65,7 @@ describe('HTTP adapter', function () {
     let data = {
       foo: 'bar'
     };
-    this.adapter._ajax(link, 'GET', data);
+    this.adapter._ajax('GET', link, data);
     assert($.ajax.calledWithMatch({
       url: link,
       type: 'GET',
@@ -82,7 +82,7 @@ describe('HTTP adapter', function () {
     let data = {
       foo: 'bar'
     };
-    this.adapter._ajax(link, 'POST', data);
+    this.adapter._ajax('POST', link, data);
     assert($.ajax.calledWithMatch({
       url: link,
       type: 'POST',
