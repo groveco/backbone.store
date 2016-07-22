@@ -6,10 +6,19 @@ var Server = require('karma').Server;
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
 
-gulp.task('karma', function () {
+gulp.task('test', function () {
   new Server({
     configFile: __dirname + '/karma.conf.js',
+    autoWatch: false,
     singleRun: true
+  }, function (exitCode) {
+    process.exit(exitCode);
+  }).start();
+});
+
+gulp.task('tdd', function () {
+  new Server({
+    configFile: __dirname + '/karma.conf.js',
   }, function (exitCode) {
     process.exit(exitCode);
   }).start();
