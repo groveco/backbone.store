@@ -21,7 +21,7 @@ describe('Store', function () {
     let name = 'test';
     let model = {}
     store.register('test', model);
-    assert.equal(store._modelClasses[name], Model);
+    assert.equal(store._modelClasses[name], model);
   });
 
   it('calls adapter\'s get method on own get', function () {
