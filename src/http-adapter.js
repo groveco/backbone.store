@@ -3,7 +3,6 @@
  * @module
  */
 import $ from 'jquery'
-import HttpMethods from './http-methods'
 import RSVP from 'rsvp'
 
 /**
@@ -25,7 +24,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for fetched data.
    */
   get(link) {
-    return this._ajax(link, HttpMethods.GET).then(data => this._parser.parse(data));
+    return this._ajax(link, 'GET').then(data => this._parser.parse(data));
   }
 
   /**
@@ -39,7 +38,7 @@ class HttpAdapter {
       data: attributes
     })
 
-    return this._ajax(link, HttpMethods.POST, payload).then(data => this._parser.parse(data));
+    return this._ajax(link, 'POST', payload).then(data => this._parser.parse(data));
   }
 
   /**
@@ -53,7 +52,7 @@ class HttpAdapter {
       data: attributes
     })
 
-    return this._ajax(link, HttpMethods.PATCH, payload).then(data => this._parser.parse(data));
+    return this._ajax(link, 'PATCH', payload).then(data => this._parser.parse(data));
   }
 
   /**
@@ -62,7 +61,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for destroy.
    */
   destroy(link) {
-    return this._ajax(link, HttpMethods.DELETE)
+    return this._ajax(link, 'DELETE')
   }
 
   _ajax(link, type, data) {
@@ -82,7 +81,7 @@ class HttpAdapter {
         }
       };
       if (data) {
-        if ([HttpMethods.POST, HttpMethods.PUT].indexOf(type) > -1) {
+        if (['POST', 'PUT'].indexOf(type) > -1) {
           options.data = JSON.stringify(data);
         } else {
           options.data = data;
