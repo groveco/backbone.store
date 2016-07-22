@@ -29,7 +29,7 @@ class Store {
    * @param {string} modelName - model name that is used in relations definitions.
    * @param {Function} definition - Model or collection class.
    */
-  register(modelName, definition) {
+  register(modelName, definition={}) {
     this._modelDefinitions[modelName] = definition;
   }
 
@@ -109,7 +109,7 @@ class Store {
    * @param {object} attributes - Data to create model with.
    * @returns {Promise} Promise for created model.
    */
-  create(link, attributes = {}) {
+  create(link, attributes={}) {
     return this._adapter.create(link, attributes)
       .then(response => this._setModels(response))
       .catch(() => {
