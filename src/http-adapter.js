@@ -70,16 +70,17 @@ class HttpAdapter {
         url: link,
         type: type,
         headers: {
-          Accept: 'application/vnd.api+json',
+          'Accept': 'application/vnd.api+json',
           'Content-Type': 'application/vnd.api+json'
         },
         success: data => {
           resolve(data);
         },
         error: () => {
-          reject();
+          reject.apply(this, arguments);
         }
       };
+
       if (data) {
         if (['POST', 'PUT'].indexOf(type) > -1) {
           options.data = JSON.stringify(data);
@@ -87,6 +88,7 @@ class HttpAdapter {
           options.data = data;
         }
       }
+
       $.ajax(options);
     });
   }
