@@ -66,7 +66,7 @@ describe('getRelated', function () {
     let func = function () {
       model.getRelated(relation);
     };
-    assert.throws(func, 'Relation for "' + relation + '" is not defined in the model.');
+    assert.throws(func, `Relation for "${relation}" is not defined in the model.`);
   });
 
   it('throws exception if there\'s no data in relation', function () {
@@ -75,7 +75,7 @@ describe('getRelated', function () {
     let func = function () {
       model.getRelated(relation);
     };
-    assert.throws(func, 'There is no related model "' + relation + '".');
+    assert.throws(func, `There is no related model "${relation}".`);
   });
 
   it('throws exception if link is not set for the collection', function (done) {
