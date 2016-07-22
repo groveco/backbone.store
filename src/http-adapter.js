@@ -3,6 +3,7 @@
  * @module
  */
 import $ from 'jquery'
+import _ from 'underscore'
 import HttpMethods from './http-methods'
 import RSVP from 'rsvp'
 
@@ -37,13 +38,20 @@ class HttpAdapter {
   /**
    * Create entity.
    * @param {string} link - Entity url.
+   * @param {string} type - Entity type.
    * @param {object} attributes - Data to create entity with.
+   * @param {object} relationships - Relationships to create entity with.
    * @returns {Promise} Promise for created data.
    */
-  create(link, attributes) {
+  create(link, type,  attributes, relationships = {}) {
+    let attributesCopy = _.extend({
+      _type: type
+    }, attributes, {
+      relationships
+    });
     return new RSVP.Promise((resolve, reject) => {
       this._ajax(link, HttpMethods.POST, this._parser.serialize({
-        data: attributes
+        data: attributesCopy
       })).then(data => {
         resolve(this._parser.parse(data));
       }, () => {
@@ -55,13 +63,20 @@ class HttpAdapter {
   /**
    * Update entity.
    * @param {string} link - Entity url.
+   * @param {string} type - Entity type.
    * @param {object} attributes - Data to update entity with.
+   * @param {object} relationships - Relationships to update entity with.
    * @returns {Promise} Promise for updated data.
    */
-  update(link, attributes) {
+  update(link, type,  attributes, relationships = {}) {
+    let attributesCopy = _.extend({
+      _type: type
+    }, attributes, {
+      relationships
+    });
     return new RSVP.Promise((resolve, reject) => {
       this._ajax(link, HttpMethods.PATCH, this._parser.serialize({
-        data: attributes
+        data: attributesCopy
       })).then(data => {
         resolve(this._parser.parse(data));
       }, () => {

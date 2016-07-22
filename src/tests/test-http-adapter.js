@@ -1,4 +1,5 @@
 import $ from 'jquery'
+import _ from 'underscore'
 import CamelCaseDashConverter from '../camelcase-dash'
 import HttpAdapter from '../http-adapter'
 import HttpMethods from '../http-methods'
@@ -26,6 +27,7 @@ describe('HTTP adapter', function () {
 
   it('calls AJAX post on create', function () {
     let link = '/foo';
+    let type = 'foo';
     let attrs = {
       foo: 'bar',
       foo2: {
@@ -33,14 +35,18 @@ describe('HTTP adapter', function () {
       }
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
-    this.adapter.create(link, attrs);
+    this.adapter.create(link, type, attrs);
     spy.should.have.been.called.with(link, HttpMethods.POST, this.adapter._parser.serialize({
-      data: attrs
+      data: _.extend({
+        _type: type,
+        relationships: {}
+      }, attrs)
     }));
   });
 
   it('calls AJAX put on update', function () {
     let link = '/foo';
+    let type = 'foo';
     let attrs = {
       foo: 'bar',
       foo2: {
@@ -48,9 +54,12 @@ describe('HTTP adapter', function () {
       }
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
-    this.adapter.update(link, attrs);
+    this.adapter.update(link, type, attrs);
     spy.should.have.been.called.with(link, HttpMethods.PATCH, this.adapter._parser.serialize({
-      data: attrs
+      data: _.extend({
+        _type: type,
+        relationships: {}
+      }, attrs)
     }));
   });
 

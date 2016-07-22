@@ -126,12 +126,14 @@ class Store {
   /**
    * Create model.
    * @param {string} link - Url for POST request.
+   * @param {string} type - Type of created entity.
    * @param {object} attributes - Data to create model with.
+   * @param {object} relationships - Relationships to create model with.
    * @returns {Promise} Promise for created model.
    */
-  create(link, attributes = {}) {
+  create(link, type, attributes, relationships = {}) {
     return new RSVP.Promise((resolve) => {
-      this._adapter.create(link, attributes).then(response => {
+      this._adapter.create(link, type, attributes, relationships).then(response => {
         let model = this._setModels(response);
         resolve(model);
       }, () => {
@@ -144,15 +146,15 @@ class Store {
    * Create model.
    * @param {Backbone.Model} model - Model to update.
    * @param {object} attributes - Data to update model with.
+   * @param {object} relationships - Relationships to update model with.
    * @returns {Promise} Promise for updated model.
    */
-  update(model, attributes) {
+  update(model, attributes, relationships = {}) {
     let patchAttributes = _.extend({
-      id: model.id,
-      _type: model.get('_type')
+      id: model.id
     }, attributes);
     return new RSVP.Promise((resolve) => {
-      this._adapter.update(model.get('_self'), patchAttributes).then((response) => {
+      this._adapter.update(model.get('_self'), model.get('_type'), patchAttributes, relationships).then((response) => {
         let model = this._setModels(response);
         resolve(model);
       }, () => {

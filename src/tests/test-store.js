@@ -108,10 +108,9 @@ describe('Store', function () {
     let spy = chai.spy.on(store._adapter, 'update');
     store.update(model, attrs);
     let expected = _.extend({
-      id: model.id,
-      _type: model.get('_type')
+      id: model.id
     }, attrs);
-    spy.should.have.been.called.with(link, expected);
+    spy.should.have.been.called.with(link, model.get('_type'), expected);
   });
 
   it('calls adapter\'s destroy method on own destroy if model is cached', function () {
@@ -181,10 +180,11 @@ describe('Store', function () {
   it('adds model to cache on create', function (done) {
     let store = createStore();
     let link = '/foo';
+    let type = 'foo';
     let attrs = {
       name: 'foo'
     };
-    store.create(link, attrs).then(() => {
+    store.create(link, type, attrs).then(() => {
       assert.lengthOf(store._repository._collection, 1);
       done();
     });
@@ -193,10 +193,11 @@ describe('Store', function () {
   it('updates model in cache on update', function (done) {
     let store = createStore();
     let link = '/foo';
+    let type = 'foo';
     let attrs = {
       name: 'foo'
     };
-    store.create(link, attrs).then((model) => {
+    store.create(link, type, attrs).then((model) => {
       let newAttrs = {
         name: 'foo2'
       };
@@ -211,11 +212,12 @@ describe('Store', function () {
   it('removes model from cache on destroy', function (done) {
     let store = createStore();
     let self = '/foo';
+    let type = 'foo';
     let attrs = {
       _self: self,
       name: 'foo'
     };
-    store.create(self, attrs).then((model) => {
+    store.create(self, type, attrs).then((model) => {
       store.destroy(self).then((model) => {
         assert.lengthOf(store._repository._collection, 0);
         done();

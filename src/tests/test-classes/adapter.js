@@ -20,10 +20,13 @@ let data = {
   included: []
 };
 
-let resolveWithData = function (link, attrs = {}) {
+let resolveWithData = function (link, type, attrs = {}) {
   let args = _.extend({}, data.data, attrs, {
     _self: link
   });
+  if (type) {
+    args._type = type;
+  }
   return new RSVP.Promise((resolve, reject) => {
     resolve({
       data: args,
@@ -44,12 +47,12 @@ class FakeAdapter {
     return resolveWithData(link);
   }
 
-  create(link, attributes) {
-    return resolveWithData(link, attributes);
+  create(link, type, attributes) {
+    return resolveWithData(link, type, attributes);
   }
 
-  update(link, attributes) {
-    return resolveWithData(link, attributes);
+  update(link, type, attributes) {
+    return resolveWithData(link, type, attributes);
   }
 
   destroy(link) {
