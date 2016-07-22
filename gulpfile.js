@@ -55,7 +55,7 @@ var browserifyBundle = function (sourcePath) {
 var bundleShare = function (b, outDir, outFile) {
   return b.bundle()
     .on('error', function(e) {
-      console.log('ERROR: ' + e.message);
+      console.log('ERROR:', message);
     })
     .pipe(source(outFile))
     .pipe(derequire())

@@ -19,9 +19,9 @@ describe('Store', function () {
   it('registers model class', function () {
     let store = createStore();
     let name = 'test';
-    let Model = Backbone.Model.extend()
-    store.register('test', Model);
-    assert.equal(store._modelClasses[name], Model);
+    let model = {}
+    store.register('test', model);
+    assert.equal(store._modelClasses[name], model);
   });
 
   it('calls adapter\'s get method on own get', function () {

@@ -3,7 +3,6 @@
  * @module
  */
 import $ from 'jquery'
-import HttpMethods from './http-methods'
 import RSVP from 'rsvp'
 
 /**
@@ -25,13 +24,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for fetched data.
    */
   get(link) {
-    return new RSVP.Promise((resolve, reject) => {
-      this._ajax(link, HttpMethods.GET).then(data => {
-        resolve(this._parser.parse(data));
-      }, () => {
-        reject();
-      });
-    });
+    return this._ajax('GET', link).then(this._parser.parse);
   }
 
   /**
@@ -41,15 +34,11 @@ class HttpAdapter {
    * @returns {Promise} Promise for created data.
    */
   create(link, attributes) {
-    return new RSVP.Promise((resolve, reject) => {
-      this._ajax(link, HttpMethods.POST, this._parser.serialize({
-        data: attributes
-      })).then(data => {
-        resolve(this._parser.parse(data));
-      }, () => {
-        reject();
-      });
-    });
+    let payload = this._parser.serialize({
+      data: attributes
+    })
+
+    return this._ajax('POST', link, payload).then(this._parser.parse);
   }
 
   /**
@@ -59,15 +48,11 @@ class HttpAdapter {
    * @returns {Promise} Promise for updated data.
    */
   update(link, attributes) {
-    return new RSVP.Promise((resolve, reject) => {
-      this._ajax(link, HttpMethods.PATCH, this._parser.serialize({
-        data: attributes
-      })).then(data => {
-        resolve(this._parser.parse(data));
-      }, () => {
-        reject();
-      });
-    });
+    let payload = this._parser.serialize({
+      data: attributes
+    })
+
+    return this._ajax('PATCH', link, payload).then(this._parser.parse);
   }
 
   /**
@@ -76,38 +61,34 @@ class HttpAdapter {
    * @returns {Promise} Promise for destroy.
    */
   destroy(link) {
-    return new RSVP.Promise((resolve, reject) => {
-      this._ajax(link, HttpMethods.DELETE).then(() => {
-        resolve();
-      }, () => {
-        reject();
-      });
-    });
+    return this._ajax('DELETE', link)
   }
 
-  _ajax(link, type, data) {
+  _ajax(type, link, data) {
     return new RSVP.Promise((resolve, reject) => {
       let options = {
         url: link,
         type: type,
         headers: {
-          Accept: 'application/vnd.api+json',
+          'Accept': 'application/vnd.api+json',
           'Content-Type': 'application/vnd.api+json'
         },
         success: data => {
           resolve(data);
         },
         error: () => {
-          reject();
+          reject.apply(this, arguments);
         }
       };
+
       if (data) {
-        if ([HttpMethods.POST, HttpMethods.PUT].indexOf(type) > -1) {
+        if (['POST', 'PUT'].indexOf(type) > -1) {
           options.data = JSON.stringify(data);
         } else {
           options.data = data;
         }
       }
+
       $.ajax(options);
     });
   }

@@ -1,7 +1,6 @@
 import $ from 'jquery'
 import CamelCaseDashConverter from '../camelcase-dash'
 import HttpAdapter from '../http-adapter'
-import HttpMethods from '../http-methods'
 import JsonApiParser from '../json-api-parser'
 
 describe('HTTP adapter', function () {
@@ -34,7 +33,7 @@ describe('HTTP adapter', function () {
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
     this.adapter.create(link, attrs);
-    spy.should.have.been.called.with(link, HttpMethods.POST, this.adapter._parser.serialize({
+    spy.should.have.been.called.with('POST', link, this.adapter._parser.serialize({
       data: attrs
     }));
   });
@@ -49,16 +48,16 @@ describe('HTTP adapter', function () {
     };
     let spy = chai.spy.on(this.adapter, '_ajax');
     this.adapter.update(link, attrs);
-    spy.should.have.been.called.with(link, HttpMethods.PATCH, this.adapter._parser.serialize({
+    spy.should.have.been.called.with('PATCH', link, this.adapter._parser.serialize({
       data: attrs
     }));
   });
 
   it('calls AJAX delete on destroy', function () {
-    let self = '/foo';
+    let link = '/foo';
     let spy = chai.spy.on(this.adapter, '_ajax');
-    this.adapter.destroy(self);
-    spy.should.have.been.called.with(self, HttpMethods.DELETE);
+    this.adapter.destroy(link);
+    spy.should.have.been.called.with(link, 'DELETE');
   });
 
   it('calls AJAX get with correct data', function () {
@@ -66,10 +65,10 @@ describe('HTTP adapter', function () {
     let data = {
       foo: 'bar'
     };
-    this.adapter._ajax(link, HttpMethods.GET, data);
+    this.adapter._ajax('GET', link, data);
     assert($.ajax.calledWithMatch({
       url: link,
-      type: HttpMethods.GET,
+      type: 'GET',
       headers: {
         Accept: 'application/vnd.api+json',
         'Content-Type': 'application/vnd.api+json'
@@ -83,10 +82,10 @@ describe('HTTP adapter', function () {
     let data = {
       foo: 'bar'
     };
-    this.adapter._ajax(link, HttpMethods.POST, data);
+    this.adapter._ajax('POST', link, data);
     assert($.ajax.calledWithMatch({
       url: link,
-      type: HttpMethods.POST,
+      type: 'POST',
       headers: {
         Accept: 'application/vnd.api+json',
         'Content-Type': 'application/vnd.api+json'

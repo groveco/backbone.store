@@ -337,7 +337,6 @@ describe('JSON API parser', () => {
 
   it('serializes with camelCase attributes', function () {
     let serialized = this.parser.serialize(parsedDashData);
-    console.log(serialized);
     assert.deepEqual(serialized, dashData);
   });
 });

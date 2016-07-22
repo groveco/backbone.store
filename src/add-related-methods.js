@@ -20,12 +20,12 @@ let addRelatedMethods = function (store) {
       isCollection = true;
     }
     if (!modelName) {
-      throw new Error('Relation for "' + relationName + '" is not defined in the model.');
+      throw new Error(`Relation for "${relationName}" is not defined in the model.`);
     }
 
     let relationship = this.get('relationships') && this.get('relationships')[relationName];
     if (!relationship) {
-      throw new Error('There is no related model "' + modelName + '".');
+      throw new Error(`There is no related model "${modelName}".`);
     }
 
     let link = relationship.links && relationship.links.related;

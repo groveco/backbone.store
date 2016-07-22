@@ -19,21 +19,17 @@ class JsonApiParser {
    * @returns {object} Data in BackboneStore format.
    */
   parse(jsonApiData) {
-    let result = {
-      data: {},
-      included: []
-    };
-    let data = jsonApiData.data;
-    if (data instanceof Array) {
-      result.data = data.map(elem => this._parseSingleObject(elem));
+    let {data, included=[]} = jsonApiData;
+
+    if (_.isArray(data)) {
+      data = data.map(elem => this._parseSingleObject(elem));
     } else {
-      result.data = this._parseSingleObject(data);
+      data = this._parseSingleObject(data);
     }
-    let included = jsonApiData.included;
-    if (included instanceof Array) {
-      result.included = included.map(elem => this._parseSingleObject(elem));
-    }
-    return result;
+
+    included = included.map(elem => this._parseSingleObject(elem));
+
+    return {data, included};
   }
 
   /**
@@ -78,61 +74,43 @@ class JsonApiParser {
   }
 
   _parseWithNames(obj) {
-    let result = {};
-    Object.keys(obj).forEach((key, index) => {
+    return Object.keys(obj).reduce((result, key) => {
       let value = obj[key];
       let newKey = this._converter.camelize(key);
-      if (JsonApiParser._isArray(value)) {
+
+      if (_.isArray(value)) {
         value = value.map(item => {
-          let mapped = item;
-          if (JsonApiParser._isObject(item)) {
-            mapped = this._parseWithNames(item);
-          }
-          return mapped;
+          if (_.isObject(item)) return this._parseWithNames(item);
+          else  return item;
         });
-      }
-      if (JsonApiParser._isObject(value)) {
+      } else if (_.isObject(value)) {
         value = this._parseWithNames(value);
       }
+
       result[newKey] = value;
-    });
-    return result;
+      return result
+    }, {});
   }
 
   _serializeWithNames(obj) {
-    let result = {};
-    Object.keys(obj).forEach((key, index) => {
-      if (key !== 'relationships' && key !== 'id' && key !== '_type' && key !== '_self') {
+    return Object.keys(obj).reduce((result, key) => {
+      if (!_.contains(['relationships', 'id', '_type', '_self'], key)) {
         let value = obj[key];
         let newKey = this._converter.decamelize(key);
-        if (JsonApiParser._isArray(value)) {
+
+        if (_.isArray(value)) {
           value = value.map(item => {
-            let mapped = item;
-            if (JsonApiParser._isObject(item)) {
-              mapped = this._serializeWithNames(item);
-            }
-            return mapped;
+            if (_.isObject(item)) return this._serializeWithNames(item);
+            else return item;
           });
-        }
-        if (JsonApiParser._isObject(value)) {
+        } else if (_.isObject(value)) {
           value = this._serializeWithNames(value);
         }
+
         result[newKey] = value;
       }
-    });
-    return result;
-  }
-
-  static _isObject(value) {
-    return value !== null && !JsonApiParser._isArray(value) && typeof value === 'object';
-  }
-
-  static _isArray(value) {
-    if (Array.isArray) {
-      return Array.isArray(value);
-    } else {
-      return Object.prototype.toString.call(value) === '[object Array]';
-    }
+      return result;
+    }, {});
   }
 }
 

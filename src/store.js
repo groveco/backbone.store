@@ -51,16 +51,12 @@ class Store {
    * @returns {Promise} Promise for requested model.
    */
   get(link) {
-    return new RSVP.Promise((resolve) => {
-      let model = this.pluck(link);
-      if (model) {
-        resolve(model);
-      } else {
-        this.fetch(link).then((model) => {
-          resolve(model);
-        });
-      }
-    });
+    let model = this.pluck(link)
+    if (model) {
+      return new RSVP.Promise(resolve => resolve(model))
+    } else {
+      return this.fetch(link)
+    }
   }
 
   /**
@@ -70,20 +66,21 @@ class Store {
    */
   fetch(link) {
     let existingPromise = this._pending[link];
+
     if (existingPromise) {
       return existingPromise;
     } else {
-      let promise = new RSVP.Promise((resolve) => {
-        this._adapter.get(link).then(response => {
-          let model = this._setModels(response);
-          resolve(model);
-        }, () => {
-          resolve(null);
-        }).finally(() => {
-          this._pending[link] = null;
-        });
+      let promise = this._adapter.get(link)
+        .then(response => {
+          return this._setModels(response);
+        })
+
+      promise.finally(() => {
+        return this._pending[link] = null;
       });
+
       this._pending[link] = promise;
+
       return promise;
     }
   }
@@ -113,14 +110,8 @@ class Store {
    * @returns {Promise} Promise for requested collection.
    */
   getCollection(link) {
-    return new RSVP.Promise((resolve) => {
-      this._adapter.get(link).then(response => {
-        let collection = this._setModels(response);
-        resolve(collection);
-      }, () => {
-        resolve(null);
-      });
-    });
+    return this._adapter.get(link)
+      .then(response => this._setModels(response));
   }
 
   /**
@@ -130,14 +121,11 @@ class Store {
    * @returns {Promise} Promise for created model.
    */
   create(link, attributes = {}) {
-    return new RSVP.Promise((resolve) => {
-      this._adapter.create(link, attributes).then(response => {
-        let model = this._setModels(response);
-        resolve(model);
-      }, () => {
+    return this._adapter.create(link, attributes)
+      .then(response => this._setModels(response))
+      .catch(() => {
         throw new Error('Couldn\'t create entity.');
       });
-    });
   }
 
   /**
@@ -151,14 +139,11 @@ class Store {
       id: model.id,
       _type: model.get('_type')
     }, attributes);
-    return new RSVP.Promise((resolve) => {
-      this._adapter.update(model.get('_self'), patchAttributes).then((response) => {
-        let model = this._setModels(response);
-        resolve(model);
-      }, () => {
+    return this._adapter.update(model.get('_self'), patchAttributes)
+      .then(response => this._setModels(response))
+      .catch(() => {
         throw new Error('Couldn\'t update entity.');
       });
-    });
   }
 
   /**
