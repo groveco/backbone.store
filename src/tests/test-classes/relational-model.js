@@ -1,12 +1,12 @@
 import Backbone from 'backbone';
 
-let RelationalModel = Backbone.Model.extend({
+let RelationalModel = {
   relatedModels: {
     test: 'test'
   },
   relatedCollections: {
     tests: 'test'
   }
-});
+};
 
 export default RelationalModel;

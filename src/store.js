@@ -3,12 +3,10 @@
  * @module
  */
 import _ from 'underscore';
-import addRelatedMethods from './add-related-methods'
 import Backbone from 'backbone';
 import Repository from './repository';
+import Model from './repository-model';
 import RSVP from 'rsvp';
-
-let methodsAdded = false;
 
 /**
  * Backbone Store class that manages all repositories.
@@ -23,25 +21,16 @@ class Store {
     this._adapter = adapter;
     this._repository = new Repository();
     this._pending = {};
-    this._modelClasses = {};
-  }
-
-  static addRelatedMethods(store) {
-    if (!methodsAdded) {
-      addRelatedMethods(store);
-      methodsAdded = true;
-    } else {
-      throw new Error('Cannot add related methods more than once');
-    }
+    this._modelDefinitions = {};
   }
 
   /**
    * Register repository in Store.
    * @param {string} modelName - model name that is used in relations definitions.
-   * @param {Function} modelClass - Model or collection class.
+   * @param {Function} definition - Model or collection class.
    */
-  register(modelName, modelClass) {
-    this._modelClasses[modelName] = modelClass;
+  register(modelName, definition) {
+    this._modelDefinitions[modelName] = definition;
   }
 
   /**
@@ -167,12 +156,12 @@ class Store {
     });
   }
 
-  _getModelClass(modelName) {
-    let modelClass = this._modelClasses[modelName];
-    if (!modelClass) {
+  _getModelDefinition(modelName) {
+    let modelDefinition = this._modelDefinitions[modelName];
+    if (!modelDefinition) {
       throw new Error(`"${modelName}" is not registered.`);
     }
-    return modelClass;
+    return modelDefinition;
   }
 
   _setModels(response) {
@@ -181,8 +170,8 @@ class Store {
     if (data instanceof Array) {
       if (data.length) {
         let models = data.map(item => {
-          let modelClass = this._getModelClass(item._type);
-          return new modelClass(item);
+          let modelDefinition = this._getModelDefinition(item._type);
+          return new (Model.extend(modelDefinition))(item);
         });
         entity = new Backbone.Collection(models);
         this._repository.set(models);
@@ -190,13 +179,13 @@ class Store {
         entity = new Backbone.Collection();
       }
     } else {
-      let modelClass = this._getModelClass(data._type);
-      entity = new modelClass(data);
+      let modelDefinition = this._getModelDefinition(data._type);
+      entity = new (Model.extend(modelDefinition))(data);
       this._repository.set(entity);
     }
     response.included.forEach(included => {
-      let modelClass = this._getModelClass(data._type);
-      let includedModel = new modelClass(included);
+      let modelDefinition = this._getModelDefinition(data._type);
+      let includedModel = new (Model.extend(modelDefinition))(included);
       this._repository.set(includedModel);
     });
     return entity;
