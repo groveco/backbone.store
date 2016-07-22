@@ -66,7 +66,7 @@ describe('HTTP adapter', function () {
       foo: 'bar'
     };
     this.adapter._ajax('GET', link, data);
-    assert($.ajax.calledWithMatch({
+    sinon.assert.calledWithMatch($.ajax, {
       url: link,
       type: 'GET',
       headers: {
@@ -74,7 +74,7 @@ describe('HTTP adapter', function () {
         'Content-Type': 'application/vnd.api+json'
       },
       data: data
-    }));
+    });
   });
 
   it('calls AJAX post with stringified data', function () {
@@ -83,7 +83,7 @@ describe('HTTP adapter', function () {
       foo: 'bar'
     };
     this.adapter._ajax('POST', link, data);
-    assert($.ajax.calledWithMatch({
+    sinon.assert.calledWithMatch($.ajax, {
       url: link,
       type: 'POST',
       headers: {
@@ -91,6 +91,6 @@ describe('HTTP adapter', function () {
         'Content-Type': 'application/vnd.api+json'
       },
       data: JSON.stringify(data)
-    }));
+    });
   });
 });
