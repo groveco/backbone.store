@@ -25,13 +25,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for fetched data.
    */
   get(link) {
-    return new RSVP.Promise((resolve, reject) => {
-      this._ajax(link, HttpMethods.GET).then(data => {
-        resolve(this._parser.parse(data));
-      }, () => {
-        reject();
-      });
-    });
+    return this._ajax(link, HttpMethods.GET).then(data => this._parser.parse(data));
   }
 
   /**
@@ -41,15 +35,11 @@ class HttpAdapter {
    * @returns {Promise} Promise for created data.
    */
   create(link, attributes) {
-    return new RSVP.Promise((resolve, reject) => {
-      this._ajax(link, HttpMethods.POST, this._parser.serialize({
-        data: attributes
-      })).then(data => {
-        resolve(this._parser.parse(data));
-      }, () => {
-        reject();
-      });
-    });
+    let payload = this._parser.serialize({
+      data: attributes
+    })
+
+    return this._ajax(link, HttpMethods.POST, payload).then(data => this._parser.parse(data));
   }
 
   /**
@@ -59,15 +49,11 @@ class HttpAdapter {
    * @returns {Promise} Promise for updated data.
    */
   update(link, attributes) {
-    return new RSVP.Promise((resolve, reject) => {
-      this._ajax(link, HttpMethods.PATCH, this._parser.serialize({
-        data: attributes
-      })).then(data => {
-        resolve(this._parser.parse(data));
-      }, () => {
-        reject();
-      });
-    });
+    let payload = this._parser.serialize({
+      data: attributes
+    })
+
+    return this._ajax(link, HttpMethods.PATCH, payload).then(data => this._parser.parse(data));
   }
 
   /**
@@ -76,13 +62,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for destroy.
    */
   destroy(link) {
-    return new RSVP.Promise((resolve, reject) => {
-      this._ajax(link, HttpMethods.DELETE).then(() => {
-        resolve();
-      }, () => {
-        reject();
-      });
-    });
+    return this._ajax(link, HttpMethods.DELETE)
   }
 
   _ajax(link, type, data) {

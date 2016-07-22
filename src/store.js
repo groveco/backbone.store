@@ -121,14 +121,11 @@ class Store {
    * @returns {Promise} Promise for created model.
    */
   create(link, attributes = {}) {
-    return new RSVP.Promise((resolve) => {
-      this._adapter.create(link, attributes).then(response => {
-        let model = this._setModels(response);
-        resolve(model);
-      }, () => {
+    return this._adapter.create(link, attributes)
+      .then(response => this._setModels(response))
+      .catch(() => {
         throw new Error('Couldn\'t create entity.');
       });
-    });
   }
 
   /**
@@ -142,14 +139,11 @@ class Store {
       id: model.id,
       _type: model.get('_type')
     }, attributes);
-    return new RSVP.Promise((resolve) => {
-      this._adapter.update(model.get('_self'), patchAttributes).then((response) => {
-        let model = this._setModels(response);
-        resolve(model);
-      }, () => {
+    return this._adapter.update(model.get('_self'), patchAttributes)
+      .then(response => this._setModels(response))
+      .catch(() => {
         throw new Error('Couldn\'t update entity.');
       });
-    });
   }
 
   /**
