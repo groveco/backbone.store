@@ -26,6 +26,7 @@
     "karma-chai": "^0.1.0",
     "karma-chai-spies": "^0.1.4",
     "karma-mocha": "^1.0.1",
+    "karma-mocha-reporter": "^2.0.4",
     "karma-phantomjs-launcher": "^1.0.0",
     "karma-sinon": "^1.0.5",
     "karma-source-map-support": "^1.1.0",

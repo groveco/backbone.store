@@ -4,6 +4,8 @@ module.exports = function (config) {
 
     frameworks: ['browserify', 'source-map-support', 'mocha', 'chai-spies', 'chai', 'sinon'],
 
+    reporters: ['mocha'],
+
     files: [
       'src/tests/**/test-*.js'
     ],
