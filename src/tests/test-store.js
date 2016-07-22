@@ -1,27 +1,34 @@
 import _ from 'underscore'
 import Backbone from 'backbone'
 import FakeAdapter from './test-classes/adapter';
+import Model from '../repository-model'
 import RSVP from 'rsvp'
 import Store from '../store';
 
-let TestModel = Backbone.Model.extend({});
 let modelName = 'foo';
 
 let createStore = function () {
   let adapter = new FakeAdapter();
   let store = new Store(adapter);
-  store.register(modelName, TestModel);
+  store.register(modelName);
   return store;
 };
 
 describe('Store', function () {
 
-  it('registers model class', function () {
+  it('registers model definition', function () {
     let store = createStore();
     let name = 'test';
     let model = {}
     store.register('test', model);
-    assert.equal(store._modelClasses[name], model);
+    assert.equal(store._modelDefinitions[name], model);
+  });
+
+  it('registers an empty object by default', function () {
+    let store = createStore();
+    let name = 'test';
+    store.register('test');
+    assert.deepEqual(store._modelDefinitions[name], {});
   });
 
   it('calls adapter\'s get method on own get', function () {
@@ -97,7 +104,7 @@ describe('Store', function () {
   it('calls adapter\'s update method on own update', function () {
     let store = createStore();
     let link = '/foo';
-    let model = new Backbone.Model({
+    let model = new Model({
       id: 42,
       slug: 'bar',
       _self: link
@@ -118,7 +125,7 @@ describe('Store', function () {
     let store = createStore();
     let id = 42;
     let self = '/foo';
-    let model = new Backbone.Model({
+    let model = new Model({
       id: id,
       _self: self
     });
@@ -256,8 +263,8 @@ describe('Store', function () {
         });
       })
     };
-    store.register('user', TestModel);
-    store.register('pantry', TestModel);
+    store.register('user');
+    store.register('pantry');
 
     store.get(userLink).then((model) => {
       assert.include(store._repository._collection.pluck('_self'), userLink);

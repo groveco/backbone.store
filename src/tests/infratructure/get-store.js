@@ -9,7 +9,6 @@ let createStore = function () {
     let parser = new JsonApiParser();
     let adapter = new HttpAdapter(parser);
     store = new Store(adapter);
-    Store.addRelatedMethods(store);
   }
   return store;
 };

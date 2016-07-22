@@ -1,24 +1,13 @@
-import Backbone from 'backbone';
 import getStore from './infratructure/get-store'
+import Model from '../repository-model';
 import RelationalModel from './test-classes/relational-model'
 
 describe('getRelated', function () {
-
-  it('are added to backbone models', function () {
-    assert.notProperty(Backbone.Model.prototype, 'pluckRelated');
-    assert.notProperty(Backbone.Model.prototype, 'getRelated');
-    assert.notProperty(Backbone.Model.prototype, 'fetchRelated');
-    getStore();
-    assert.property(Backbone.Model.prototype, 'pluckRelated');
-    assert.property(Backbone.Model.prototype, 'getRelated');
-    assert.property(Backbone.Model.prototype, 'fetchRelated');
-  });
-
   it('calls pluckByLink and fetch with link in store', function () {
     let id = 2;
     let type = 'foo';
     let link = '/api/test/2/';
-    let model = new RelationalModel({
+    let model = new (Model.extend(RelationalModel))({
       id: 1,
       relationships: {
         test: {
@@ -33,6 +22,7 @@ describe('getRelated', function () {
       }
     });
     let store = getStore();
+    model.store = store
     let spyPluck = chai.spy.on(store, 'pluckByTypeId');
     let spyFetch = chai.spy.on(store, 'fetch');
     store.register(type, RelationalModel);
@@ -43,7 +33,7 @@ describe('getRelated', function () {
 
   it('calls getCollection in repository if collection relation name is passed', function () {
     let link = '/api/tests/';
-    let model = new RelationalModel({
+    let model = new (Model.extend(RelationalModel))({
       id: 1,
       relationships: {
         tests: {
@@ -54,6 +44,7 @@ describe('getRelated', function () {
       }
     });
     let store = getStore();
+    model.store = store
     let spy = chai.spy.on(store, 'getCollection');
     store.register('test', RelationalModel);
     model.fetchRelated('tests');
@@ -62,7 +53,7 @@ describe('getRelated', function () {
 
   it('throws exception if related model with this name is not defined', function () {
     let relation = 'notexisting';
-    let model = new RelationalModel();
+    let model = new (Model.extend(RelationalModel))();
     let func = function () {
       model.getRelated(relation);
     };
@@ -71,16 +62,16 @@ describe('getRelated', function () {
 
   it('throws exception if there\'s no data in relation', function () {
     let relation = 'test';
-    let model = new RelationalModel();
+    let model = new (Model.extend(RelationalModel))();
     let func = function () {
       model.getRelated(relation);
     };
     assert.throws(func, `There is no related model "${relation}".`);
   });
 
-  it('throws exception if link is not set for the collection', function (done) {
+  it('throws exception if link is not set for the collection', function () {
     let relation = 'tests';
-    let model = new RelationalModel({
+    let model = new (Model.extend(RelationalModel))({
       id: 1,
       relationships: {
         tests: {
@@ -90,9 +81,6 @@ describe('getRelated', function () {
     });
     let store = getStore();
     store.register('test', RelationalModel);
-    model.getRelated(relation).then(collection => {
-      assert.isNull(collection);
-      done();
-    });
+    assert.throws(() => model.getRelated(relation))
   });
 });
