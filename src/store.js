@@ -98,7 +98,7 @@ class Store {
    * @param {string} link - Collection link.
    * @returns {Promise} Promise for requested collection.
    */
-  getCollection(link) {
+  fetchCollection(link) {
     return this._adapter.get(link)
       .then(response => this._setModels(response));
   }

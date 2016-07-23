@@ -30,7 +30,7 @@ let resolveRelatedMethod = function (relationName, action) {
   if (link) {
     if (isCollection) {
       if (action == actions.FETCH) {
-        return this.store.getCollection(link);
+        return this.store.fetchCollection(link);
       } else {
         throw new Error('Collection should be fetched. Use "fetchRelated".');
       }

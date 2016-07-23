@@ -32,7 +32,7 @@ describe('getRelated', function () {
     sinon.assert.calledWith(spyFetch, link);
   });
 
-  it('calls getCollection in repository if collection relation name is passed', function () {
+  it('calls fetchCollection in repository if collection relation name is passed', function () {
     let link = '/api/tests/';
     let model = new (Model.extend(RelationalModel))({
       id: 1,
@@ -46,7 +46,7 @@ describe('getRelated', function () {
     });
     let store = getStore();
     model.store = store;
-    let spy = sinon.spy(store, 'getCollection');
+    let spy = sinon.spy(store, 'fetchCollection');
     store.register('test', RelationalModel);
     model.fetchRelated('tests');
     sinon.assert.calledWith(spy, link);

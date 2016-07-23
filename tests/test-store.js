@@ -50,11 +50,11 @@ describe('Store', function () {
     });
   });
 
-  it('calls adapter\'s get method on own getCollection', function () {
+  it('calls adapter\'s get method on own fetchCollection', function () {
     let store = createStore();
     let link = '/api/user/42/';
     let spy = sinon.spy(store._adapter, 'get');
-    store.getCollection(link);
+    store.fetchCollection(link);
     sinon.assert.calledWith(spy, link);
   });
 
@@ -151,7 +151,7 @@ describe('Store', function () {
     });
   });
 
-  it('adds models to cache on getCollection', function (done) {
+  it('adds models to cache on fetchCollection', function (done) {
     let store = createStore();
     let link = '/api/user/1/';
     let response = {
@@ -178,7 +178,7 @@ describe('Store', function () {
         resolve(response);
       });
     };
-    store.getCollection(link).then(() => {
+    store.fetchCollection(link).then(() => {
       assert.lengthOf(store._repository._collection, response.data.length);
       done();
     });
