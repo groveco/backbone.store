@@ -64,32 +64,31 @@ class HttpAdapter {
     return this._ajax('DELETE', link)
   }
 
-  _ajax(type, link, data) {
-    return new RSVP.Promise((resolve, reject) => {
-      let options = {
-        url: link,
-        type: type,
-        headers: {
-          'Accept': 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json'
-        },
-        success: data => {
-          resolve(data);
-        },
-        error: () => {
-          reject.apply(this, arguments);
-        }
-      };
+  _ajax(type, url, data, options) {
+    let headers = {
+      'Accept': 'application/vnd.api+json',
+      'Content-Type': 'application/vnd.api+json'
+    }
 
-      if (data) {
-        if (['POST', 'PUT'].indexOf(type) > -1) {
-          options.data = JSON.stringify(data);
-        } else {
-          options.data = data;
-        }
+    if (data) {
+      if (['PATCH', 'POST'].indexOf(type) > -1) {
+        data = JSON.stringify(data);
+      } else {
+        data = data;
+      }
+    }
+
+    return new RSVP.Promise((resolve, reject) => {
+      let request = {
+        url,
+        type,
+        headers,
+        success: resolve,
+        error: reject,
+        data
       }
 
-      $.ajax(options);
+      $.ajax(request);
     });
   }
 
