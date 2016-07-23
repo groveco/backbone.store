@@ -43,6 +43,7 @@ let jsonApiData = {
 };
 
 let parsedData = {
+  included: [],
   data: {
     name: 'foo',
     id: 12,
@@ -152,6 +153,7 @@ let jsonApiCollection = {
 };
 
 let parsedCollection = {
+  included: [],
   data: [{
     id: 1,
     _type: 'foo',
@@ -224,6 +226,7 @@ let jsonApiDataIncluded = {
 };
 
 let parsedIncludedData = {
+  included: [],
   data: {
     name: 'foo',
     id: 12,
@@ -287,6 +290,7 @@ let dashData = {
 };
 
 let parsedDashData = {
+  included: [],
   data: {
     id: 12,
     _type: 'user',

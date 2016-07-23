@@ -19,20 +19,18 @@ class JsonApiParser {
    * @returns {object} Data in BackboneStore format.
    */
   parse(jsonApiData) {
-    let {data, included} = jsonApiData;
+    let {data, included=[]} = jsonApiData;
     let response = {}
 
     if (_.isArray(data)) {
-      response.data = data.map(elem => this._parseSingleObject(elem));
+      data = data.map(elem => this._parseSingleObject(elem));
     } else {
-      response.data = this._parseSingleObject(data);
+      data = this._parseSingleObject(data);
     }
 
-    if (included && included.length > 0) {
-      response.included = included.map(elem => this._parseSingleObject(elem));
-    }
+    included = included.map(elem => this._parseSingleObject(elem));
 
-    return response;
+    return {data, included};
   }
 
   /**
