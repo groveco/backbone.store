@@ -50,12 +50,12 @@ class Store {
    * @param {string} link - Model link.
    * @returns {Promise} Promise for requested model.
    */
-  get(link) {
+  get(link, query) {
     let model = this.pluck(link)
     if (model) {
       return new RSVP.Promise(resolve => resolve(model))
     } else {
-      return this.fetch(link)
+      return this.fetch(link, query)
     }
   }
 
@@ -64,13 +64,13 @@ class Store {
    * @param {string} link - Model link.
    * @returns {Promise} Promise for requested model.
    */
-  fetch(link) {
+  fetch(link, query) {
     let existingPromise = this._pending[link];
 
     if (existingPromise) {
       return existingPromise;
     } else {
-      let promise = this._adapter.get(link)
+      let promise = this._adapter.get(link, query)
         .then(response => {
           return this._setModels(response);
         })

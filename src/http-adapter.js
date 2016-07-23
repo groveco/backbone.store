@@ -2,8 +2,8 @@
  * HttpAdapter
  * @module
  */
-import $ from 'jquery'
-import RSVP from 'rsvp'
+import {ajax} from 'jquery'
+import {Promise} from 'rsvp'
 
 /**
  * Adapter which works with data over HTTP.
@@ -23,8 +23,10 @@ class HttpAdapter {
    * @param {string} link - Link to entity.
    * @returns {Promise} Promise for fetched data.
    */
-  get(link) {
-    return this._ajax('GET', link).then(this._parser.parse);
+  get(link, query) {
+    return this._ajax('GET', link, query)
+      .then(body => JSON.parse(body))
+      .then(body => this._parser.parse(body));
   }
 
   /**
@@ -38,7 +40,9 @@ class HttpAdapter {
       data: attributes
     })
 
-    return this._ajax('POST', link, payload).then(this._parser.parse);
+    return this._ajax('POST', link, payload)
+      .then(body => JSON.parse(body))
+      .then(body => this._parser.parse(body));
   }
 
   /**
@@ -52,7 +56,9 @@ class HttpAdapter {
       data: attributes
     })
 
-    return this._ajax('PATCH', link, payload).then(this._parser.parse);
+    return this._ajax('PATCH', link, payload)
+      .then(body => JSON.parse(body))
+      .then(body => this._parser.parse(body));
   }
 
   /**
@@ -78,17 +84,17 @@ class HttpAdapter {
       }
     }
 
-    return new RSVP.Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let request = {
         url,
         type,
         headers,
-        success: resolve,
-        error: reject,
+        success: (data) => resolve(data),
+        error: (err) => reject(err),
         data
       }
 
-      $.ajax(request);
+      ajax(request);
     });
   }
 

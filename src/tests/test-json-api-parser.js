@@ -77,7 +77,6 @@ let parsedData = {
       }
     }
   },
-  included: []
 };
 
 let serializedData = {
@@ -169,7 +168,6 @@ let parsedCollection = {
     name: 'foo3',
     _self: '/api/foo/3/'
   }],
-  included: []
 };
 
 let jsonApiDataIncluded = {
@@ -300,7 +298,6 @@ let parsedDashData = {
     },
     _self: '/api/user/12/'
   },
-  included: []
 };
 
 describe('JSON API parser', () => {

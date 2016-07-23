@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import CamelCaseDashConverter from '../camelcase-dash'
 import HttpAdapter from '../http-adapter'
 import JsonApiParser from '../json-api-parser'
@@ -8,113 +7,69 @@ describe('HTTP adapter', function () {
     let converter = new CamelCaseDashConverter();
     this.parser = new JsonApiParser(converter);
     this.adapter = new HttpAdapter(this.parser);
-    sinon.stub($, "ajax");
   });
 
-  after(function () {
-    $.ajax.restore()
+  beforeEach(function () {
+    this.server = sinon.fakeServer.create({autoRespond: true});
+    this.server.respondImmediately = true
+  });
+
+  afterEach(function () {
+    this.server.restore()
   });
 
   describe('#get', function () {
-    it('calls AJAX on get', function () {
-      let url = '/api/user/42/';
-      let spy = chai.spy.on(this.adapter, '_ajax');
-      this.adapter.get(url);
-      spy.should.have.been.called.with(url);
+    it('returns a parsed resource from the network', function () {
+      let payload = {data: {id: 123, attributes: {foo: 'asdf'}}};
+      this.server.respondWith('GET', '/api/user/42/', JSON.stringify(payload));
+
+      return this.adapter.get('/api/user/42/')
+        .then((response) => {
+          assert.deepEqual(response, this.parser.parse(payload))
+        });
     });
 
-    it('calls AJAX get with correct data', function () {
-      let link = '/foo';
-      let data = {
-        foo: 'bar'
-      };
-      this.adapter._ajax('GET', link, data);
-      sinon.assert.calledWithMatch($.ajax, {
-        url: link,
-        type: 'GET',
-        headers: {
-          Accept: 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json'
-        },
-        data: data
-      });
+    it('accepts arbitrary query parameters', function () {
+      let payload = {data: {id: 123, attributes: {foo: 'asdf'}}};
+      this.server.respondWith('GET', '/api/user/42/?include=bio&foo=bar', JSON.stringify(payload));
+
+      return this.adapter.get('/api/user/42/', {include: 'bio', foo: 'bar'});
     });
   })
 
   describe('#create', function () {
-    it('calls AJAX post on create', function () {
-      let link = '/foo';
-      let attrs = {
-        foo: 'bar',
-        foo2: {
-          foo3: 42
-        }
-      };
-      let spy = chai.spy.on(this.adapter, '_ajax');
-      this.adapter.create(link, attrs);
-      spy.should.have.been.called.with('POST', link, this.parser.serialize({
-        data: attrs
-      }));
-    });
-
-    it('calls AJAX post with stringified data', function () {
-      let link = '/foo';
-      let data = {
-        foo: 'bar'
-      };
-      this.adapter._ajax('POST', link, data);
-      sinon.assert.calledWithMatch($.ajax, {
-        url: link,
-        type: 'POST',
-        headers: {
-          Accept: 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json'
-        },
-        data: JSON.stringify(data)
+    it('creates a new resource on the network', function () {
+      let payload = {foo: 'bar', fiz: {biz: 'buz'}};
+      this.server.respondWith('POST', '/api/user/', (req) => {
+        req.respond(200, {}, req.requestBody)
       });
+
+      return this.adapter.create('/api/user/', {foo: 'bar', fiz: {biz: 'buz'}})
+        .then((response) => {
+          assert.deepEqual(response, this.parser.parse({data: {attributes: payload}}))
+        });
     });
   })
 
   describe('#update', function () {
-    it('calls AJAX patch on update', function () {
-      let link = '/foo';
-      let attrs = {
-        foo: 'bar',
-        foo2: {
-          foo3: 42
-        }
-      };
-      let spy = chai.spy.on(this.adapter, '_ajax');
-      this.adapter.update(link, attrs);
-      spy.should.have.been.called.with('PATCH', link, this.parser.serialize({
-        data: attrs
-      }));
-    });
-
-    it('calls AJAX patch with stringified data', function () {
-      let link = '/foo';
-      let data = {
-        foo: 'bar'
-      };
-      this.adapter._ajax('PATCH', link, data);
-      sinon.assert.calledWithMatch($.ajax, {
-        url: link,
-        type: 'PATCH',
-        headers: {
-          Accept: 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json'
-        },
-        data: JSON.stringify(data)
+    it('patches a resource on the network', function () {
+      let payload = {foo: 'bar', fiz: {biz: 'buz'}};
+      this.server.respondWith('PATCH', '/api/user/2/', (req) => {
+        req.respond(200, {}, req.requestBody)
       });
+
+      return this.adapter.update('/api/user/2/', payload)
+        .then((response) => {
+          assert.deepEqual(response, this.parser.parse({data: {attributes: payload}}))
+        });
     });
   })
 
   describe('#destroy', function () {
-    it('calls AJAX delete on destroy', function () {
-      let link = '/foo';
-      let spy = chai.spy.on(this.adapter, '_ajax');
-      this.adapter.destroy(link);
-      spy.should.have.been.called.with(link, 'DELETE');
+    it('deletes a record from the network', function () {
+      this.server.respondWith('DELETE', '/api/user/42/', [200, {}, '']);
+
+      return this.adapter.destroy('/api/user/42/')
     });
   })
 });
