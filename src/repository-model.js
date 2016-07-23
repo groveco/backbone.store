@@ -1,57 +1,46 @@
+import _ from 'underscore';
 import Backbone from 'backbone';
 import RSVP from 'rsvp';
 
 let actions = {
-  GET: 0,
   PLUCK: 1,
   FETCH: 2
 };
 
 let resolveRelatedMethod = function (relationName, action) {
-  let isCollection = false;
-  let modelName = this.relatedModels && this.relatedModels[relationName];
-  if (!modelName) {
-    modelName = this.relatedCollections && this.relatedCollections[relationName];
-    isCollection = true;
-  }
-  if (!modelName) {
+  let modelName = this.relatedModels && this.relatedModels[relationName] || this.relatedCollections && this.relatedCollections[relationName];
+  if (modelName == null) {
     throw new Error('Relation for "' + relationName + '" is not defined in the model.');
   }
 
   let relationship = this.get('relationships') && this.get('relationships')[relationName];
-  if (!relationship) {
+  if (relationship == null) {
     throw new Error('There is no related model "' + modelName + '".');
   }
 
   let link = relationship.links && relationship.links.related;
-  let type = relationship.data && relationship.data.type;
-  let id = relationship.data && relationship.data.id;
+  if (link == null) {
+    throw new Error('link is undefined, can\'t do that');
+  }
 
-  if (link) {
-    if (isCollection) {
-      if (action == actions.FETCH) {
-        return this.store.fetchCollection(link);
-      } else {
-        throw new Error('Collection should be fetched. Use "fetchRelated".');
-      }
-    } else if (type && id) {
-      if (action === actions.GET) {
-        let existing = this.store.pluckByTypeId(type, id);
-        if (existing) {
-          return new RSVP.Promise(resolve => resolve(existing));
-        } else {
-          return this.store.fetch(link);
-        }
-      } else if (action === actions.FETCH) {
-        return this.store.fetch(link);
-      } else if (action === actions.PLUCK) {
+  if (_.isArray(relationship.data)) {
+    if (action === actions.FETCH) {
+      return this.store.fetchCollection(link);
+    } else if (action === actions.PLUCK) {
+      return RSVP.all(relationship.data.map(related => {
+        let {id, type} = related;
         return this.store.pluckByTypeId(type, id);
-      } else {
-        throw new Error('Unknown action');
-      }
+      }));
+    }
+  } else {
+    if (action === actions.FETCH) {
+      return this.store.fetch(link);
+    } else if (action === actions.PLUCK) {
+      let type = relationship.data && relationship.data.type;
+      let id = relationship.data && relationship.data.id;
+      return this.store.pluckByTypeId(type, id);
     }
   }
-  throw new Error('link is undefined, can\'t do that');
 };
 
 let Model = Backbone.Model.extend({
@@ -61,7 +50,12 @@ let Model = Backbone.Model.extend({
    * @returns {Promise} Promise for requested model.
    */
   getRelated(relationName) {
-    return resolveRelatedMethod.call(this, relationName, actions.GET);
+    let plucked = resolveRelatedMethod.call(this, relationName, actions.PLUCK);
+    if (plucked) {
+      return plucked;
+    } else {
+      return resolveRelatedMethod.call(this, relationName, actions.FETCH);
+    }
   },
 
   /**

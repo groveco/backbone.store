@@ -3,7 +3,25 @@ import Model from '../src/repository-model';
 import RelationalModel from './test-classes/relational-model';
 import sinon from 'sinon';
 
-describe('getRelated', function () {
+describe('related methods', function () {
+  describe('pluckRelated', function () {
+    xit('hasOne returns a single model from the cache');
+    xit('hasOne returns a single model from the network, if it is not cached');
+    xit('hasMany returns a collection of models from the cache');
+    xit('hasMany returns a collection models from the network, if they are not cached');
+    xit('hasMany returns a partial collection models from the cache, and hits the network for remaining models');
+  });
+
+  describe('fetchRelated', function () {
+    xit('hasOne returns a single model from the network');
+    xit('hasMany returns a collection of models from the network');
+  });
+
+  describe('pluckRelated', function () {
+    xit('hasOne returns a single model from the cache');
+    xit('hasMany returns a collection of models from the cache');
+  });
+
   it('calls pluckByLink and fetch with link in store', function () {
     let id = 2;
     let type = 'foo';
@@ -38,6 +56,33 @@ describe('getRelated', function () {
       id: 1,
       relationships: {
         tests: {
+          data: [
+            {id: 1, type: 'test'},
+            {id: 2, type: 'test'},
+            {id: 3, type: 'test'}
+          ],
+          links: {
+            related: link
+          }
+        }
+      }
+    });
+    let store = getStore();
+    model.store = store;
+    store.register('test', RelationalModel);
+    return model.pluckRelated('tests')
+      .then(tests => {
+        return assert.equal(tests.length, 3);
+      });
+  });
+
+  it('calls fetchCollection in repository if collection relation name is passed', function () {
+    let link = '/api/tests/';
+    let model = new (Model.extend(RelationalModel))({
+      id: 1,
+      relationships: {
+        tests: {
+          data: [],
           links: {
             related: link
           }
