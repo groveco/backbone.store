@@ -3,15 +3,12 @@
  * @module
  */
 import _ from 'underscore'
+import {camelize, decamelize} from './camelcase-dash'
 
 /**
  * Parser that parses data in JSON API format to BackboneStore format.
  */
 class JsonApiParser {
-
-  constructor(converter) {
-    this._converter = converter;
-  }
 
   /**
    * Parses data from JSON API format to BackboneStore format.
@@ -77,7 +74,7 @@ class JsonApiParser {
   _parseWithNames(obj) {
     return Object.keys(obj).reduce((result, key) => {
       let value = obj[key];
-      let newKey = this._converter.camelize(key);
+      let newKey = camelize(key);
 
       if (_.isArray(value)) {
         value = value.map(item => {
@@ -97,7 +94,7 @@ class JsonApiParser {
     return Object.keys(obj).reduce((result, key) => {
       if (!_.contains(['relationships', 'id', '_type', '_self'], key)) {
         let value = obj[key];
-        let newKey = this._converter.decamelize(key);
+        let newKey = decamelize(key);
 
         if (_.isArray(value)) {
           value = value.map(item => {

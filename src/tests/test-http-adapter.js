@@ -1,11 +1,9 @@
-import CamelCaseDashConverter from '../camelcase-dash'
 import HttpAdapter from '../http-adapter'
 import JsonApiParser from '../json-api-parser'
 
 describe('HTTP adapter', function () {
   before(function () {
-    let converter = new CamelCaseDashConverter();
-    this.parser = new JsonApiParser(converter);
+    this.parser = new JsonApiParser();
     this.adapter = new HttpAdapter(this.parser);
   });
 
