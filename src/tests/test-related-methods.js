@@ -23,12 +23,12 @@ describe('getRelated', function () {
     });
     let store = getStore();
     model.store = store
-    let spyPluck = chai.spy.on(store, 'pluckByTypeId');
-    let spyFetch = chai.spy.on(store, 'fetch');
+    let spyPluck = sinon.spy(store, 'pluckByTypeId');
+    let spyFetch = sinon.spy(store, 'fetch');
     store.register(type, RelationalModel);
     model.getRelated('test');
-    spyPluck.should.have.been.called.with(type, id);
-    spyFetch.should.have.been.called.with(link);
+    sinon.assert.calledWith(spyPluck, type, id);
+    sinon.assert.calledWith(spyFetch, link);
   });
 
   it('calls getCollection in repository if collection relation name is passed', function () {
@@ -45,10 +45,10 @@ describe('getRelated', function () {
     });
     let store = getStore();
     model.store = store
-    let spy = chai.spy.on(store, 'getCollection');
+    let spy = sinon.spy(store, 'getCollection');
     store.register('test', RelationalModel);
     model.fetchRelated('tests');
-    spy.should.have.been.called.with(link);
+    sinon.assert.calledWith(spy, link);
   });
 
   it('throws exception if related model with this name is not defined', function () {
