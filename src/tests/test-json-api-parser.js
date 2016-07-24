@@ -1,4 +1,3 @@
-import CamelCaseDashConverter from '../camelcase-dash'
 import JsonApiParser from '../json-api-parser'
 
 let jsonApiData = {
@@ -307,8 +306,7 @@ let parsedDashData = {
 describe('JSON API parser', () => {
 
   before(function () {
-    let converter = new CamelCaseDashConverter();
-    this.parser = new JsonApiParser(converter);
+    this.parser = new JsonApiParser();
   });
 
   it('parses data', function () {
