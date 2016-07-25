@@ -32,33 +32,7 @@ describe('getRelated', function () {
     sinon.assert.calledWith(spyFetch, link);
   });
 
-  it('calls pluckRelated in repository if collection relation name is passed', function () {
-    let link = '/api/tests/';
-    let model = new (Model.extend(RelationalModel))({
-      id: 1,
-      relationships: {
-        tests: {
-          data: [
-            {id: 1, type: 'test'},
-            {id: 2, type: 'test'},
-            {id: 3, type: 'test'},
-          ],
-          links: {
-            related: link
-          }
-        }
-      }
-    });
-    let store = getStore();
-    model.store = store
-    store.register('test', RelationalModel);
-    return model.pluckRelated('tests')
-      .then(tests => {
-        return assert.equal(tests.length, 3)
-      })
-  });
-
-  it('calls fetchCollection in repository if collection relation name is passed', function () {
+  it('calls getCollection in repository if collection relation name is passed', function () {
     let link = '/api/tests/';
     let model = new (Model.extend(RelationalModel))({
       id: 1,
