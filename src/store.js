@@ -167,17 +167,13 @@ class Store {
   _setModels(response) {
     let data = response.data;
     let entity;
-    if (data instanceof Array) {
-      if (data.length) {
-        let models = data.map(item => {
-          let modelDefinition = this._getModelDefinition(item._type);
-          return new (Model.extend(modelDefinition))(item);
-        });
-        entity = new Backbone.Collection(models);
-        this._repository.set(models);
-      } else {
-        entity = new Backbone.Collection();
-      }
+    if (_.isArray(data)) {
+      let models = data.map(item => {
+        let modelDefinition = this._getModelDefinition(item._type);
+        return new (Model.extend(modelDefinition))(item);
+      });
+      entity = new Backbone.Collection(models);
+      this._repository.set(models);
     } else {
       let modelDefinition = this._getModelDefinition(data._type);
       entity = new (Model.extend(modelDefinition))(data);
