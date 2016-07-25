@@ -1,9 +1,9 @@
-import _ from 'underscore'
-import Backbone from 'backbone'
+import _ from 'underscore';
 import FakeAdapter from './test-classes/adapter';
-import Model from '../src/repository-model'
-import RSVP from 'rsvp'
+import Model from '../src/repository-model';
+import RSVP from 'rsvp';
 import Store from '../src/store';
+import sinon from 'sinon';
 
 let modelName = 'foo';
 
@@ -19,7 +19,7 @@ describe('Store', function () {
   it('registers model definition', function () {
     let store = createStore();
     let name = 'test';
-    let model = {}
+    let model = {};
     store.register('test', model);
     assert.equal(store._modelDefinitions[name], model);
   });
@@ -68,7 +68,6 @@ describe('Store', function () {
 
   it('calls adapter\'s get method every time own fetch is called', function () {
     let store = createStore();
-    let id = 42;
     let link = '/api/user/42/';
     let spy = sinon.spy(store._adapter, 'get');
     store.fetch(link).then(() => {
@@ -175,7 +174,7 @@ describe('Store', function () {
       included: []
     };
     store._adapter.get = function () {
-      return new RSVP.Promise((resolve, reject) => {
+      return new RSVP.Promise((resolve) => {
         resolve(response);
       });
     };
@@ -207,7 +206,7 @@ describe('Store', function () {
       let newAttrs = {
         name: 'foo2'
       };
-      store.update(model, newAttrs).then((model) => {
+      store.update(model, newAttrs).then(() => {
         assert.lengthOf(store._repository._collection, 1);
         assert.equal(store._repository._collection.at(0).get('name'), newAttrs.name);
         done();
@@ -222,8 +221,8 @@ describe('Store', function () {
       _self: self,
       name: 'foo'
     };
-    store.create(self, attrs).then((model) => {
-      store.destroy(self).then((model) => {
+    store.create(self, attrs).then(() => {
+      store.destroy(self).then(() => {
         assert.lengthOf(store._repository._collection, 0);
         done();
       });
@@ -235,7 +234,7 @@ describe('Store', function () {
     let userLink = '/api/user/12/';
     let pantryLink = '/api/pantry/42/';
     store._adapter.get = () => {
-      return new RSVP.Promise((resolve, reject) => {
+      return new RSVP.Promise((resolve) => {
         resolve({
           data: {
             id: 12,
@@ -261,12 +260,12 @@ describe('Store', function () {
             _self: pantryLink
           }]
         });
-      })
+      });
     };
     store.register('user');
     store.register('pantry');
 
-    store.get(userLink).then((model) => {
+    store.get(userLink).then(() => {
       assert.include(store._repository._collection.pluck('_self'), userLink);
       assert.include(store._repository._collection.pluck('_self'), pantryLink);
       done();

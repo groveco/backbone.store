@@ -2,8 +2,8 @@
  * HttpAdapter
  * @module
  */
-import {ajax} from 'jquery'
-import {Promise} from 'rsvp'
+import {ajax} from 'jquery';
+import {Promise} from 'rsvp';
 
 /**
  * Adapter which works with data over HTTP.
@@ -38,7 +38,7 @@ class HttpAdapter {
   create(link, attributes) {
     let payload = this._parser.serialize({
       data: attributes
-    })
+    });
 
     return this._ajax('POST', link, payload)
       .then(body => JSON.parse(body))
@@ -54,7 +54,7 @@ class HttpAdapter {
   update(link, attributes) {
     let payload = this._parser.serialize({
       data: attributes
-    })
+    });
 
     return this._ajax('PATCH', link, payload)
       .then(body => JSON.parse(body))
@@ -67,21 +67,17 @@ class HttpAdapter {
    * @returns {Promise} Promise for destroy.
    */
   destroy(link) {
-    return this._ajax('DELETE', link)
+    return this._ajax('DELETE', link);
   }
 
-  _ajax(type, url, data, options) {
+  _ajax(type, url, data) {
     let headers = {
       'Accept': 'application/vnd.api+json',
       'Content-Type': 'application/vnd.api+json'
-    }
+    };
 
-    if (data) {
-      if (['PATCH', 'POST'].indexOf(type) > -1) {
-        data = JSON.stringify(data);
-      } else {
-        data = data;
-      }
+    if (data && ['PATCH', 'POST'].indexOf(type) > -1) {
+      data = JSON.stringify(data);
     }
 
     return new Promise((resolve, reject) => {
@@ -95,7 +91,7 @@ class HttpAdapter {
         // changing this may not break tests, but does behave badly in prod
         dataType: 'text',
         data
-      }
+      };
 
       ajax(request);
     });

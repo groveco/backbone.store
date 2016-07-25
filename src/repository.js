@@ -2,7 +2,7 @@
  * Repository.
  * @module
  */
-import RepositoryCollection from './repository-collection'
+import RepositoryCollection from './repository-collection';
 
 /**
  * Repository class which provides access to entities and stores them.
@@ -23,7 +23,7 @@ class Repository {
     if (!result) {
       result = this._collection.find((elem) => {
         return `${elem.get('_type')}__${elem.id}` == identifier;
-      })
+      });
     }
     return result;
   }

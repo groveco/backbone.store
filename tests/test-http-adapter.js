@@ -1,5 +1,6 @@
-import HttpAdapter from '../src/http-adapter'
-import JsonApiParser from '../src/json-api-parser'
+import HttpAdapter from '../src/http-adapter';
+import JsonApiParser from '../src/json-api-parser';
+import sinon from 'sinon';
 
 describe('HTTP adapter', function () {
   before(function () {
@@ -9,11 +10,11 @@ describe('HTTP adapter', function () {
 
   beforeEach(function () {
     this.server = sinon.fakeServer.create({autoRespond: true});
-    this.server.respondImmediately = true
+    this.server.respondImmediately = true;
   });
 
   afterEach(function () {
-    this.server.restore()
+    this.server.restore();
   });
 
   describe('#get', function () {
@@ -23,7 +24,7 @@ describe('HTTP adapter', function () {
 
       return this.adapter.get('/api/user/42/')
         .then((response) => {
-          assert.deepEqual(response, this.parser.parse(payload))
+          assert.deepEqual(response, this.parser.parse(payload));
         });
     });
 
@@ -33,41 +34,41 @@ describe('HTTP adapter', function () {
 
       return this.adapter.get('/api/user/42/', {include: 'bio', foo: 'bar'});
     });
-  })
+  });
 
   describe('#create', function () {
     it('creates a new resource on the network', function () {
       let payload = {foo: 'bar', fiz: {biz: 'buz'}};
       this.server.respondWith('POST', '/api/user/', (req) => {
-        req.respond(200, {}, req.requestBody)
+        req.respond(200, {}, req.requestBody);
       });
 
       return this.adapter.create('/api/user/', {foo: 'bar', fiz: {biz: 'buz'}})
         .then((response) => {
-          assert.deepEqual(response, this.parser.parse({data: {attributes: payload}}))
+          assert.deepEqual(response, this.parser.parse({data: {attributes: payload}}));
         });
     });
-  })
+  });
 
   describe('#update', function () {
     it('patches a resource on the network', function () {
       let payload = {foo: 'bar', fiz: {biz: 'buz'}};
       this.server.respondWith('PATCH', '/api/user/2/', (req) => {
-        req.respond(200, {}, req.requestBody)
+        req.respond(200, {}, req.requestBody);
       });
 
       return this.adapter.update('/api/user/2/', payload)
         .then((response) => {
-          assert.deepEqual(response, this.parser.parse({data: {attributes: payload}}))
+          assert.deepEqual(response, this.parser.parse({data: {attributes: payload}}));
         });
     });
-  })
+  });
 
   describe('#destroy', function () {
     it('deletes a record from the network', function () {
       this.server.respondWith('DELETE', '/api/user/42/', [200, {}, '']);
 
-      return this.adapter.destroy('/api/user/42/')
+      return this.adapter.destroy('/api/user/42/');
     });
-  })
+  });
 });
