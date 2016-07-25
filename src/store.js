@@ -136,27 +136,6 @@ class Store {
   pluckByTypeId(type, id) {
     return this._repository.get(`${type}__${id}`);
   }
-
-  /**
-   * Destroy model.
-   * @param {string} link - Self link of model to destroy.
-   * @returns {Promise} Promise for destroy.
-   */
-  destroy(link) {
-    return new RSVP.Promise((resolve) => {
-      let model = this._repository.get(link);
-      if (model) {
-        this._adapter.destroy(link).then(() => {
-          this._repository.remove(link);
-          resolve();
-        }, () => {
-          throw new Error('Couldn\'t destroy entity.');
-        });
-      } else {
-        throw new Error('Model does not exist');
-      }
-    });
-  }
 }
 
 export default Store;
