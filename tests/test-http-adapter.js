@@ -24,7 +24,7 @@ describe('HTTP adapter', function () {
 
       return this.adapter.get('/api/user/42/')
         .then((response) => {
-          assert.deepEqual(response, this.parser.parse(payload));
+          assert.deepEqual(response, payload);
         });
     });
 
@@ -32,20 +32,21 @@ describe('HTTP adapter', function () {
       let payload = {data: {id: 123, attributes: {foo: 'asdf'}}};
       this.server.respondWith('GET', '/api/user/42/?include=bio&foo=bar', JSON.stringify(payload));
 
-      return this.adapter.get('/api/user/42/', {include: 'bio', foo: 'bar'});
+      return this.adapter.get('/api/user/42/', {include: 'bio', foo: 'bar'})
+        .then((response) => {
+          assert.deepEqual(response, payload);
+        });
     });
   });
 
   describe('#create', function () {
     it('creates a new resource on the network', function () {
-      let payload = {foo: 'bar', fiz: {biz: 'buz'}};
-      this.server.respondWith('POST', '/api/user/', (req) => {
-        req.respond(200, {}, req.requestBody);
-      });
+      let payload = {data: {foo: 'bar', fiz: {biz: 'buz'}}};
+      this.server.respondWith('POST', '/api/user/', JSON.stringify(payload));
 
-      return this.adapter.create('/api/user/', {foo: 'bar', fiz: {biz: 'buz'}})
+      return this.adapter.create('/api/user/', payload)
         .then((response) => {
-          assert.deepEqual(response, this.parser.parse({data: {attributes: payload}}));
+          assert.deepEqual(response, payload);
         });
     });
   });
@@ -53,20 +54,18 @@ describe('HTTP adapter', function () {
   describe('#update', function () {
     it('patches a resource on the network', function () {
       let payload = {foo: 'bar', fiz: {biz: 'buz'}};
-      this.server.respondWith('PATCH', '/api/user/2/', (req) => {
-        req.respond(200, {}, req.requestBody);
-      });
+      this.server.respondWith('PATCH', '/api/user/2/', JSON.stringify(payload));
 
       return this.adapter.update('/api/user/2/', payload)
         .then((response) => {
-          assert.deepEqual(response, this.parser.parse({data: {attributes: payload}}));
+          assert.deepEqual(response, payload);
         });
     });
   });
 
   describe('#destroy', function () {
     it('deletes a record from the network', function () {
-      this.server.respondWith('DELETE', '/api/user/42/', [200, {}, '']);
+      this.server.respondWith('DELETE', '/api/user/42/', [204, {}, '']);
 
       return this.adapter.destroy('/api/user/42/');
     });
