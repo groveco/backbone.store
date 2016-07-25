@@ -2,7 +2,7 @@ module.exports = function (config) {
   config.set({
     browsers: ['PhantomJS'],
 
-    frameworks: ['browserify', 'source-map-support', 'mocha', 'chai', 'sinon'],
+    frameworks: ['browserify', 'mocha', 'chai', 'sinon'],
 
     reporters: ['mocha'],
 
@@ -15,13 +15,10 @@ module.exports = function (config) {
     },
 
     browserify: {
-      transform: [['babelify', {presets: ['es2015']}]],
       debug: true,
-      configure: function (b) {
-        b.on('prebundle', function () {
-          b.require('./node_modules/underscore/underscore.js', {expose: 'underscore'});
-        });
-      }
-    },
+      transform: [
+        ['babelify']
+      ],
+    }
   });
 };

@@ -45,18 +45,14 @@ gulp.task('watchify', function() {
 });
 
 var browserifyBundle = function (sourcePath) {
-  var b = browserify(sourcePath, {
-    standalone: 'BackboneStore'
-  });
-  b.transform(babelify, { presets: ['es2015'] });
+  var b = browserify(sourcePath);
+  b.transform(babelify);
   return b;
 };
 
 var bundleShare = function (b, outDir, outFile) {
   return b.bundle()
-    .on('error', function(e) {
-      console.log('ERROR:', e);
-    })
+    .on('error', (e) => console.log(e.stack))
     .pipe(source(outFile))
     .pipe(derequire())
     .pipe(gulp.dest(outDir));
