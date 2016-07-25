@@ -2,7 +2,7 @@ module.exports = function (config) {
   config.set({
     browsers: ['PhantomJS'],
 
-    frameworks: ['browserify', 'source-map-support', 'mocha', 'chai-spies', 'chai', 'sinon'],
+    frameworks: ['browserify', 'source-map-support', 'mocha', 'chai', 'sinon'],
 
     reporters: ['mocha'],
 

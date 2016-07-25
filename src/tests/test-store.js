@@ -1,44 +1,51 @@
 import _ from 'underscore'
 import Backbone from 'backbone'
 import FakeAdapter from './test-classes/adapter';
+import Model from '../repository-model'
 import RSVP from 'rsvp'
 import Store from '../store';
 
-let TestModel = Backbone.Model.extend({});
 let modelName = 'foo';
 
 let createStore = function () {
   let adapter = new FakeAdapter();
   let store = new Store(adapter);
-  store.register(modelName, TestModel);
+  store.register(modelName);
   return store;
 };
 
 describe('Store', function () {
 
-  it('registers model class', function () {
+  it('registers model definition', function () {
     let store = createStore();
     let name = 'test';
     let model = {}
     store.register('test', model);
-    assert.equal(store._modelClasses[name], model);
+    assert.equal(store._modelDefinitions[name], model);
+  });
+
+  it('registers an empty object by default', function () {
+    let store = createStore();
+    let name = 'test';
+    store.register('test');
+    assert.deepEqual(store._modelDefinitions[name], {});
   });
 
   it('calls adapter\'s get method on own get', function () {
     let store = createStore();
     let link = '/api/user/42/';
-    let spy = chai.spy.on(store._adapter, 'get');
+    let spy = sinon.spy(store._adapter, 'get');
     store.get(link);
-    spy.should.have.been.called.with(link);
+    sinon.assert.calledWith(spy, link);
   });
 
   it('calls adapter\'s get method once on multiple own get', function (done) {
     let store = createStore();
     let link = '/foo';
-    let spy = chai.spy.on(store._adapter, 'get');
+    let spy = sinon.spy(store._adapter, 'get');
     store.get(link).then(() => {
       store.get(link);
-      spy.should.have.been.called.once();
+      sinon.assert.calledOnce(spy);
       done();
     });
   });
@@ -46,35 +53,35 @@ describe('Store', function () {
   it('calls adapter\'s get method on own getCollection', function () {
     let store = createStore();
     let link = '/api/user/42/';
-    let spy = chai.spy.on(store._adapter, 'get');
+    let spy = sinon.spy(store._adapter, 'get');
     store.getCollection(link);
-    spy.should.have.been.called.with(link);
+    sinon.assert.calledWith(spy, link);
   });
 
   it('calls adapter\'s get method on own fetch', function () {
     let store = createStore();
     let link = '/api/user/42/';
-    let spy = chai.spy.on(store._adapter, 'get');
+    let spy = sinon.spy(store._adapter, 'get');
     store.fetch(link);
-    spy.should.have.been.called.with(link);
+    sinon.assert.calledWith(spy, link);
   });
 
   it('calls adapter\'s get method every time own fetch is called', function () {
     let store = createStore();
     let id = 42;
     let link = '/api/user/42/';
-    let spy = chai.spy.on(store._adapter, 'get');
+    let spy = sinon.spy(store._adapter, 'get');
     store.fetch(link).then(() => {
       store.fetch(link);
-      spy.should.have.been.called.twice();
+      sinon.assert.calledTwice(spy);
     });
   });
 
   it('doesn\'t call adapter\'s get method on own pluck call', function () {
     let store = createStore();
-    let spy = chai.spy.on(store._adapter, 'get');
+    let spy = sinon.spy(store._adapter, 'get');
     store.pluck('/foo');
-    spy.should.not.have.been.called();
+    sinon.assert.notCalled(spy);
   });
 
   it('pluck doesn\'t return not cached data', function () {
@@ -89,15 +96,15 @@ describe('Store', function () {
     let attrs = {
       name: 'foo'
     };
-    let spy = chai.spy.on(store._adapter, 'create');
+    let spy = sinon.spy(store._adapter, 'create');
     store.create(link, attrs);
-    spy.should.have.been.called.with(link, attrs);
+    sinon.assert.calledWith(spy, link, attrs);
   });
 
   it('calls adapter\'s update method on own update', function () {
     let store = createStore();
     let link = '/foo';
-    let model = new Backbone.Model({
+    let model = new Model({
       id: 42,
       slug: 'bar',
       _self: link
@@ -105,35 +112,35 @@ describe('Store', function () {
     let attrs = {
       name: 'foo'
     };
-    let spy = chai.spy.on(store._adapter, 'update');
+    let spy = sinon.spy(store._adapter, 'update');
     store.update(model, attrs);
     let expected = _.extend({
       id: model.id,
       _type: model.get('_type')
     }, attrs);
-    spy.should.have.been.called.with(link, expected);
+    sinon.assert.calledWith(spy, link, expected);
   });
 
   it('calls adapter\'s destroy method on own destroy if model is cached', function () {
     let store = createStore();
     let id = 42;
     let self = '/foo';
-    let model = new Backbone.Model({
+    let model = new Model({
       id: id,
       _self: self
     });
     store._repository.set(model);
-    let spy = chai.spy.on(store._adapter, 'destroy');
+    let spy = sinon.spy(store._adapter, 'destroy');
     store.destroy(self);
-    spy.should.have.been.called.with(self);
+    sinon.assert.calledWith(spy, self);
   });
 
   it('does not call adapter\'s destroy method on own destroy if model is not cached', function () {
     let store = createStore();
     let link = '/foo';
-    let spy = chai.spy.on(store._adapter, 'destroy');
+    let spy = sinon.spy(store._adapter, 'destroy');
     store.destroy(link);
-    spy.should.not.have.been.called();
+    sinon.assert.notCalled(spy);
   });
 
   it('adds model to cache on get with link', function (done) {
@@ -256,8 +263,8 @@ describe('Store', function () {
         });
       })
     };
-    store.register('user', TestModel);
-    store.register('pantry', TestModel);
+    store.register('user');
+    store.register('pantry');
 
     store.get(userLink).then((model) => {
       assert.include(store._repository._collection.pluck('_self'), userLink);
