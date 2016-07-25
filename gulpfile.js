@@ -1,3 +1,4 @@
+/* eslint-env node */
 var _ = require('underscore');
 var gulp = require('gulp');
 var Server = require('karma').Server;
