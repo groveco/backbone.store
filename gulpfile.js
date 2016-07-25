@@ -1,57 +1,15 @@
-var babelify = require('babelify');
-var browserify = require('browserify');
+var _ = require('underscore');
 var gulp = require('gulp');
 var Server = require('karma').Server;
-var source = require('vinyl-source-stream');
-var watchify = require('watchify');
 
-gulp.task('test', function () {
-  new Server({
-    configFile: __dirname + '/karma.conf.js',
-    autoWatch: false,
-    singleRun: true
-  }, function (exitCode) {
-    process.exit(exitCode);
-  }).start();
-});
+function karmaServer(config) {
+  var configFile = __dirname + '/karma.conf.js';
+  new Server(_.defaults(config, {configFile})).start();
+}
 
-gulp.task('tdd', function () {
-  new Server({
-    configFile: __dirname + '/karma.conf.js',
-  }, function (exitCode) {
-    process.exit(exitCode);
-  }).start();
-});
+gulp.task('test', () => karmaServer({
+  autoWatch: false,
+  singleRun: true
+}));
 
-gulp.task('browserify', function () {
-  var b = browserifyBundle('src/index.js');
-  bundleShare(b, 'dist/', 'main.js');
-});
-
-gulp.task('watchify', function() {
-  var b = browserifyBundle();
-  var w = watchify(b, {
-    poll: true
-  });
-  w.on('update', function() {
-    console.log('Bundling...');
-    bundleShare(w);
-  });
-  w.on('time', function (time) {
-    console.log('Bundled in ' + time + 'ms');
-  });
-  return bundleShare(w);
-});
-
-var browserifyBundle = function (sourcePath) {
-  var b = browserify(sourcePath);
-  b.transform(babelify);
-  return b;
-};
-
-var bundleShare = function (b, outDir, outFile) {
-  return b.bundle()
-    .on('error', (e) => console.log(e.stack))
-    .pipe(source(outFile))
-    .pipe(gulp.dest(outDir));
-};
+gulp.task('tdd', () => karmaServer());
