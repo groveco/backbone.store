@@ -1,9 +1,9 @@
 import _ from 'underscore'
 import Backbone from 'backbone'
 import FakeAdapter from './test-classes/adapter';
-import Model from '../repository-model'
+import Model from '../src/repository-model'
 import RSVP from 'rsvp'
-import Store from '../store';
+import Store from '../src/store';
 
 let modelName = 'foo';
 

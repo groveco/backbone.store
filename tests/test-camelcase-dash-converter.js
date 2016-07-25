@@ -1,4 +1,4 @@
-import {camelize, decamelize} from '../camelcase-dash'
+import {camelize, decamelize} from '../src/camelcase-dash'
 
 describe('camelCase - dash converter', function () {
   describe('decamelize', function () {

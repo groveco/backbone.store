@@ -1,4 +1,4 @@
-import JsonApiParser from '../json-api-parser'
+import JsonApiParser from '../src/json-api-parser'
 
 let jsonApiData = {
   data: {

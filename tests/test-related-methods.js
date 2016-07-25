@@ -1,5 +1,5 @@
 import getStore from './infratructure/get-store'
-import Model from '../repository-model';
+import Model from '../src/repository-model';
 import RelationalModel from './test-classes/relational-model'
 
 describe('getRelated', function () {

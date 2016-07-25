@@ -1,5 +1,5 @@
-import HttpAdapter from '../http-adapter'
-import JsonApiParser from '../json-api-parser'
+import HttpAdapter from '../src/http-adapter'
+import JsonApiParser from '../src/json-api-parser'
 
 describe('HTTP adapter', function () {
   before(function () {

@@ -7,11 +7,11 @@ module.exports = function (config) {
     reporters: ['mocha'],
 
     files: [
-      'src/tests/**/test-*.js'
+      'tests/**/test-*.js'
     ],
 
     preprocessors: {
-      'src/tests/**/test-*.js': ['browserify']
+      'tests/**/test-*.js': ['browserify']
     },
 
     browserify: {

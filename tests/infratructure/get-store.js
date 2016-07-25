@@ -1,6 +1,6 @@
-import HttpAdapter from '../../http-adapter';
-import JsonApiParser from '../../json-api-parser';
-import Store from '../../store';
+import HttpAdapter from '../../src/http-adapter';
+import JsonApiParser from '../../src/json-api-parser';
+import Store from '../../src/store';
 
 let store = null;
 
