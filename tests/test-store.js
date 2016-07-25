@@ -3,12 +3,9 @@ import RSVP from 'rsvp';
 import Store from '../src/store';
 import sinon from 'sinon';
 
-let modelName = 'foo';
-
 let createStore = function () {
   let adapter = new HttpAdapter();
   let store = new Store(adapter);
-  store.register(modelName);
   store.register('user');
   store.register('pantry');
   return store;
