@@ -1,4 +1,4 @@
-import {camelize, decamelize} from '../src/camelcase-dash'
+import {camelize, decamelize} from '../src/camelcase-dash';
 
 describe('camelCase - dash converter', function () {
   describe('decamelize', function () {
@@ -8,7 +8,7 @@ describe('camelCase - dash converter', function () {
       let expected = 'foo-bar-test';
       assert.equal(got, expected);
     });
-  })
+  });
 
   describe('camelize', function () {
     it('converts dash to camelCase', function () {
@@ -17,5 +17,5 @@ describe('camelCase - dash converter', function () {
       let expected = 'fooBarTest';
       assert.equal(got, expected);
     });
-  })
+  });
 });

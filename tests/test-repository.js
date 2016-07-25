@@ -1,5 +1,5 @@
-import Backbone from 'backbone'
-import Repository from '../src/repository'
+import Backbone from 'backbone';
+import Repository from '../src/repository';
 
 let TestModel = Backbone.Model.extend({});
 let TestCollection = Backbone.Collection.extend({

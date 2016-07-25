@@ -51,7 +51,7 @@ let resolveRelatedMethod = function (relationName, action) {
       }
     }
   }
-  throw new Error('link is undefined, can\'t do that')
+  throw new Error('link is undefined, can\'t do that');
 };
 
 let Model = Backbone.Model.extend({
@@ -80,7 +80,7 @@ let Model = Backbone.Model.extend({
    */
   pluckRelated(relationName) {
     return resolveRelatedMethod.call(this, relationName, actions.PLUCK);
-  },
+  }
 });
 
 export default Model;

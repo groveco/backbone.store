@@ -1,4 +1,4 @@
-import JsonApiParser from '../src/json-api-parser'
+import JsonApiParser from '../src/json-api-parser';
 
 let jsonApiData = {
   data: {
@@ -76,7 +76,7 @@ let parsedData = {
         }
       }
     }
-  },
+  }
 };
 
 let serializedData = {
@@ -168,7 +168,7 @@ let parsedCollection = {
     _type: 'foo',
     name: 'foo3',
     _self: '/api/foo/3/'
-  }],
+  }]
 };
 
 let jsonApiDataIncluded = {
@@ -225,7 +225,6 @@ let jsonApiDataIncluded = {
 };
 
 let parsedIncludedData = {
-  included: [],
   data: {
     name: 'foo',
     id: 12,
@@ -300,11 +299,10 @@ let parsedDashData = {
       }]
     },
     _self: '/api/user/12/'
-  },
+  }
 };
 
 describe('JSON API parser', () => {
-
   before(function () {
     this.parser = new JsonApiParser();
   });

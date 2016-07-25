@@ -2,8 +2,8 @@
  * JsonApiParser.
  * @module
  */
-import _ from 'underscore'
-import {camelize, decamelize} from './camelcase-dash'
+import _ from 'underscore';
+import {camelize, decamelize} from './camelcase-dash';
 
 /**
  * Parser that parses data in JSON API format to BackboneStore format.
@@ -17,7 +17,6 @@ class JsonApiParser {
    */
   parse(jsonApiData) {
     let {data, included=[]} = jsonApiData;
-    let response = {}
 
     if (_.isArray(data)) {
       data = data.map(elem => this._parseSingleObject(elem));
@@ -86,7 +85,7 @@ class JsonApiParser {
       }
 
       result[newKey] = value;
-      return result
+      return result;
     }, {});
   }
 

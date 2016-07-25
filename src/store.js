@@ -40,11 +40,11 @@ class Store {
    * @returns {Promise} Promise for requested model.
    */
   get(link, query) {
-    let model = this.pluck(link)
+    let model = this.pluck(link);
     if (model) {
-      return new RSVP.Promise(resolve => resolve(model))
+      return new RSVP.Promise(resolve => resolve(model));
     } else {
-      return this.fetch(link, query)
+      return this.fetch(link, query);
     }
   }
 
@@ -62,7 +62,7 @@ class Store {
       let promise = this._adapter.get(link, query)
         .then(response => {
           return this._setModels(response);
-        })
+        });
 
       promise.finally(() => {
         return this._pending[link] = null;

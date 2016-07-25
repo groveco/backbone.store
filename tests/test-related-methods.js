@@ -1,6 +1,7 @@
-import getStore from './infratructure/get-store'
+import getStore from './infratructure/get-store';
 import Model from '../src/repository-model';
-import RelationalModel from './test-classes/relational-model'
+import RelationalModel from './test-classes/relational-model';
+import sinon from 'sinon';
 
 describe('getRelated', function () {
   it('calls pluckByLink and fetch with link in store', function () {
@@ -22,7 +23,7 @@ describe('getRelated', function () {
       }
     });
     let store = getStore();
-    model.store = store
+    model.store = store;
     let spyPluck = sinon.spy(store, 'pluckByTypeId');
     let spyFetch = sinon.spy(store, 'fetch');
     store.register(type, RelationalModel);
@@ -70,7 +71,7 @@ describe('getRelated', function () {
       }
     });
     let store = getStore();
-    model.store = store
+    model.store = store;
     let spy = sinon.spy(store, 'getCollection');
     store.register('test', RelationalModel);
     model.fetchRelated('tests');
@@ -107,6 +108,6 @@ describe('getRelated', function () {
     });
     let store = getStore();
     store.register('test', RelationalModel);
-    assert.throws(() => model.getRelated(relation))
+    assert.throws(() => model.getRelated(relation));
   });
 });
