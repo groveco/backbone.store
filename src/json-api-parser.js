@@ -15,18 +15,12 @@ class JsonApiParser {
    * @param {object} jsonApiData - Data in JSON API format.
    * @returns {object} Data in BackboneStore format.
    */
-  parse(jsonApiData) {
-    let {data, included=[]} = jsonApiData;
-
+  parse(data) {
     if (_.isArray(data)) {
-      data = data.map(elem => this._parseSingleObject(elem));
+      return data.map(elem => this._parseSingleObject(elem));
     } else {
-      data = this._parseSingleObject(data);
+      return this._parseSingleObject(data);
     }
-
-    included = included.map(elem => this._parseSingleObject(elem));
-
-    return {data, included};
   }
 
   /**

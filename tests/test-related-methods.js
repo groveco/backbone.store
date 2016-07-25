@@ -4,7 +4,7 @@ import RelationalModel from './test-classes/relational-model';
 import sinon from 'sinon';
 
 describe('related methods', function () {
-  describe('pluckRelated', function () {
+  describe('getRelated', function () {
     xit('hasOne returns a single model from the cache');
     xit('hasOne returns a single model from the network, if it is not cached');
     xit('hasMany returns a collection of models from the cache');

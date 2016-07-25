@@ -3,7 +3,7 @@
  * @module
  */
 import _ from 'underscore';
-import Backbone from 'backbone';
+import JsonApiParser from './json-api-parser';
 import Repository from './repository';
 import Model from './repository-model';
 import RSVP from 'rsvp';
@@ -18,6 +18,7 @@ class Store {
    * @param {HttpAdapter} adapter - Adapter to any data source.
    */
   constructor(adapter) {
+    this._parser = new JsonApiParser();
     this._adapter = adapter;
     this._repository = new Repository();
     this._pending = {};
@@ -33,6 +34,49 @@ class Store {
     this._modelDefinitions[modelName] = definition;
   }
 
+  modelFor(modelName) {
+    let definition = this._modelDefinitions[modelName];
+
+    if (!definition) {
+      throw new Error(`"${modelName}" is not registered.`);
+    }
+
+    return Model.extend(definition);
+  }
+
+  /**
+   * Push a raw JSON API document into the store.
+   * @param {string} modelName - model name that is used in relations definitions.
+   * @param {Function} resource - a JSON API document
+   */
+  push(resource) {
+    let {data, included} = resource;
+
+    if (!resource.hasOwnProperty('data')) {
+      throw new Error('Expected the resource pushed to include a top level property `data`');
+    }
+
+    if (included) {
+      included.forEach(model => this._pushInternalModel(model));
+    }
+
+    if (_.isArray(data)) {
+      return data.map(model => this._pushInternalModel(model));
+    }
+
+    if (data == null) {
+      return null;
+    }
+
+    return this._pushInternalModel(data);
+  }
+
+  _pushInternalModel(data) {
+    let model = this.modelFor(data.type);
+    let record = new model(this._parser.parse(data));
+    return this._repository.set(record);
+  }
+
   /**
    * Get model by Id or link. If model is cached on front-end it will be returned from cache, otherwise it will be
    * fetched.
@@ -40,7 +84,7 @@ class Store {
    * @returns {Promise} Promise for requested model.
    */
   get(link, query) {
-    let model = this.pluck(link);
+    let model = this.peek(link);
     if (model) {
       return new RSVP.Promise(resolve => resolve(model));
     } else {
@@ -61,7 +105,7 @@ class Store {
     } else {
       let promise = this._adapter.get(link, query)
         .then(response => {
-          return this._setModels(response);
+          return this.push(response);
         });
 
       promise.finally(() => {
@@ -79,7 +123,7 @@ class Store {
    * @param {string} link - Model self link.
    * @returns {object} Requested model.
    */
-  pluck(link) {
+  peek(link) {
     return this._repository.get(link);
   }
 
@@ -91,16 +135,6 @@ class Store {
    */
   pluckByTypeId(type, id) {
     return this._repository.get(`${type}__${id}`);
-  }
-
-  /**
-   * Get collection by link.
-   * @param {string} link - Collection link.
-   * @returns {Promise} Promise for requested collection.
-   */
-  fetchCollection(link) {
-    return this._adapter.get(link)
-      .then(response => this._setModels(response));
   }
 
   /**
@@ -154,37 +188,6 @@ class Store {
         throw new Error('Model does not exist');
       }
     });
-  }
-
-  _getModelDefinition(modelName) {
-    let modelDefinition = this._modelDefinitions[modelName];
-    if (!modelDefinition) {
-      throw new Error(`"${modelName}" is not registered.`);
-    }
-    return modelDefinition;
-  }
-
-  _setModels(response) {
-    let data = response.data;
-    let entity;
-    if (_.isArray(data)) {
-      let models = data.map(item => {
-        let modelDefinition = this._getModelDefinition(item._type);
-        return new (Model.extend(modelDefinition))(item);
-      });
-      entity = new Backbone.Collection(models);
-      this._repository.set(models);
-    } else {
-      let modelDefinition = this._getModelDefinition(data._type);
-      entity = new (Model.extend(modelDefinition))(data);
-      this._repository.set(entity);
-    }
-    response.included.forEach(included => {
-      let modelDefinition = this._getModelDefinition(data._type);
-      let includedModel = new (Model.extend(modelDefinition))(included);
-      this._repository.set(includedModel);
-    });
-    return entity;
   }
 }
 

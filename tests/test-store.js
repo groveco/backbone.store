@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import FakeAdapter from './test-classes/adapter';
+import HttpAdapter from '../src/http-adapter';
 import Model from '../src/repository-model';
 import RSVP from 'rsvp';
 import Store from '../src/store';
@@ -8,277 +8,256 @@ import sinon from 'sinon';
 let modelName = 'foo';
 
 let createStore = function () {
-  let adapter = new FakeAdapter();
+  let adapter = new HttpAdapter();
   let store = new Store(adapter);
   store.register(modelName);
+  store.register('user');
+  store.register('pantry');
   return store;
 };
 
 describe('Store', function () {
 
-  it('registers model definition', function () {
-    let store = createStore();
-    let name = 'test';
-    let model = {};
-    store.register('test', model);
-    assert.equal(store._modelDefinitions[name], model);
-  });
+  describe('register', function () {
+    it('registers model definition', function () {
+      let store = createStore();
+      let name = 'test';
+      let model = {};
+      store.register('test', model);
+      assert.equal(store._modelDefinitions[name], model);
+    });
 
-  it('registers an empty object by default', function () {
-    let store = createStore();
-    let name = 'test';
-    store.register('test');
-    assert.deepEqual(store._modelDefinitions[name], {});
-  });
-
-  it('calls adapter\'s get method on own get', function () {
-    let store = createStore();
-    let link = '/api/user/42/';
-    let spy = sinon.spy(store._adapter, 'get');
-    store.get(link);
-    sinon.assert.calledWith(spy, link);
-  });
-
-  it('calls adapter\'s get method once on multiple own get', function (done) {
-    let store = createStore();
-    let link = '/foo';
-    let spy = sinon.spy(store._adapter, 'get');
-    store.get(link).then(() => {
-      store.get(link);
-      sinon.assert.calledOnce(spy);
-      done();
+    it('registers an empty obcject by default', function () {
+      let store = createStore();
+      let name = 'test';
+      store.register('test');
+      assert.deepEqual(store._modelDefinitions[name], {});
     });
   });
 
-  it('calls adapter\'s get method on own fetchCollection', function () {
-    let store = createStore();
-    let link = '/api/user/42/';
-    let spy = sinon.spy(store._adapter, 'get');
-    store.fetchCollection(link);
-    sinon.assert.calledWith(spy, link);
-  });
-
-  it('calls adapter\'s get method on own fetch', function () {
-    let store = createStore();
-    let link = '/api/user/42/';
-    let spy = sinon.spy(store._adapter, 'get');
-    store.fetch(link);
-    sinon.assert.calledWith(spy, link);
-  });
-
-  it('calls adapter\'s get method every time own fetch is called', function () {
-    let store = createStore();
-    let link = '/api/user/42/';
-    let spy = sinon.spy(store._adapter, 'get');
-    store.fetch(link).then(() => {
-      store.fetch(link);
-      sinon.assert.calledTwice(spy);
+  describe('push', function () {
+    it('throws an error if data does not exist', function () {
+      let store = createStore();
+      assert.throws(() => store.push({}), 'include a top level property `data`');
     });
   });
 
-  it('doesn\'t call adapter\'s get method on own pluck call', function () {
-    let store = createStore();
-    let spy = sinon.spy(store._adapter, 'get');
-    store.pluck('/foo');
-    sinon.assert.notCalled(spy);
-  });
-
-  it('pluck doesn\'t return not cached data', function () {
-    let store = createStore();
-    let model = store.pluck('/foo');
-    assert.isUndefined(model);
-  });
-
-  it('calls adapter\'s create method on own create', function () {
-    let store = createStore();
-    let link = '/foo';
-    let attrs = {
-      name: 'foo'
-    };
-    let spy = sinon.spy(store._adapter, 'create');
-    store.create(link, attrs);
-    sinon.assert.calledWith(spy, link, attrs);
-  });
-
-  it('calls adapter\'s update method on own update', function () {
-    let store = createStore();
-    let link = '/foo';
-    let model = new Model({
-      id: 42,
-      slug: 'bar',
-      _self: link
-    });
-    let attrs = {
-      name: 'foo'
-    };
-    let spy = sinon.spy(store._adapter, 'update');
-    store.update(model, attrs);
-    let expected = _.extend({
-      id: model.id,
-      _type: model.get('_type')
-    }, attrs);
-    sinon.assert.calledWith(spy, link, expected);
-  });
-
-  it('calls adapter\'s destroy method on own destroy if model is cached', function () {
-    let store = createStore();
-    let id = 42;
-    let self = '/foo';
-    let model = new Model({
-      id: id,
-      _self: self
-    });
-    store._repository.set(model);
-    let spy = sinon.spy(store._adapter, 'destroy');
-    store.destroy(self);
-    sinon.assert.calledWith(spy, self);
-  });
-
-  it('does not call adapter\'s destroy method on own destroy if model is not cached', function () {
-    let store = createStore();
-    let link = '/foo';
-    let spy = sinon.spy(store._adapter, 'destroy');
-    store.destroy(link);
-    sinon.assert.notCalled(spy);
-  });
-
-  it('adds model to cache on get with link', function (done) {
-    let store = createStore();
-    let link = '/api/user/1/';
-    store.get(link).then(() => {
-      assert.lengthOf(store._repository._collection, 1);
-      done();
-    });
-  });
-
-  it('adds models to cache on fetchCollection', function (done) {
-    let store = createStore();
-    let link = '/api/user/1/';
-    let response = {
-      data: [{
-        id: 1,
-        _type: modelName,
-        name: 'foo1',
-        _self: '/foo/1/'
-      }, {
-        id: 2,
-        _type: modelName,
-        name: 'foo2',
-        _self: '/foo/2/'
-      }, {
-        id: 3,
-        _type: modelName,
-        name: 'foo3',
-        _self: '/foo/3/'
-      }],
-      included: []
-    };
-    store._adapter.get = function () {
-      return new RSVP.Promise((resolve) => {
-        resolve(response);
-      });
-    };
-    store.fetchCollection(link).then(() => {
-      assert.lengthOf(store._repository._collection, response.data.length);
-      done();
-    });
-  });
-
-  it('adds model to cache on create', function (done) {
-    let store = createStore();
-    let link = '/foo';
-    let attrs = {
-      name: 'foo'
-    };
-    store.create(link, attrs).then(() => {
-      assert.lengthOf(store._repository._collection, 1);
-      done();
-    });
-  });
-
-  it('updates model in cache on update', function (done) {
-    let store = createStore();
-    let link = '/foo';
-    let attrs = {
-      name: 'foo'
-    };
-    store.create(link, attrs).then((model) => {
-      let newAttrs = {
-        name: 'foo2'
-      };
-      store.update(model, newAttrs).then(() => {
-        assert.lengthOf(store._repository._collection, 1);
-        assert.equal(store._repository._collection.at(0).get('name'), newAttrs.name);
-        done();
-      });
-    });
-  });
-
-  it('removes model from cache on destroy', function (done) {
-    let store = createStore();
-    let self = '/foo';
-    let attrs = {
-      _self: self,
-      name: 'foo'
-    };
-    store.create(self, attrs).then(() => {
-      store.destroy(self).then(() => {
-        assert.lengthOf(store._repository._collection, 0);
-        done();
-      });
-    });
-  });
-
-  it('caches included models as well', function (done) {
-    let store = createStore();
-    let userLink = '/api/user/12/';
-    let pantryLink = '/api/pantry/42/';
-    store._adapter.get = () => {
-      return new RSVP.Promise((resolve) => {
-        resolve({
-          data: {
-            id: 12,
-            _type: 'user',
-            name: 'foo',
-            _self: userLink,
-            relationships: {
-              pantry: {
-                data: {
-                  id: 42,
-                  type: 'pantry'
-                },
-                links: {
-                  related: pantryLink
-                }
+  describe('get', function () {
+    it('adds model to cache on get with link', function () {
+      let store = createStore();
+      let link = '/user/1/';
+      sinon.stub(store._adapter, 'get', function () {
+        return new RSVP.Promise((resolve) => {
+          resolve({
+            data: {
+              id: 1,
+              type: 'user',
+              links: {
+                self: link
               }
             }
-          },
-          included: [{
-            id: 42,
-            _type: 'pantry',
-            name: 'bar',
-            _self: pantryLink
-          }]
+          });
         });
       });
-    };
-    store.register('user');
-    store.register('pantry');
+      return store.get(link)
+        .then(() => {
+          assert.isDefined(store._repository._collection.find({_self: link}));
+        });
+    });
 
-    store.get(userLink).then(() => {
-      assert.include(store._repository._collection.pluck('_self'), userLink);
-      assert.include(store._repository._collection.pluck('_self'), pantryLink);
-      done();
+    it('caches included models as well', function () {
+      let store = createStore();
+      let pantryLink = '/pantry/42/';
+      sinon.stub(store._adapter, 'get', function () {
+        return new RSVP.Promise((resolve) => {
+          resolve({
+            data: null,
+            included: [{
+              id: 42,
+              type: 'pantry',
+              attributes: {name: 'bar'},
+              links: {self: pantryLink}
+            }]
+          });
+        });
+      });
+
+      return store.get('/')
+        .then(() => {
+          assert.isDefined(store._repository._collection.find({_self: pantryLink}));
+        });
     });
   });
 
-  it('pluck returns cached data', function (done) {
-    let store = createStore();
-    let link = '/api/user/42/';
-    store.get(link).then(() => {
-      let model = store.pluck(link);
-      assert.isObject(model);
-      done();
+  describe('fetch', function () {
+    it('adds model to cache on get with link', function () {
+      let store = createStore();
+      let link = '/user/1/';
+      sinon.stub(store._adapter, 'get', function () {
+        return new RSVP.Promise((resolve) => {
+          resolve({
+            data: {
+              id: 1,
+              type: 'user',
+              links: {
+                self: link
+              }
+            }
+          });
+        });
+      });
+      return store.fetch(link)
+        .then(() => {
+          assert.isDefined(store._repository._collection.find({_self: link}));
+        });
+    });
+
+    it('caches included models as well', function () {
+      let store = createStore();
+      let pantryLink = '/pantry/42/';
+      sinon.stub(store._adapter, 'get', function () {
+        return new RSVP.Promise((resolve) => {
+          resolve({
+            data: null,
+            included: [{
+              id: 42,
+              type: 'pantry',
+              attributes: {name: 'bar'},
+              links: {self: pantryLink}
+            }]
+          });
+        });
+      });
+
+      return store.fetch('/')
+        .then(() => {
+          assert.isDefined(store._repository._collection.find({_self: pantryLink}));
+        });
+    });
+  });
+
+  describe('peek', function () {
+    it('returns a previously cached resource', function () {
+      let store = createStore();
+      store.push({
+        data: {
+          id: 1,
+          type: 'user',
+          links: {
+            self: '/user/1/'
+          }
+        }
+      });
+      assert.equal(store.peek('/user/1/').get('id'), 1);
+    });
+
+    it('returns undefined if the requested resource is not cached', function () {
+      let store = createStore();
+      assert.isUndefined(store.peek('/user/1/'));
+    });
+  });
+
+  describe('create', function () {
+    it('calls adapter\'s create method on own create', function () {
+      let store = createStore();
+      let link = '/foo';
+      let attrs = {
+        name: 'foo'
+      };
+      let spy = sinon.spy(store._adapter, 'create');
+      store.create(link, attrs);
+      sinon.assert.calledWith(spy, link, attrs);
+    });
+
+    it('adds model to cache on create', function (done) {
+      let store = createStore();
+      let link = '/foo';
+      let attrs = {
+        name: 'foo'
+      };
+      store.create(link, attrs).then(() => {
+        assert.lengthOf(store._repository._collection, 1);
+        done();
+      });
+    });
+  });
+
+  describe('update', function () {
+    it('calls adapter\'s update method on own update', function () {
+      let store = createStore();
+      let link = '/foo';
+      let model = new Model({
+        id: 42,
+        slug: 'bar',
+        _self: link
+      });
+      let attrs = {
+        name: 'foo'
+      };
+      let spy = sinon.spy(store._adapter, 'update');
+      store.update(model, attrs);
+      let expected = _.extend({
+        id: model.id,
+        _type: model.get('_type')
+      }, attrs);
+      sinon.assert.calledWith(spy, link, expected);
+    });
+
+    it('updates model in cache on update', function (done) {
+      let store = createStore();
+      let link = '/foo';
+      let attrs = {
+        name: 'foo'
+      };
+      store.create(link, attrs).then((model) => {
+        let newAttrs = {
+          name: 'foo2'
+        };
+        store.update(model, newAttrs).then(() => {
+          assert.lengthOf(store._repository._collection, 1);
+          assert.equal(store._repository._collection.at(0).get('name'), newAttrs.name);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('destroy', function () {
+    it('calls adapter\'s destroy method on own destroy if model is cached', function () {
+      let store = createStore();
+      let id = 42;
+      let self = '/foo';
+      let model = new Model({
+        id: id,
+        _self: self
+      });
+      store._repository.set(model);
+      let spy = sinon.spy(store._adapter, 'destroy');
+      store.destroy(self);
+      sinon.assert.calledWith(spy, self);
+    });
+
+    it('does not call adapter\'s destroy method on own destroy if model is not cached', function () {
+      let store = createStore();
+      let link = '/foo';
+      let spy = sinon.spy(store._adapter, 'destroy');
+      store.destroy(link);
+      sinon.assert.notCalled(spy);
+    });
+
+    it('removes model from cache on destroy', function (done) {
+      let store = createStore();
+      let self = '/foo';
+      let attrs = {
+        _self: self,
+        name: 'foo'
+      };
+      store.create(self, attrs).then(() => {
+        store.destroy(self).then(() => {
+          assert.lengthOf(store._repository._collection, 0);
+          done();
+        });
+      });
     });
   });
 });
