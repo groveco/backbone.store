@@ -158,28 +158,8 @@ describe('Store', function () {
   });
 
   describe('create', function () {
-    it('calls adapter\'s create method on own create', function () {
-      let store = createStore();
-      let link = '/foo';
-      let attrs = {
-        name: 'foo'
-      };
-      let spy = sinon.spy(store._adapter, 'create');
-      store.create(link, attrs);
-      sinon.assert.calledWith(spy, link, attrs);
-    });
-
-    it('adds model to cache on create', function (done) {
-      let store = createStore();
-      let link = '/foo';
-      let attrs = {
-        name: 'foo'
-      };
-      store.create(link, attrs).then(() => {
-        assert.lengthOf(store._repository._collection, 1);
-        done();
-      });
-    });
+    xit('adds a new resource to the store');
+    xit('returns the model version of the resource');
   });
 
   describe('update', function () {

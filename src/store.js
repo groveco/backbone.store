@@ -138,38 +138,6 @@ class Store {
   }
 
   /**
-   * Create model.
-   * @param {string} link - Url for POST request.
-   * @param {object} attributes - Data to create model with.
-   * @returns {Promise} Promise for created model.
-   */
-  create(link, attributes={}) {
-    return this._adapter.create(link, attributes)
-      .then(response => this._setModels(response))
-      .catch(() => {
-        throw new Error('Couldn\'t create entity.');
-      });
-  }
-
-  /**
-   * Create model.
-   * @param {Backbone.Model} model - Model to update.
-   * @param {object} attributes - Data to update model with.
-   * @returns {Promise} Promise for updated model.
-   */
-  update(model, attributes) {
-    let patchAttributes = _.extend({
-      id: model.id,
-      _type: model.get('_type')
-    }, attributes);
-    return this._adapter.update(model.get('_self'), patchAttributes)
-      .then(response => this._setModels(response))
-      .catch(() => {
-        throw new Error('Couldn\'t update entity.');
-      });
-  }
-
-  /**
    * Destroy model.
    * @param {string} link - Self link of model to destroy.
    * @returns {Promise} Promise for destroy.
