@@ -1,7 +1,6 @@
 var babelify = require('babelify');
 var browserify = require('browserify');
 var gulp = require('gulp');
-var derequire = require('gulp-derequire');
 var Server = require('karma').Server;
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
@@ -54,6 +53,5 @@ var bundleShare = function (b, outDir, outFile) {
   return b.bundle()
     .on('error', (e) => console.log(e.stack))
     .pipe(source(outFile))
-    .pipe(derequire())
     .pipe(gulp.dest(outDir));
 };
