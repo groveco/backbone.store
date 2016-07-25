@@ -1,6 +1,4 @@
-import _ from 'underscore';
 import HttpAdapter from '../src/http-adapter';
-import Model from '../src/repository-model';
 import RSVP from 'rsvp';
 import Store from '../src/store';
 import sinon from 'sinon';
@@ -17,7 +15,6 @@ let createStore = function () {
 };
 
 describe('Store', function () {
-
   describe('register', function () {
     it('registers model definition', function () {
       let store = createStore();
