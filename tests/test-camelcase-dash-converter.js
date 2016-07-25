@@ -3,19 +3,23 @@ import {camelize, decamelize} from '../src/camelcase-dash';
 describe('camelCase - dash converter', function () {
   describe('decamelize', function () {
     it('converts camelCase to dash', function () {
-      let str = 'fooBarTest';
-      let got = decamelize(str);
-      let expected = 'foo-bar-test';
-      assert.equal(got, expected);
+      assert.equal(decamelize('fooBarTest'), 'foo-bar-test');
+    });
+
+    it('supports numbers', function () {
+      assert.equal(decamelize('fo1BarTest'), 'fo1-bar-test');
+      assert.equal(decamelize('fo12arTest'), 'fo12ar-test');
     });
   });
 
   describe('camelize', function () {
     it('converts dash to camelCase', function () {
-      let str = 'foo-bar-test';
-      let got = camelize(str);
-      let expected = 'fooBarTest';
-      assert.equal(got, expected);
+      assert.equal(camelize('foo-bar-test'), 'fooBarTest');
+    });
+
+    it('supports numbers', function () {
+      assert.equal(camelize('fo1-bar-test'), 'fo1BarTest');
+      assert.equal(camelize('fo12ar-test'), 'fo12arTest');
     });
   });
 });

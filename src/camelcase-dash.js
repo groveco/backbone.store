@@ -4,7 +4,7 @@
 * @returns {string} Converted string.
 */
 export function camelize(str) {
-  return str.replace(/-([a-z])/g,  match => match[1].toUpperCase());
+  return str.replace(/-([a-z0-9])/g,  match => match[1].toUpperCase());
 }
 
 /**
@@ -13,5 +13,5 @@ export function camelize(str) {
 * @returns {string} Converted string.
 */
 export function decamelize(str) {
-  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 }
