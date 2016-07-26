@@ -6,61 +6,51 @@ import _ from 'underscore';
 import {camelize, decamelize} from './camelcase-dash';
 
 /**
- * Parser that parses data in JSON API format to BackboneStore format.
+ * Parser that parses a resource in JSON API format to BackboneStore format.
  */
 class JsonApiParser {
 
   /**
-   * Parses data from JSON API format to BackboneStore format.
-   * @param {object} jsonApiData - Data in JSON API format.
+   * Parses a resource from JSON API format to BackboneStore format.
+   * @param {object} resource - Data in JSON API format.
    * @returns {object} Data in BackboneStore format.
    */
-  parse(data) {
-    if (_.isArray(data)) {
-      return data.map(elem => this._parseSingleObject(elem));
-    } else {
-      return this._parseSingleObject(data);
+  parse(resource) {
+    let result = {};
+    if (resource.attributes) {
+      _.extend(result, this._parseWithNames(resource.attributes));
     }
+    result.id = resource.id;
+    result._type = resource.type;
+    if (resource.links && resource.links.self) {
+      result._self = resource.links.self;
+    }
+    if (resource.relationships) {
+      result.relationships = resource.relationships;
+    }
+    return result;
   }
 
   /**
-   * Serializes data from BackboneStore format to JSON API format.
+   * Serializes a resource from BackboneStore format to JSON API format.
    * @param {object} obj - Data in BackboneStore format.
    * @returns {object} Data in JSON API format.
    */
   serialize(obj) {
     let result = {
-      data: {
-        id: obj.data.id,
-        type: obj.data._type,
-        attributes: {}
-      }
+      id: obj.id,
+      type: obj._type,
+      attributes: {}
     };
-    if (obj.data._self) {
-      result.data.links = {
-        self: obj.data._self
+    if (obj._self) {
+      result.links = {
+        self: obj._self
       };
     }
-    if (obj.data.relationships) {
-      result.data.relationships = obj.data.relationships;
+    if (obj.relationships) {
+      result.relationships = obj.relationships;
     }
-    _.extend(result.data.attributes, this._serializeWithNames(obj.data));
-    return result;
-  }
-
-  _parseSingleObject(object) {
-    let result = {};
-    if (object.attributes) {
-      _.extend(result, this._parseWithNames(object.attributes));
-    }
-    result.id = object.id;
-    result._type = object.type;
-    if (object.links && object.links.self) {
-      result._self = object.links.self;
-    }
-    if (object.relationships) {
-      result.relationships = object.relationships;
-    }
+    _.extend(result.attributes, this._serializeWithNames(obj));
     return result;
   }
 
