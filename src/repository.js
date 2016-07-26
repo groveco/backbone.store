@@ -32,8 +32,16 @@ class Repository {
    * Add ot update model(s) in cache.
    * @param {object|array} models - Model or array of models to add/update in cache.
    */
-  set(models) {
-    this._collection.add(models, {merge: true});
+  set(model) {
+    let self = model.get('_self');
+    if (self) {
+      let existingModel = this.get(self);
+      if (existingModel) {
+        existingModel.clear().set(model.toJSON());
+      } else {
+        this._collection.add(model);
+      }
+    }
   }
 
   /**
