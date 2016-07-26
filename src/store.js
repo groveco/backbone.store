@@ -74,7 +74,9 @@ class Store {
   _pushInternalModel(data) {
     let model = this.modelFor(data.type);
     let record = new model(this._parser.parse(data));
-    return this._repository.set(record);
+    record.store = this;
+    this._repository.set(record);
+    return record;
   }
 
   /**
@@ -133,7 +135,7 @@ class Store {
    * @param {string|number} id - Model id.
    * @returns {object} Requested model.
    */
-  pluckByTypeId(type, id) {
+  peekByType(type, id) {
     return this._repository.get(`${type}__${id}`);
   }
 }

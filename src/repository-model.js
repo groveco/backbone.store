@@ -3,7 +3,7 @@ import Backbone from 'backbone';
 import RSVP from 'rsvp';
 
 let actions = {
-  PLUCK: 1,
+  PEEK: 1,
   FETCH: 2
 };
 
@@ -26,19 +26,18 @@ let resolveRelatedMethod = function (relationName, action) {
   if (_.isArray(relationship.data)) {
     if (action === actions.FETCH) {
       return this.store.fetchCollection(link);
-    } else if (action === actions.PLUCK) {
-      return RSVP.all(relationship.data.map(related => {
-        let {id, type} = related;
-        return this.store.pluckByTypeId(type, id);
-      }));
+    } else if (action === actions.PEEK) {
+      return relationship.data.map(related => {
+        let {type, id} = related;
+        return this.store.peekByType(type, id);
+      });
     }
   } else {
     if (action === actions.FETCH) {
       return this.store.fetch(link);
-    } else if (action === actions.PLUCK) {
-      let type = relationship.data && relationship.data.type;
-      let id = relationship.data && relationship.data.id;
-      return this.store.pluckByTypeId(type, id);
+    } else if (relationship.data && action === actions.PEEK) {
+      let {type, id} = relationship.data;
+      return this.store.peekByType(type, id);
     }
   }
 };
@@ -50,9 +49,9 @@ let Model = Backbone.Model.extend({
    * @returns {Promise} Promise for requested model.
    */
   getRelated(relationName) {
-    let plucked = resolveRelatedMethod.call(this, relationName, actions.PLUCK);
-    if (plucked) {
-      return plucked;
+    let peeked = resolveRelatedMethod.call(this, relationName, actions.PEEK);
+    if (peeked) {
+      return peeked;
     } else {
       return resolveRelatedMethod.call(this, relationName, actions.FETCH);
     }
@@ -72,8 +71,8 @@ let Model = Backbone.Model.extend({
    * @param {string} relationName - Name of relation to requested model.
    * @returns {Promise} Promise for requested model.
    */
-  pluckRelated(relationName) {
-    return resolveRelatedMethod.call(this, relationName, actions.PLUCK);
+  peekRelated(relationName) {
+    return resolveRelatedMethod.call(this, relationName, actions.PEEK);
   }
 });
 

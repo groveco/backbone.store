@@ -33,11 +33,7 @@ class Repository {
    * @param {object|array} models - Model or array of models to add/update in cache.
    */
   set(models) {
-    if (models instanceof Array) {
-      models.forEach(model => this._setModel(model));
-    } else {
-      this._setModel(models);
-    }
+    this._collection.add(models, {merge: true});
   }
 
   /**
@@ -49,10 +45,6 @@ class Repository {
     if (model) {
       this._collection.remove(model);
     }
-  }
-
-  _setModel(model) {
-    this._collection.set(model);
   }
 }
 
