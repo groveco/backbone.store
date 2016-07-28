@@ -156,6 +156,28 @@ describe('Store', function () {
           assert.isDefined(store._repository._collection.find({_self: pantryLink}));
         });
     });
+
+    xit('returns a single promise instance if previous request has not resolved', function () {
+      let link = '/mything';
+      let store = createStore();
+      let resolver;
+      sinon.stub(store._adapter, 'get', function () {
+        return new RSVP.Promise((resolve, reject) => resolver = {resolve, reject});
+      });
+
+
+      let first = store.fetch(link);
+      let second = store.fetch(link);
+      resolver.resolve();
+
+      let third = store.fetch(link);
+      resolver.resolve();
+
+      return RSVP.all([first, second, third]).finally(() => {
+        assert.equal(first, second);
+        assert.notEqual(first, third);
+      });
+    });
   });
 
   describe('peek', function () {
