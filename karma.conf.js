@@ -27,6 +27,17 @@ module.exports = function (config) {
       transform: [
         ['babelify']
       ],
-    }
+    },
   });
+
+  if (process.env.CIRCLECI) {
+    config.set({
+      reporters: ['progress', 'junit'],
+      junitReporter: {
+        outputDir: process.env.CIRCLE_TEST_REPORTS + '/junit/',
+        outputFile: 'test-results.xml',
+        useBrowserName: false,
+      }
+    });
+  }
 };
