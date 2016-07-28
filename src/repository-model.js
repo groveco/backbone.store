@@ -1,59 +1,59 @@
 import _ from 'underscore';
-import Backbone from 'backbone';
-import RSVP from 'rsvp';
+import {Model} from 'backbone';
+import CollectionProxy from './collection-proxy';
+import ModelProxy from './model-proxy';
 
-let actions = {
-  PEEK: 1,
-  FETCH: 2
-};
-
-let resolveRelatedMethod = function (relationName, action) {
-  let modelName = this.relatedModels && this.relatedModels[relationName] || this.relatedCollections && this.relatedCollections[relationName];
-  if (modelName == null) {
-    throw new Error('Relation for "' + relationName + '" is not defined in the model.');
-  }
-
-  let relationship = this.get('relationships') && this.get('relationships')[relationName];
-  if (relationship == null) {
-    throw new Error('There is no related model "' + modelName + '".');
-  }
-
-  let link = relationship.links && relationship.links.related;
-  if (link == null) {
-    throw new Error('link is undefined, can\'t do that');
-  }
-
-  if (_.isArray(relationship.data)) {
-    if (action === actions.FETCH) {
-      return this.store.fetchCollection(link);
-    } else if (action === actions.PEEK) {
-      return relationship.data.map(related => {
-        let {type, id} = related;
-        return this.store.peekByType(type, id);
-      });
+let RepositoryModel = Model.extend({
+  getRelationshipType(relationName) {
+    let relationship = this.getRelationship(relationName);
+    if (_.isArray(relationship.data)) {
+      return 'has-many';
+    } else {
+      return 'belongs-to';
     }
-  } else {
-    if (action === actions.FETCH) {
-      return this.store.fetch(link);
-    } else if (relationship.data && action === actions.PEEK) {
-      let {type, id} = relationship.data;
-      return this.store.peekByType(type, id);
-    }
-  }
-};
+  },
 
-let Model = Backbone.Model.extend({
+  getRelationshipLink(relationName) {
+    let link = this.getRelationship(relationName).links.related;
+    if (link == null) {
+      throw new Error('link is undefined, can\'t do that');
+    }
+    return link;
+  },
+
+  getRelationship(relationName) {
+    let modelName = this.relatedModels && this.relatedModels[relationName] || this.relatedCollections && this.relatedCollections[relationName];
+    if (modelName == null) {
+      throw new Error('Relation for "' + relationName + '" is not defined in the model.');
+    }
+
+    let relationship = this.get('relationships') && this.get('relationships')[relationName];
+    if (relationship == null) {
+      throw new Error('There is no related model "' + modelName + '".');
+    }
+
+    return relationship;
+  },
+
   /**
    * Get related model. If model is cached on front-end it will be returned from cache, otherwise it will be fetched.
    * @param {string} relationName - Name of relation to requested model.
    * @returns {Promise} Promise for requested model.
    */
   getRelated(relationName) {
-    let peeked = resolveRelatedMethod.call(this, relationName, actions.PEEK);
-    if (peeked) {
-      return peeked;
+    let peeked = this.peekRelated(relationName);
+    if (!peeked) {
+      let model = new ModelProxy();
+      model.promise = this.fetchRelated(relationName);
+      return model;
+    } else if (peeked.hasOwnProperty('length') && peeked._incomplete) {
+      let collection = new CollectionProxy(peeked);
+      collection.promise = this.fetchRelated(relationName);
+      return collection;
+    } else if (peeked.hasOwnProperty('length')) {
+      return new CollectionProxy(peeked);
     } else {
-      return resolveRelatedMethod.call(this, relationName, actions.FETCH);
+      return new ModelProxy(peeked);
     }
   },
 
@@ -63,7 +63,8 @@ let Model = Backbone.Model.extend({
    * @returns {Promise} Promise for requested model or collection.
    */
   fetchRelated(relationName) {
-    return resolveRelatedMethod.call(this, relationName, actions.FETCH);
+    let link = this.getRelationshipLink(relationName);
+    return this.store.fetch(link);
   },
 
   /**
@@ -72,8 +73,13 @@ let Model = Backbone.Model.extend({
    * @returns {Promise} Promise for requested model.
    */
   peekRelated(relationName) {
-    return resolveRelatedMethod.call(this, relationName, actions.PEEK);
+    let relationship = this.getRelationship(relationName);
+    if (this.getRelationshipType(relationName) === 'has-many') {
+      return this.store.peekManyByType(relationship.data);
+    } else if (relationship.data) {
+      return this.store.peekByType(relationship.data.type, relationship.data.id);
+    }
   }
 });
 
-export default Model;
+export default RepositoryModel;

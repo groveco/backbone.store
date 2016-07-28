@@ -81,6 +81,34 @@ describe('Store', function () {
           assert.isDefined(store._repository._collection.find({_self: pantryLink}));
         });
     });
+
+    it('adds a collection of models to the cache', function () {
+      let store = createStore();
+      sinon.stub(store._adapter, 'get', function () {
+        return new RSVP.Promise((resolve) => {
+          resolve({
+            data: [{
+              id: 1,
+              type: 'user',
+              links: {
+                self: '/user/1/'
+              }
+            },{
+              id: 2,
+              type: 'user',
+              links: {
+                self: '/user/2/'
+              }
+            }]
+          });
+        });
+      });
+      return store.get()
+        .then(() => {
+          assert.isDefined(store._repository._collection.find({_self: '/user/1/'}));
+          assert.isDefined(store._repository._collection.find({_self: '/user/2/'}));
+        });
+    });
   });
 
   describe('fetch', function () {

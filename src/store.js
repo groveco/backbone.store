@@ -3,6 +3,7 @@
  * @module
  */
 import _ from 'underscore';
+import {Collection} from 'backbone';
 import JsonApiParser from './json-api-parser';
 import Repository from './repository';
 import Model from './repository-model';
@@ -61,7 +62,7 @@ class Store {
     }
 
     if (_.isArray(data)) {
-      return data.map(model => this._pushInternalModel(model));
+      return new Collection(data.map(model => this._pushInternalModel(model)));
     }
 
     if (data == null) {
@@ -137,6 +138,21 @@ class Store {
    */
   peekByType(type, id) {
     return this._repository.get(`${type}__${id}`);
+  }
+
+  peekManyByType(all) {
+    let result = new Collection();
+    result._incomplete = false;
+
+    return all.reduce((memo, item) => {
+      let peeked = this.peekByType(item.type, item.id);
+      if (peeked) {
+        memo.push(peeked);
+      } else {
+        memo._incomplete = true;
+      }
+      return memo;
+    }, result);
   }
 }
 

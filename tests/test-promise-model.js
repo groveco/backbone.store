@@ -7,54 +7,60 @@ describe('PromiseModel', function () {
     assert.instanceOf(new PromiseModel(), Model);
   });
 
+  it('sets the model attributes when the promise is resolved', function () {
+    let model = new PromiseModel({something: 'nothing'});
+    let deferred = RSVP.defer();
+    let resource = {something: 'everything'};
+
+    model.promise = deferred.promise;
+    deferred.resolve(resource);
+
+    return model.then((result) => {
+      assert.equal(result, resource);
+      assert.equal(model.get('something'), 'everything');
+    });
+  });
+
   it('#then is called when the promise resolves', function () {
-    let promiseCollection = new PromiseModel();
+    let model = new PromiseModel();
     let deferred = RSVP.defer();
 
-    promiseCollection.promise = deferred.promise;
+    model.promise = deferred.promise;
     deferred.resolve('ping');
 
-    return promiseCollection.then(function (message) {
-      assert(message);
-    });
+    return model.then(message => assert(message));
   });
 
   it('#catch is called when the promise is rejected', function () {
-    let promiseCollection = new PromiseModel();
+    let model = new PromiseModel();
     let deferred = RSVP.defer();
 
-    promiseCollection.promise = deferred.promise;
+    model.promise = deferred.promise;
     deferred.reject(new Error('ping'));
 
-    return promiseCollection.catch(function (message) {
-      assert(message);
-    });
+    return model.catch(message => assert(message));
   });
 
   it('#finally is called when the promise is resolved', function () {
-    let promiseCollection = new PromiseModel();
+    let model = new PromiseModel();
     let deferred = RSVP.defer();
 
-    promiseCollection.promise = deferred.promise;
+    model.promise = deferred.promise;
     deferred.resolve('ping');
-    promiseCollection.catch(() => {});
+    model.catch(() => {});
 
-    return promiseCollection.finally(function () {
-      assert(true);
-    });
+    return model.finally(() => assert(true));
   });
 
   it('#finally is called when the promise is rejected', function () {
-    let promiseCollection = new PromiseModel();
+    let model = new PromiseModel();
     let deferred = RSVP.defer();
 
-    promiseCollection.promise = deferred.promise;
+    model.promise = deferred.promise;
     deferred.reject(new Error('ping'));
 
-    return promiseCollection
-      .finally(function () {
-        assert(true);
-      })
+    return model
+      .finally(() => assert(true))
       .catch(() => {}); // catch the error so it doesn't throw and break the test
   });
 });

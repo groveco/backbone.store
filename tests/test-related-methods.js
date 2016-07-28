@@ -1,6 +1,7 @@
 import HttpAdapter from '../src/http-adapter';
 import sinon from 'sinon';
 import Store from '../src/store';
+import {Collection} from 'backbone';
 
 let createStore = function () {
   let adapter = new HttpAdapter();
@@ -178,10 +179,16 @@ describe('related methods', function () {
       let relationship = this.resource.getRelated('all-together-now');
       assert.equal(relationship.length, 2);
       return relationship
-        .then((rest) => assert.equal(rest.length, 5));
+        .then(() => assert.equal(relationship.length, 5));
     });
 
-    it('hasMany partial collection will resolve to a collection of models');
+    it('hasMany partial collection will resolve to a collection of models', function () {
+      this.server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow));
+      let relationship = this.resource.getRelated('all-together-now');
+      assert.equal(relationship.length, 2);
+      return relationship
+        .then((rest) => assert.instanceOf(rest, Collection));
+    });
 
     it('throws an exception for an unknown relationship', function () {
       assert.throws(() => this.resource.fetchRelated('foo'), 'Relation for "foo" is not defined');

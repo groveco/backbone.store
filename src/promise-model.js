@@ -1,8 +1,6 @@
 import {Model} from 'backbone';
 
-export default Model.extend({
-  promise: null,
-
+let PromiseModel = Model.extend({
   then() {
     return this.promise.then(...arguments);
   },
@@ -15,3 +13,20 @@ export default Model.extend({
     return this.promise.finally(...arguments);
   }
 });
+
+Object.defineProperty(PromiseModel.prototype, 'promise', {
+  get() {
+    return this._promise;
+  },
+
+  set(promise) {
+    this._promise = promise;
+    return promise
+      .then(resource => {
+        this.set(resource);
+        return resource;
+      });
+  },
+});
+
+export default PromiseModel;
