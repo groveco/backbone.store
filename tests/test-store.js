@@ -2,6 +2,7 @@ import HttpAdapter from '../src/http-adapter';
 import RSVP from 'rsvp';
 import Store from '../src/store';
 import sinon from 'sinon';
+import Model from '../src/repository-model';
 
 let createStore = function () {
   let adapter = new HttpAdapter();
@@ -198,6 +199,28 @@ describe('Store', function () {
     it('returns undefined if the requested resource is not cached', function () {
       let store = createStore();
       assert.isUndefined(store.peek('/user/1/'));
+    });
+  });
+
+  describe('build', function () {
+    it('returns a new resource', function () {
+      let store = createStore();
+      let user = store.build('user', {
+        name: 'Hello'
+      });
+
+      assert.instanceOf(user, Model);
+      assert.equal(user.get('_type'), 'user');
+      assert.equal(user.get('name'), 'Hello');
+    });
+
+    it('adds the resource to the store', function () {
+      let store = createStore();
+      let user = store.build('user', {
+        name: 'Hello'
+      });
+
+      assert.equal(user.store._repository._collection.findWhere({_type: 'user'}), user);
     });
   });
 

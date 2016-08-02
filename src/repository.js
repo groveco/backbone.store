@@ -41,6 +41,8 @@ class Repository {
       } else {
         this._collection.add(model);
       }
+    } else {
+      this._collection.add(model);
     }
   }
 

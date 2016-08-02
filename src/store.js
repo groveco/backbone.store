@@ -80,6 +80,15 @@ class Store {
     return record;
   }
 
+  build(type, attributes) {
+    return this.push({
+      data: {
+        type,
+        attributes
+      }
+    });
+  }
+
   /**
    * Get model by Id or link. If model is cached on front-end it will be returned from cache, otherwise it will be
    * fetched.
