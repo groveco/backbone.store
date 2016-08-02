@@ -1,4 +1,4 @@
-import {Collection, Model} from 'backbone';
+import {Collection} from 'backbone';
 import CollectionProxy from '../src/collection-proxy';
 import RSVP from 'rsvp';
 import sinon from 'sinon';
@@ -90,6 +90,14 @@ describe('CollectionProxy', function () {
   itProxiesMethod('toJSON');
   itProxiesMethod('where');
   itProxiesMethod('without');
+
+  xit('triggers "update" event when the content is changed', function () {
+    let collection = new CollectionProxy();
+    let spy = sinon.spy();
+    collection.on('update', spy);
+    collection.content = new Collection();
+    sinon.assert.calledOnce(spy);
+  });
 
   it('swaps out event listeners from original content', function () {
     let collection = new CollectionProxy();

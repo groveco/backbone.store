@@ -69,7 +69,13 @@ describe('ModelProxy', function () {
   itProxiesMethod('validate');
   itProxiesMethod('values');
 
-  it('triggers "change" event when the content is changed');
+  xit('triggers "change" event when the content is changed', function () {
+    let model = new ModelProxy();
+    let spy = sinon.spy();
+    model.on('change', spy);
+    model.content = new Model();
+    sinon.assert.calledOnce(spy);
+  });
 
   it('swaps out event listeners from original content', function () {
     let model = new ModelProxy();

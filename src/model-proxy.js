@@ -8,9 +8,9 @@ class ModelProxy {
       content = new Model();
     }
 
+    this.eventProxy = _.extend({}, Events);
     this.content = content;
     this.promise = new Promise(resolve => resolve(content));
-    this.eventProxy = _.extend({}, Events);
   }
 
   get content() {

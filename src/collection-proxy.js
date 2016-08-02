@@ -8,9 +8,9 @@ class CollectionProxy {
       content = new Collection();
     }
 
+    this.eventProxy = _.extend({}, Events);
     this.content = content;
     this.promise = new Promise(resolve => resolve(content));
-    this.eventProxy = _.extend({}, Events);
   }
 
   get content() {
