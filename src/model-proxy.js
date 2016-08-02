@@ -19,19 +19,24 @@ class ModelProxy {
 
   set content(val) {
     let oldContent = this._content;
-    this._content = val;
-
-    this._migrateEvents(oldContent);
+    if (oldContent !== val) {
+      this._content = val;
+      this._migrateEvents(oldContent);
+    }
   }
 
   _migrateEvents(oldObj) {
     if (oldObj == null) return;
     let oldEvents = oldObj._events;
-    Object.keys(oldEvents).forEach((name) => {
-      let events = _.filter(oldEvents[name], {context: this.eventProxy});
-      let callbacks = _.pluck(events, 'callback');
-      callbacks.forEach((callback) => this.on(name, callback));
-    });
+
+    if (oldEvents != null) {
+      Object.keys(oldEvents).forEach((name) => {
+        let events = _.filter(oldEvents[name], {context: this.eventProxy});
+        let callbacks = _.pluck(events, 'callback');
+        callbacks.forEach((callback) => this.on(name, callback));
+      });
+    }
+
     this.eventProxy.stopListening(oldObj);
   }
 

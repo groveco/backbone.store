@@ -71,35 +71,42 @@ describe('ModelProxy', function () {
 
   it('triggers "change" event when the content is changed');
 
-  // REFACTOR: unclear test
   it('swaps out event listeners from original content', function () {
-    let model = new ModelProxy(new Model({something: 'nothing'}));
+    let model = new ModelProxy();
     let spy = sinon.spy();
-
+    model.content = new Model();
     model.on('change', spy);
-    model.set('something', 'everything');
 
+    model.content.trigger('change');
     sinon.assert.calledOnce(spy);
 
-    model.content = new Model({something: 'everything', foo: 'bar'});
-    model.set('foo', 'buz');
-
+    model.content = new Model();
+    model.content.trigger('change');
     sinon.assert.calledTwice(spy);
   });
 
-  // REFACTOR: unclear test
   it('tears down the old content events', function () {
-    let originalContent = new Model({something: 'nothing'});
-    let model = new ModelProxy(originalContent);
+    let model = new ModelProxy();
     let spy = sinon.spy();
+    let content = new Model();
+    model.content = content;
     model.on('change', spy);
-    model.set('something', 'everything');
-    sinon.assert.calledOnce(spy);
-    model.content = new Model({something: 'everything', foo: 'bar'});
-    model.set('foo', 'buz');
-    // simulate a change on the orignal content
-    originalContent.set('foo', 'fiz');
-    sinon.assert.calledTwice(spy);
+
+    model.content = new Model();
+    content.trigger('change');
+    sinon.assert.notCalled(spy);
+  });
+
+  it('setting content to null tears down events', function () {
+    let model = new ModelProxy();
+    let spy = sinon.spy();
+    let content = new Model();
+    model.content = content;
+    model.on('change', spy);
+
+    model.content = null;
+    content.trigger('change');
+    sinon.assert.notCalled(spy);
   });
 
   // REFACTOR: unclear test
@@ -114,12 +121,12 @@ describe('ModelProxy', function () {
     modelA.on('change', spyA);
     modelB.on('change', spyB);
     modelA.content = newContent;
-    modelA.set('something', 'everything');
+    modelA.content.trigger('change');
 
     sinon.assert.calledOnce(spyA);
     sinon.assert.notCalled(spyB);
 
-    modelB.set('something', 'everything');
+    modelB.content.trigger('change');
     sinon.assert.calledOnce(spyB);
   });
 

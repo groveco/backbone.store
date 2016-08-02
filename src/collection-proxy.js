@@ -1,4 +1,5 @@
-import {Collection} from 'backbone';
+import _ from 'underscore';
+import {Collection, Events} from 'backbone';
 import {Promise} from 'rsvp';
 
 class CollectionProxy {
@@ -9,6 +10,34 @@ class CollectionProxy {
 
     this.content = content;
     this.promise = new Promise(resolve => resolve(content));
+    this.eventProxy = _.extend({}, Events);
+  }
+
+  get content() {
+    return this._content;
+  }
+
+  set content(val) {
+    let oldContent = this._content;
+    if (oldContent !== val) {
+      this._content = val;
+      this._migrateEvents(oldContent);
+    }
+  }
+
+  _migrateEvents(oldObj) {
+    if (oldObj == null) return;
+    let oldEvents = oldObj._events;
+
+    if (oldEvents != null) {
+      Object.keys(oldEvents).forEach((name) => {
+        let events = _.filter(oldEvents[name], {context: this.eventProxy});
+        let callbacks = _.pluck(events, 'callback');
+        callbacks.forEach((callback) => this.on(name, callback));
+      });
+    }
+
+    this.eventProxy.stopListening(oldObj);
   }
 
   get promise() {
@@ -35,6 +64,10 @@ class CollectionProxy {
   finally() {
     return this.promise.finally(...arguments);
   }
+
+  off() { return this.eventProxy.stopListening(this.content, ...arguments); }
+  on() { return this.eventProxy.listenTo(this.content, ...arguments); }
+  once() { return this.eventProxy.listenToOnce(this.content, ...arguments); }
 
   //
   // Proxied methods and properties
@@ -69,9 +102,6 @@ class CollectionProxy {
   map() { return this.content.map(...arguments); }
   max() { return this.content.max(...arguments); }
   min() { return this.content.min(...arguments); }
-  off() { return this.content.off(...arguments); }
-  on() { return this.content.on(...arguments); }
-  once() { return this.content.once(...arguments); }
   partition() { return this.content.partition(...arguments); }
   pluck() { return this.content.pluck(...arguments); }
   pop() { return this.content.pop(...arguments); }
