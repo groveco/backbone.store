@@ -1,4 +1,5 @@
-import {Model} from 'backbone';
+import _ from 'underscore';
+import {Events, Model} from 'backbone';
 import {Promise} from 'rsvp';
 
 class ModelProxy {
@@ -9,6 +10,29 @@ class ModelProxy {
 
     this.content = content;
     this.promise = new Promise(resolve => resolve(content));
+    this.eventProxy = _.extend({}, Events);
+  }
+
+  get content() {
+    return this._content;
+  }
+
+  set content(val) {
+    let oldContent = this._content;
+    this._content = val;
+
+    this._migrateEvents(oldContent);
+  }
+
+  _migrateEvents(oldObj) {
+    if (oldObj == null) return;
+    let oldEvents = oldObj._events;
+    Object.keys(oldEvents).forEach((name) => {
+      let events = _.filter(oldEvents[name], {context: this.eventProxy});
+      let callbacks = _.pluck(events, 'callback');
+      callbacks.forEach((callback) => this.on(name, callback));
+    });
+    this.eventProxy.stopListening(oldObj);
   }
 
   get promise() {
@@ -35,6 +59,10 @@ class ModelProxy {
   finally() {
     return this.promise.finally(...arguments);
   }
+
+  off() { return this.eventProxy.stopListening(this.content, ...arguments); }
+  on() { return this.eventProxy.listenTo(this.content, ...arguments); }
+  once() { return this.eventProxy.listenToOnce(this.content, ...arguments); }
 
   //
   // Proxied methods and properties

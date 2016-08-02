@@ -68,6 +68,9 @@ describe('CollectionProxy', function () {
   itProxiesMethod('map');
   itProxiesMethod('max');
   itProxiesMethod('min');
+  itProxiesMethod('off');
+  itProxiesMethod('on');
+  itProxiesMethod('once');
   itProxiesMethod('partition');
   itProxiesMethod('pluck');
   itProxiesMethod('pop');

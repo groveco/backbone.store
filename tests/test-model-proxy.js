@@ -69,6 +69,66 @@ describe('ModelProxy', function () {
   itProxiesMethod('validate');
   itProxiesMethod('values');
 
+  it('triggers "change" event when the content is changed');
+
+  // REFACTOR: unclear test
+  it('swaps out event listeners from original content', function () {
+    let model = new ModelProxy(new Model({something: 'nothing'}));
+    let spy = sinon.spy();
+
+    model.on('change', spy);
+    model.set('something', 'everything');
+
+    sinon.assert.calledOnce(spy);
+
+    model.content = new Model({something: 'everything', foo: 'bar'});
+    model.set('foo', 'buz');
+
+    sinon.assert.calledTwice(spy);
+  });
+
+  // REFACTOR: unclear test
+  it('tears down the old content events', function () {
+    let originalContent = new Model({something: 'nothing'});
+    let model = new ModelProxy(originalContent);
+    let spy = sinon.spy();
+    model.on('change', spy);
+    model.set('something', 'everything');
+    sinon.assert.calledOnce(spy);
+    model.content = new Model({something: 'everything', foo: 'bar'});
+    model.set('foo', 'buz');
+    // simulate a change on the orignal content
+    originalContent.set('foo', 'fiz');
+    sinon.assert.calledTwice(spy);
+  });
+
+  // REFACTOR: unclear test
+  it('events are bound on the proxy level', function () {
+    let originalContent = new Model({something: 'nothing'});
+    let newContent = new Model({something: 'another thing'});
+    let modelA = new ModelProxy(originalContent);
+    let modelB = new ModelProxy(originalContent);
+    let spyA = sinon.spy();
+    let spyB = sinon.spy();
+
+    modelA.on('change', spyA);
+    modelB.on('change', spyB);
+    modelA.content = newContent;
+    modelA.set('something', 'everything');
+
+    sinon.assert.calledOnce(spyA);
+    sinon.assert.notCalled(spyB);
+
+    modelB.set('something', 'everything');
+    sinon.assert.calledOnce(spyB);
+  });
+
+  it('isPending is true when the promise has not been resolved or rejected');
+  it('isResolved is true when the promise has been resolved');
+  it('isResolved is false when the promise has been rejected');
+  it('isRejected is true when the promise has been rejected');
+  it('isRejected is false when the promise has been resolved');
+
   it('sets the content when the promise is resolved', function () {
     let model = new ModelProxy(new Model({something: 'nothing'}));
     let deferred = RSVP.defer();
