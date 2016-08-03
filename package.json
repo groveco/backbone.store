@@ -36,5 +36,8 @@
     "phantomjs-prebuilt": "^2.1.7",
     "sinon": "^1.17.2",
     "watchify": "^3.7.0"
+  },
+  "browserify": {
+    "transform": ["babelify"]
   }
 }
