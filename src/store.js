@@ -163,6 +163,24 @@ class Store {
       return memo;
     }, result);
   }
+
+  create(link, resource) {
+    return this._adapter
+      .create(link, this._parser.serialize(resource.attributes))
+      .then(created => resource.set(this._parser.parse(created.data)));
+  }
+
+  update(resource) {
+    return this._adapter
+      .update(resource.get('_self'), this._parser.serialize(resource.attributes))
+      .then(updated => resource.set(this._parser.parse(updated.data)));
+  }
+
+  destroy(resource) {
+    return this._adapter
+      .destroy(resource.get('_self'))
+      .then(() => resource.set('isDeleted', true));
+  }
 }
 
 export default Store;

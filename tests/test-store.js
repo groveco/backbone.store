@@ -225,11 +225,81 @@ describe('Store', function () {
   });
 
   describe('create', function () {
-    xit('adds a new resource to the store');
-    xit('returns the model version of the resource');
+    it('POSTs a serialized resource', function () {
+      let store = createStore();
+      let user = store.build('user', {name: 'Hello'});
+      sinon.stub(store._adapter, 'create', function () {
+        return new RSVP.Promise((resolve) => {
+          resolve({
+            data: {
+              id: 1,
+              attributes: {
+                name: 'Hello',
+                status: 'awesome'
+              }
+            },
+          });
+        });
+      });
+
+      return store.create('/api/user/', user).then(function(created) {
+        assert.equal(user.get('id'), 1);
+        assert.equal(user.get('status'), 'awesome');
+        assert.equal(created, user);
+      });
+    });
   });
 
-  describe('delete', function () {
-    xit('removes a record from the store');
+  describe('update', function () {
+    it('PATCHes a serialized resource', function () {
+      let store = createStore();
+      let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'});
+      sinon.stub(store._adapter, 'update', function () {
+        return new RSVP.Promise((resolve) => {
+          resolve({
+            data: {
+              id: 1,
+              attributes: {
+                name: 'Goodbye'
+              }
+            },
+          });
+        });
+      });
+
+      return store.update(user).then(function(updated) {
+        assert.equal(user.get('id'), 1);
+        assert.equal(user.get('name'), 'Goodbye');
+        assert.equal(updated, user);
+      });
+    });
+
+    it('only PATCHes dirty attributes');
+    it('updates the resource with the response');
+  });
+
+  describe('destroy', function () {
+    it('DELETEs a serialized resource', function () {
+      let store = createStore();
+      let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'});
+      sinon.stub(store._adapter, 'destroy', function () {
+        return new RSVP.Promise((resolve) => {
+          resolve();
+        });
+      });
+
+      return store.destroy(user).then(function(destroyed) {
+        assert.equal(user.get('isDeleted'), true);
+        assert.equal(destroyed, user);
+      });
+    });
+
+    // maybe this is wrong, maybe the store should simply not return deteled records?
+    it('removes a record from the store');
+  });
+
+  describe('reload', function () {
+    it('fetches a single resource');
+    it('updates the resource with the response');
   });
 });
