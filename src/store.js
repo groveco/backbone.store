@@ -165,14 +165,14 @@ class Store {
   }
 
   create(link, resource) {
-    return this._adapter
-      .create(link, this._parser.serialize(resource.attributes))
+    let data = this._parser.serialize(resource.attributes);
+    return this._adapter.create(link, {data})
       .then(created => resource.set(this._parser.parse(created.data)));
   }
 
   update(resource) {
-    return this._adapter
-      .update(resource.get('_self'), this._parser.serialize(resource.attributes))
+    let data = this._parser.serialize(resource.attributes);
+    return this._adapter.update(resource.get('_self'), {data})
       .then(updated => resource.set(this._parser.parse(updated.data)));
   }
 

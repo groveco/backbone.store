@@ -135,6 +135,9 @@ let userWithRelationships = {
 };
 
 describe('related methods', function () {
+  it('triggers a change event when a new relationship is added');
+  it('peeks a new related resource when a relationship is added');
+
   describe('getRelated', function () {
     before(function () {
       this.server = sinon.fakeServer.create({autoRespond: true});
@@ -197,6 +200,8 @@ describe('related methods', function () {
     it('throws an exception for an unregistered relationship type', function () {
       assert.throws(() => this.resource.fetchRelated('enemy'), 'There is no related model');
     });
+
+    it('pends request until parent promise has resolved');
   });
 
   describe('fetchRelated', function () {
@@ -233,6 +238,8 @@ describe('related methods', function () {
     it('throws an exception for an unregistered relationship type', function () {
       assert.throws(() => this.resource.fetchRelated('enemy'), 'There is no related model');
     });
+
+    xit('pends request until parent promise has resolved');
   });
 
   describe('peekRelated', function () {
@@ -250,6 +257,8 @@ describe('related methods', function () {
       assert.equal(related.at(0).get('name'), 'Bonnie');
       assert.equal(related.at(1).get('name'), 'Clyde');
     });
+
+    xit('pends request until parent promise has resolved');
 
     context('if no resources are cached', function () {
       it('hasOne returns undefined', function () {

@@ -179,6 +179,8 @@ describe('Store', function () {
         assert.notEqual(first, third);
       });
     });
+
+    it('updates an existing resource in the store');
   });
 
   describe('peek', function () {
@@ -248,6 +250,8 @@ describe('Store', function () {
         assert.equal(created, user);
       });
     });
+
+    it('makes request with a valid request body');
   });
 
   describe('update', function () {
@@ -275,7 +279,7 @@ describe('Store', function () {
     });
 
     it('only PATCHes dirty attributes');
-    it('updates the resource with the response');
+    it('makes request with a valid request body');
   });
 
   describe('destroy', function () {
@@ -296,6 +300,7 @@ describe('Store', function () {
 
     // maybe this is wrong, maybe the store should simply not return deteled records?
     it('removes a record from the store');
+    it('makes request with an empty request body');
   });
 
   describe('reload', function () {
