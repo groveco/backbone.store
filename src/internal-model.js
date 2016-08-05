@@ -3,7 +3,7 @@ import {Model} from 'backbone';
 import CollectionProxy from './collection-proxy';
 import ModelProxy from './model-proxy';
 
-let RepositoryModel = Model.extend({
+let InternalModel = Model.extend({
   getRelationshipType(relationName) {
     let relationship = this.getRelationship(relationName);
     if (_.isArray(relationship.data)) {
@@ -82,4 +82,4 @@ let RepositoryModel = Model.extend({
   }
 });
 
-export default RepositoryModel;
+export default InternalModel;

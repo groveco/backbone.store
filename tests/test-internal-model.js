@@ -134,7 +134,7 @@ let userWithRelationships = {
   included: [Bonnie, Clyde]
 };
 
-describe('related methods', function () {
+describe('InternalModel', function () {
   it('triggers a change event when a new relationship is added');
   it('peeks a new related resource when a relationship is added');
 

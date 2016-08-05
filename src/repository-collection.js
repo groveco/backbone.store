@@ -1,5 +1,5 @@
 import Backbone from 'backbone';
-import Model from './repository-model';
+import Model from './internal-model';
 
 let Collection = Backbone.Collection.extend({
   model: Model,

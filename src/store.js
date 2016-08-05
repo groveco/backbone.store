@@ -6,7 +6,7 @@ import _ from 'underscore';
 import {Collection} from 'backbone';
 import JsonApiParser from './json-api-parser';
 import Repository from './repository';
-import Model from './repository-model';
+import Model from './internal-model';
 import RSVP from 'rsvp';
 
 /**

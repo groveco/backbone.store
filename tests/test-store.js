@@ -2,7 +2,7 @@ import HttpAdapter from '../src/http-adapter';
 import RSVP from 'rsvp';
 import Store from '../src/store';
 import sinon from 'sinon';
-import Model from '../src/repository-model';
+import Model from '../src/internal-model';
 
 let createStore = function () {
   let adapter = new HttpAdapter();
