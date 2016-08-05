@@ -2,6 +2,7 @@ import HttpAdapter from '../src/http-adapter';
 import sinon from 'sinon';
 import Store from '../src/store';
 import {Collection} from 'backbone';
+import InternalModel from '../src/internal-model';
 
 let createStore = function () {
   let adapter = new HttpAdapter();
@@ -137,6 +138,42 @@ let userWithRelationships = {
 describe('InternalModel', function () {
   it('triggers a change event when a new relationship is added');
   it('peeks a new related resource when a relationship is added');
+
+  describe('attributes', function () {
+    it('#get() returns an attributes value', function () {
+      let model = new InternalModel({
+        amazing: 'boom'
+      });
+
+      assert.equal(model.get('amazing'), 'boom');
+    });
+  });
+
+  describe('computed properties', function () {
+    it('#get() returns a computed property', function () {
+      let model = new (InternalModel.extend({
+        computed: {
+          amazing: function () {
+            return 'a really random value';
+          }
+        }
+      }))();
+
+      assert.equal(model.get('amazing'), 'a really random value');
+    });
+
+    it('are scoped to the model instance', function () {
+      let model = new (InternalModel.extend({
+        computed: {
+          getScope: function () {
+            return this;
+          }
+        }
+      }))();
+
+      assert.equal(model.get('getScope'), model);
+    });
+  });
 
   describe('getRelated', function () {
     before(function () {

@@ -4,6 +4,27 @@ import CollectionProxy from './collection-proxy';
 import ModelProxy from './model-proxy';
 
 let InternalModel = Model.extend({
+  constructor: function (attributes) {
+    let defaults = _.result(this, 'defaults');
+    attributes || (attributes = {});
+
+    this.cid = _.uniqueId(this.cidPrefix);
+    this.attributes = {};
+    if (this.computed == null) this.computed = {};
+    attributes = _.defaults(_.extend({}, defaults, attributes), defaults);
+    this.set(attributes);
+    this.changed = {};
+    this.initialize.apply(this, arguments);
+  },
+
+  get(attr) {
+    if (this.attributes.hasOwnProperty(attr)) {
+      return this.attributes[attr];
+    } else if (this.computed.hasOwnProperty(attr)) {
+      return this.computed[attr].call(this);
+    }
+  },
+
   getRelationshipType(relationName) {
     let relationship = this.getRelationship(relationName);
     if (_.isArray(relationship.data)) {
