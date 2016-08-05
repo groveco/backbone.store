@@ -144,7 +144,7 @@ describe('InternalModel', function () {
       let Model = InternalModel.extend({
         computed: {
           amazing: function () {
-            return 'a really random value';
+            return `much more than just ${this.get('something')}`;
           }
         }
       });
@@ -153,7 +153,7 @@ describe('InternalModel', function () {
       });
 
       assert.deepEqual(model.toJSON(), {
-        amazing: 'a really random value',
+        amazing: 'much more than just else',
         something: 'else'
       });
     });

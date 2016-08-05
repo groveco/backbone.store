@@ -19,7 +19,7 @@ let InternalModel = Model.extend({
 
   toJSON() {
     let attributes = _.clone(this.attributes);
-    let computed = _.mapObject(this.computed, (cp) => cp());
+    let computed = _.mapObject(this.computed, (cp) => cp.call(this));
     return _.extend(attributes, computed);
   },
 
