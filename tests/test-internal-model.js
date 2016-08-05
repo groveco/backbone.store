@@ -7,7 +7,7 @@ let createStore = function () {
   let adapter = new HttpAdapter();
   let store = new Store(adapter);
   store.register('user', {
-    relatedModels: {
+    relationships: {
       'bff': 'user',
       'friends': 'user',
       'mother': 'user',

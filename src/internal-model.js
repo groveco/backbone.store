@@ -22,7 +22,7 @@ let InternalModel = Model.extend({
   },
 
   getRelationship(relationName) {
-    let modelName = this.relatedModels && this.relatedModels[relationName] || this.relatedCollections && this.relatedCollections[relationName];
+    let modelName = this._getRelationForName(relationName);
     if (modelName == null) {
       throw new Error('Relation for "' + relationName + '" is not defined in the model.');
     }
@@ -79,7 +79,11 @@ let InternalModel = Model.extend({
     } else if (relationship.data) {
       return this.store.peekByType(relationship.data.type, relationship.data.id);
     }
-  }
+  },
+
+  _getRelationForName(relationName) {
+    return this.relationships && this.relationships[relationName];
+  },
 });
 
 export default InternalModel;
