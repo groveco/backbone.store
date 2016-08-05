@@ -17,6 +17,12 @@ let InternalModel = Model.extend({
     this.initialize.apply(this, arguments);
   },
 
+  toJSON() {
+    let attributes = _.clone(this.attributes);
+    let computed = _.mapObject(this.computed, (cp) => cp());
+    return _.extend(attributes, computed);
+  },
+
   get(attr) {
     if (this.attributes.hasOwnProperty(attr)) {
       return this.attributes[attr];

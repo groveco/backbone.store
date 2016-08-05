@@ -139,6 +139,26 @@ describe('InternalModel', function () {
   it('triggers a change event when a new relationship is added');
   it('peeks a new related resource when a relationship is added');
 
+  describe('toJSON', function () {
+    it('returns a hash of all attributes and computed properties', function () {
+      let Model = InternalModel.extend({
+        computed: {
+          amazing: function () {
+            return 'a really random value';
+          }
+        }
+      });
+      let model = new Model({
+        something: 'else'
+      });
+
+      assert.deepEqual(model.toJSON(), {
+        amazing: 'a really random value',
+        something: 'else'
+      });
+    });
+  });
+
   describe('attributes', function () {
     it('#get() returns an attributes value', function () {
       let model = new InternalModel({
