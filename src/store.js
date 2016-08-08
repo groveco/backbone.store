@@ -86,6 +86,10 @@ class Store {
   }
 
   build(type, attributes) {
+    if (attributes == null) {
+      attributes = {};
+    }
+
     return this.push({
       data: {
         id: attributes.id,
