@@ -296,6 +296,20 @@ describe('Store', function () {
 
       assert.equal(user.store._repository._collection.findWhere({_type: 'user'}), user);
     });
+
+    it('defaults to an empty set of attributes', function () {
+      let store = createStore();
+      let user = store.build('user');
+
+      assert.deepEqual(user.attributes, {id: undefined, _type: 'user'});
+    });
+
+    it('sets the resource id from attributes', function () {
+      let store = createStore();
+      let user = store.build('user', {id: 4});
+
+      assert.deepEqual(user.get('id'), 4);
+    });
   });
 
   describe('create', function () {
