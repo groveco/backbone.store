@@ -74,15 +74,21 @@ class Store {
 
   _pushInternalModel(data) {
     let model = this.modelFor(data.type);
-    let record = new model(this._parser.parse(data));
-    record.store = this;
-    this._repository.set(record);
+    let record = this._repository.get(`${data.type}__${data.id}`);
+    if (record == null) {
+      record = new model(this._parser.parse(data));
+      record.store = this;
+      this._repository.set(record);
+    } else {
+      record.set(this._parser.parse(data));
+    }
     return record;
   }
 
   build(type, attributes) {
     return this.push({
       data: {
+        id: attributes.id,
         type,
         attributes
       }

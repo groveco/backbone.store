@@ -35,6 +35,31 @@ describe('Store', function () {
       let store = createStore();
       assert.throws(() => store.push({}), 'include a top level property `data`');
     });
+
+    it('triggers update when pushing updates to an existing resource', function () {
+      let store = createStore();
+      let user = store.build('user', {
+        id: 2,
+        name: 'foo'
+      });
+
+      let spy = sinon.spy();
+      user.on('change', spy);
+      user.on('change:name', spy);
+
+      store.push({
+        data: {
+          id: 2,
+          type: 'user',
+          attributes: {
+            name: 'bar'
+          }
+        }
+      });
+
+      sinon.assert.calledTwice(spy);
+      assert.equal(user.get('name'), 'bar');
+    });
   });
 
   describe('get', function () {
@@ -180,7 +205,34 @@ describe('Store', function () {
       });
     });
 
-    it('updates an existing resource in the store');
+    it('updates an existing resource in the store', function () {
+      let store = createStore();
+      let userLink = '/user/1/';
+      let obj = store.build('user', {
+        name: 'foo'
+      });
+      obj.set('id', 1);
+
+      let objChangeSpy = sinon.spy();
+      obj.on('change:name', objChangeSpy);
+
+      sinon.stub(store._adapter, 'get', function () {
+        return new RSVP.Promise((resolve) => {
+          resolve({
+            data: {
+              id: 1,
+              type: 'user',
+              attributes: {
+                name: 'bar'
+              }
+            },
+          });
+        });
+      });
+
+      return store.fetch(userLink)
+        .then(() => sinon.assert.calledOnce(objChangeSpy));
+    });
   });
 
   describe('peek', function () {
