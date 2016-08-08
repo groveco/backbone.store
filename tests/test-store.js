@@ -209,9 +209,9 @@ describe('Store', function () {
       let store = createStore();
       let userLink = '/user/1/';
       let obj = store.build('user', {
+        id: 1,
         name: 'foo'
       });
-      obj.set('id', 1);
 
       let objChangeSpy = sinon.spy();
       obj.on('change:name', objChangeSpy);
