@@ -9,6 +9,23 @@ import {Promise} from 'rsvp';
  * Adapter which works with data over HTTP.
  */
 class HttpAdapter {
+  constructor(options={}) {
+    this.urlPrefix = options.urlPrefix;
+  }
+
+  buildUrl(type, id) {
+    let idPath = `/${id}`;
+    let typePath = `/${type}`;
+    let path = this.urlPrefix || '';
+
+    path += typePath;
+
+    if (id != null) {
+      path += idPath;
+    }
+
+    return path + '/';
+  }
 
   /**
    * Get entity by link.

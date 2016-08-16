@@ -1,11 +1,9 @@
 import HttpAdapter from '../src/http-adapter';
-import JsonApiParser from '../src/json-api-parser';
 import sinon from 'sinon';
 
 describe('HTTP adapter', function () {
   before(function () {
-    this.parser = new JsonApiParser();
-    this.adapter = new HttpAdapter(this.parser);
+    this.adapter = new HttpAdapter();
   });
 
   beforeEach(function () {
@@ -15,6 +13,25 @@ describe('HTTP adapter', function () {
 
   afterEach(function () {
     this.server.restore();
+  });
+
+  describe('#buildUrl', function () {
+    it('returns the canonical link for a type and id', function () {
+      assert.equal(this.adapter.buildUrl('foo', 2), '/foo/2/');
+      assert.equal(this.adapter.buildUrl(4, 2), '/4/2/');
+      assert.equal(this.adapter.buildUrl('foo', 0), '/foo/0/');
+    });
+
+    it('returns the canonical link for a type', function () {
+      assert.equal(this.adapter.buildUrl('foo'), '/foo/');
+      assert.equal(this.adapter.buildUrl(4), '/4/');
+    });
+
+    it('returns the canonical link with a prefix', function () {
+      let adapter = new HttpAdapter({urlPrefix: '/api'});
+      assert.equal(adapter.buildUrl('foo', 2), '/api/foo/2/');
+      assert.equal(adapter.buildUrl('foo'), '/api/foo/');
+    });
   });
 
   describe('#get', function () {

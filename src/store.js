@@ -123,7 +123,7 @@ class Store {
   fetch(type, id, options={}) {
     let {query, link} = options;
     let key = `${type}__${id}`;
-    let promise = this._fetch(key, link || this._buildUrl(type, id), query);
+    let promise = this._fetch(key, link || this._adapter.buildUrl(type, id), query);
 
     let _Model = this.modelFor(type);
     let model = new ModelProxy(new _Model());
@@ -212,7 +212,7 @@ class Store {
 
   create(resource) {
     let data = this._parser.serialize(resource.attributes);
-    return this._adapter.create(this._buildUrl(resource.get('_type'), resource.get('id')), {data})
+    return this._adapter.create(this._adapter.buildUrl(resource.get('_type'), resource.get('id')), {data})
       .then(created => resource.set(this._parser.parse(created.data)));
   }
 
@@ -226,10 +226,6 @@ class Store {
     return this._adapter
       .destroy(resource.get('_self'))
       .then(() => resource.set('isDeleted', true));
-  }
-
-  _buildUrl(type, id) {
-    return `/${type}/${id}/`;
   }
 }
 
