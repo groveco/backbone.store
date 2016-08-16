@@ -91,7 +91,8 @@ let InternalModel = Model.extend({
    */
   fetchRelated(relationName) {
     let link = this.getRelationshipLink(relationName);
-    return this.store.fetch(link);
+    let {type, id} = this.getRelationship(relationName).data;
+    return this.store.fetch(type, id);
   },
 
   /**
@@ -102,9 +103,9 @@ let InternalModel = Model.extend({
   peekRelated(relationName) {
     let relationship = this.getRelationship(relationName);
     if (this.getRelationshipType(relationName) === 'has-many') {
-      return this.store.peekManyByType(relationship.data);
+      return this.store.peekMany(relationship.data);
     } else if (relationship.data) {
-      return this.store.peekByType(relationship.data.type, relationship.data.id);
+      return this.store.peek(relationship.data.type, relationship.data.id);
     }
   },
 

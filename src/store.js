@@ -7,7 +7,7 @@ import {Collection} from 'backbone';
 import JsonApiParser from './json-api-parser';
 import Repository from './repository';
 import Model from './internal-model';
-import RSVP from 'rsvp';
+import ModelProxy from './model-proxy';
 
 /**
  * Backbone Store class that manages all repositories.
@@ -105,12 +105,12 @@ class Store {
    * @param {string} link - Model link.
    * @returns {Promise} Promise for requested model.
    */
-  get(link, query) {
-    let model = this.peek(link);
+  get(type, id, query) {
+    let model = this.peek(type, id);
     if (model) {
-      return new RSVP.Promise(resolve => resolve(model));
+      return model;
     } else {
-      return this.fetch(link, query);
+      return this.fetch(type, id, query);
     }
   }
 
@@ -119,33 +119,29 @@ class Store {
    * @param {string} link - Model link.
    * @returns {Promise} Promise for requested model.
    */
-  fetch(link, query) {
-    let existingPromise = this._pending[link];
+  fetch(type, id, options={}) {
+    let existingPromise = this._pending[`${type}__${id}`];
+    let {query, link} = options;
 
-    if (existingPromise) {
-      return existingPromise;
-    } else {
-      let promise = this._adapter.get(link, query)
+    if (existingPromise == null) {
+      let promise = this._adapter.get(link || this._buildUrl(type, id), query)
         .then(response => {
           return this.push(response);
         })
         .finally(() => {
-          this._pending[link] = null;
+          this._pending[`${type}__${id}`] = null;
         });
 
-      this._pending[link] = promise;
+      this._pending[`${type}__${id}`] = promise;
 
-      return promise;
+      promise;
     }
-  }
 
-  /**
-   * Get model by link from front-end cache.
-   * @param {string} link - Model self link.
-   * @returns {object} Requested model.
-   */
-  peek(link) {
-    return this._repository.get(link);
+    let _Model = this.modelFor(type);
+    let model = new ModelProxy(new _Model());
+    model.promise = this._pending[`${type}__${id}`];
+
+    return model;
   }
 
   /**
@@ -154,16 +150,20 @@ class Store {
    * @param {string|number} id - Model id.
    * @returns {object} Requested model.
    */
-  peekByType(type, id) {
-    return this._repository.get(`${type}__${id}`);
+  peek(type, id) {
+    let resource = this._repository.get(`${type}__${id}`);
+    if (resource) {
+      let model = new ModelProxy(resource);
+      return model;
+    }
   }
 
-  peekManyByType(all) {
+  peekMany(all) {
     let result = new Collection();
     result._incomplete = false;
 
     return all.reduce((memo, item) => {
-      let peeked = this.peekByType(item.type, item.id);
+      let peeked = this.peek(item.type, item.id);
       if (peeked) {
         memo.push(peeked);
       } else {
@@ -173,9 +173,9 @@ class Store {
     }, result);
   }
 
-  create(link, resource) {
+  create(resource) {
     let data = this._parser.serialize(resource.attributes);
-    return this._adapter.create(link, {data})
+    return this._adapter.create(this._buildUrl(resource.get('_type'), resource.get('id')), {data})
       .then(created => resource.set(this._parser.parse(created.data)));
   }
 
@@ -189,6 +189,10 @@ class Store {
     return this._adapter
       .destroy(resource.get('_self'))
       .then(() => resource.set('isDeleted', true));
+  }
+
+  _buildUrl(type, id) {
+    return `/${type}/${id}/`;
   }
 }
 

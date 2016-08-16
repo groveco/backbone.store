@@ -63,23 +63,24 @@ describe('Store', function () {
   });
 
   describe('get', function () {
-    it('adds model to cache on get with link', function () {
+    it('adds model to cache on get with type and id', function () {
       let store = createStore();
       let link = '/user/1/';
-      sinon.stub(store._adapter, 'get', function () {
-        return new RSVP.Promise((resolve) => {
-          resolve({
-            data: {
-              id: 1,
-              type: 'user',
-              links: {
-                self: link
-              }
+      let stub = sinon.stub(store._adapter, 'get');
+
+      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+        resolve({
+          data: {
+            id: 1,
+            type: 'user',
+            links: {
+              self: link
             }
-          });
+          }
         });
-      });
-      return store.get(link)
+      }));
+
+      return store.get('user', 1)
         .then(() => {
           assert.isDefined(store._repository._collection.find({_self: link}));
         });
@@ -88,21 +89,21 @@ describe('Store', function () {
     it('caches included models as well', function () {
       let store = createStore();
       let pantryLink = '/pantry/42/';
-      sinon.stub(store._adapter, 'get', function () {
-        return new RSVP.Promise((resolve) => {
-          resolve({
-            data: null,
-            included: [{
-              id: 42,
-              type: 'pantry',
-              attributes: {name: 'bar'},
-              links: {self: pantryLink}
-            }]
-          });
-        });
-      });
+      let stub = sinon.stub(store._adapter, 'get');
 
-      return store.get('/')
+      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+        resolve({
+          data: null,
+          included: [{
+            id: 42,
+            type: 'pantry',
+            attributes: {name: 'bar'},
+            links: {self: pantryLink}
+          }]
+        });
+      }));
+
+      return store.get('user', 1)
         .then(() => {
           assert.isDefined(store._repository._collection.find({_self: pantryLink}));
         });
@@ -110,26 +111,27 @@ describe('Store', function () {
 
     it('adds a collection of models to the cache', function () {
       let store = createStore();
-      sinon.stub(store._adapter, 'get', function () {
-        return new RSVP.Promise((resolve) => {
-          resolve({
-            data: [{
-              id: 1,
-              type: 'user',
-              links: {
-                self: '/user/1/'
-              }
-            },{
-              id: 2,
-              type: 'user',
-              links: {
-                self: '/user/2/'
-              }
-            }]
-          });
+      let stub = sinon.stub(store._adapter, 'get');
+
+      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+        resolve({
+          data: [{
+            id: 1,
+            type: 'user',
+            links: {
+              self: '/user/1/'
+            }
+          },{
+            id: 2,
+            type: 'user',
+            links: {
+              self: '/user/2/'
+            }
+          }]
         });
-      });
-      return store.get()
+      }));
+
+      return store.get('user', 1)
         .then(() => {
           assert.isDefined(store._repository._collection.find({_self: '/user/1/'}));
           assert.isDefined(store._repository._collection.find({_self: '/user/2/'}));
@@ -141,20 +143,20 @@ describe('Store', function () {
     it('adds model to cache on get with link', function () {
       let store = createStore();
       let link = '/user/1/';
-      sinon.stub(store._adapter, 'get', function () {
-        return new RSVP.Promise((resolve) => {
-          resolve({
-            data: {
-              id: 1,
-              type: 'user',
-              links: {
-                self: link
-              }
+      let stub = sinon.stub(store._adapter, 'get');
+      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+        resolve({
+          data: {
+            id: 1,
+            type: 'user',
+            links: {
+              self: link
             }
-          });
+          }
         });
-      });
-      return store.fetch(link)
+      }));
+
+      return store.fetch('user', 1)
         .then(() => {
           assert.isDefined(store._repository._collection.find({_self: link}));
         });
@@ -163,21 +165,20 @@ describe('Store', function () {
     it('caches included models as well', function () {
       let store = createStore();
       let pantryLink = '/pantry/42/';
-      sinon.stub(store._adapter, 'get', function () {
-        return new RSVP.Promise((resolve) => {
-          resolve({
-            data: null,
-            included: [{
-              id: 42,
-              type: 'pantry',
-              attributes: {name: 'bar'},
-              links: {self: pantryLink}
-            }]
-          });
+      let stub = sinon.stub(store._adapter, 'get');
+      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+        resolve({
+          data: null,
+          included: [{
+            id: 42,
+            type: 'pantry',
+            attributes: {name: 'bar'},
+            links: {self: pantryLink}
+          }]
         });
-      });
+      }));
 
-      return store.fetch('/')
+      return store.fetch('user', 1)
         .then(() => {
           assert.isDefined(store._repository._collection.find({_self: pantryLink}));
         });
@@ -204,7 +205,6 @@ describe('Store', function () {
     });
 
     xit('returns a single promise instance if previous request has not resolved', function () {
-      let link = '/mything';
       let store = createStore();
       let resolver;
       sinon.stub(store._adapter, 'get', function () {
@@ -212,11 +212,11 @@ describe('Store', function () {
       });
 
 
-      let first = store.fetch(link);
-      let second = store.fetch(link);
+      let first = store.fetch('mything');
+      let second = store.fetch('mything');
       resolver.resolve();
 
-      let third = store.fetch(link);
+      let third = store.fetch('mything');
       resolver.resolve();
 
       return RSVP.all([first, second, third]).finally(() => {
@@ -227,7 +227,6 @@ describe('Store', function () {
 
     it('updates an existing resource in the store', function () {
       let store = createStore();
-      let userLink = '/user/1/';
       let obj = store.build('user', {
         id: 1,
         name: 'foo'
@@ -236,21 +235,20 @@ describe('Store', function () {
       let objChangeSpy = sinon.spy();
       obj.on('change:name', objChangeSpy);
 
-      sinon.stub(store._adapter, 'get', function () {
-        return new RSVP.Promise((resolve) => {
-          resolve({
-            data: {
-              id: 1,
-              type: 'user',
-              attributes: {
-                name: 'bar'
-              }
-            },
-          });
+      let stub = sinon.stub(store._adapter, 'get');
+      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+        resolve({
+          data: {
+            id: 1,
+            type: 'user',
+            attributes: {
+              name: 'bar'
+            }
+          },
         });
-      });
+      }));
 
-      return store.fetch(userLink)
+      return store.fetch('user', 1)
         .then(() => sinon.assert.calledOnce(objChangeSpy));
     });
   });
@@ -267,12 +265,12 @@ describe('Store', function () {
           }
         }
       });
-      assert.equal(store.peek('/user/1/').get('id'), 1);
+      assert.equal(store.peek('user', 1).get('id'), 1);
     });
 
     it('returns undefined if the requested resource is not cached', function () {
       let store = createStore();
-      assert.isUndefined(store.peek('/user/1/'));
+      assert.isUndefined(store.peek('user', 1));
     });
   });
 
@@ -330,7 +328,7 @@ describe('Store', function () {
         });
       });
 
-      return store.create('/api/user/', user).then(function(created) {
+      return store.create(user).then(function(created) {
         assert.equal(user.get('id'), 1);
         assert.equal(user.get('status'), 'awesome');
         assert.equal(created, user);
