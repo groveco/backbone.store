@@ -121,28 +121,35 @@ class Store {
    * @returns {Promise} Promise for requested model.
    */
   fetch(type, id, options={}) {
-    let existingPromise = this._pending[`${type}__${id}`];
     let {query, link} = options;
+    let key = `${type}__${id}`;
+    let promise = this._fetch(key, link || this._buildUrl(type, id), query);
+
+    let _Model = this.modelFor(type);
+    let model = new ModelProxy(new _Model());
+    model.promise = promise;
+
+    return model;
+  }
+
+  _fetch(key, link, query) {
+    let existingPromise = this._pending[key];
 
     if (existingPromise == null) {
-      let promise = this._adapter.get(link || this._buildUrl(type, id), query)
+      let promise = this._adapter.get(link, query)
         .then(response => {
           return this.push(response);
         })
         .finally(() => {
-          this._pending[`${type}__${id}`] = null;
+          this._pending[key] = null;
         });
 
-      this._pending[`${type}__${id}`] = promise;
+      this._pending[key] = promise;
 
       promise;
     }
 
-    let _Model = this.modelFor(type);
-    let model = new ModelProxy(new _Model());
-    model.promise = this._pending[`${type}__${id}`];
-
-    return model;
+    return this._pending[key];
   }
 
   /**
@@ -195,25 +202,9 @@ class Store {
     if (!models.content._incomplete) {
       return models;
     } else {
-      let existingPromise = this._pending[`${link}`];
-
-      if (existingPromise == null) {
-        let promise = this._adapter.get(link)
-          .then(response => {
-            return this.push(response);
-          });
-
-        promise.finally(() => {
-          return this._pending[`${link}`] = null;
-        });
-
-        this._pending[`${link}`] = promise;
-
-        promise;
-      }
-
+      let promise = this._fetch(link, link);
       let result = new CollectionProxy(models);
-      models.promise = this._pending[`${link}`];
+      models.promise = promise;
 
       return result;
     }
