@@ -8,6 +8,7 @@ import JsonApiParser from './json-api-parser';
 import Repository from './repository';
 import Model from './internal-model';
 import ModelProxy from './model-proxy';
+import CollectionProxy from './collection-proxy';
 
 /**
  * Backbone Store class that manages all repositories.
@@ -162,15 +163,60 @@ class Store {
     let result = new Collection();
     result._incomplete = false;
 
-    return all.reduce((memo, item) => {
-      let peeked = this.peek(item.type, item.id);
+    return new CollectionProxy(all.reduce((memo, item) => {
+      let {type, id} = item;
+      let peeked = this._repository.get(`${type}__${id}`);
       if (peeked) {
         memo.push(peeked);
       } else {
         memo._incomplete = true;
       }
       return memo;
-    }, result);
+    }, result));
+  }
+
+  /**
+   * @private
+   */
+  getBelongsTo(owner, link, type, id) {
+    let model = this.peek(type, id);
+    if (model) {
+      return model;
+    } else {
+      return this.fetch(type, id, {link: link});
+    }
+  }
+
+  /**
+   * @private
+   */
+  getHasMany(owner, link, all) {
+    let models = this.peekMany(all);
+    if (!models.content._incomplete) {
+      return models;
+    } else {
+      let existingPromise = this._pending[`${link}`];
+
+      if (existingPromise == null) {
+        let promise = this._adapter.get(link)
+          .then(response => {
+            return this.push(response);
+          });
+
+        promise.finally(() => {
+          return this._pending[`${link}`] = null;
+        });
+
+        this._pending[`${link}`] = promise;
+
+        promise;
+      }
+
+      let result = new CollectionProxy(models);
+      models.promise = this._pending[`${link}`];
+
+      return result;
+    }
   }
 
   create(resource) {

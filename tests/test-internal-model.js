@@ -251,88 +251,13 @@ describe('InternalModel', function () {
     });
 
     it('throws an exception for an unknown relationship', function () {
-      assert.throws(() => this.resource.fetchRelated('foo'), 'Relation for "foo" is not defined');
+      assert.throws(() => this.resource.getRelated('foo'), 'Relation for "foo" is not defined');
     });
 
     it('throws an exception for an unregistered relationship type', function () {
-      assert.throws(() => this.resource.fetchRelated('enemy'), 'There is no related model');
+      assert.throws(() => this.resource.getRelated('enemy'), 'There is no related model');
     });
 
     it('pends request until parent promise has resolved');
-  });
-
-  describe('fetchRelated', function () {
-    before(function () {
-      let store = createStore();
-      this.resource = store.push(userWithRelationships);
-      this.server = sinon.fakeServer.create({autoRespond: true});
-      this.server.respondImmediately = true;
-    });
-
-    after(function () {
-      this.server.restore();
-    });
-
-    it('hasOne returns a single model from the network', function () {
-      this.server.respondWith('GET', '/user/1/mother', JSON.stringify(mother));
-      return this.resource.fetchRelated('mother')
-        .then((mother) => assert.equal(mother.get('name'), 'Jo'));
-    });
-
-    it('hasMany returns a collection of models from the network', function () {
-      this.server.respondWith('GET', '/user/1/siblings', JSON.stringify(siblings));
-      return this.resource.fetchRelated('siblings')
-        .then((siblings) => {
-          assert.equal(siblings.at(0).get('name'), 'Riggs');
-          assert.equal(siblings.at(1).get('name'), 'Murtaugh');
-        });
-    });
-
-    it('throws an exception for an unknown relationship', function () {
-      assert.throws(() => this.resource.fetchRelated('foo'), 'Relation for "foo" is not defined');
-    });
-
-    it('throws an exception for an unregistered relationship type', function () {
-      assert.throws(() => this.resource.fetchRelated('enemy'), 'There is no related model');
-    });
-
-    xit('pends request until parent promise has resolved');
-  });
-
-  describe('peekRelated', function () {
-    before(function () {
-      let store = createStore();
-      this.resource = store.push(userWithRelationships);
-    });
-
-    it('hasOne returns a single model from the cache', function () {
-      assert.equal(this.resource.peekRelated('bff').get('name'), 'Bonnie');
-    });
-
-    it('hasMany returns a collection of models from the cache', function () {
-      let related = this.resource.peekRelated('friends');
-      assert.equal(related.at(0).get('name'), 'Bonnie');
-      assert.equal(related.at(1).get('name'), 'Clyde');
-    });
-
-    xit('pends request until parent promise has resolved');
-
-    context('if no resources are cached', function () {
-      it('hasOne returns undefined', function () {
-        assert.isUndefined(this.resource.peekRelated('mother'));
-      });
-
-      it('hasMany returns an empty collection', function () {
-        assert.equal(this.resource.peekRelated('siblings').length, 0);
-      });
-    });
-
-    it('throws an exception for an unknown relationship', function () {
-      assert.throws(() => this.resource.peekRelated('foo'), 'Relation for "foo" is not defined');
-    });
-
-    it('throws an exception for an unregistered relationship type', function () {
-      assert.throws(() => this.resource.peekRelated('enemy'), 'There is no related model');
-    });
   });
 });

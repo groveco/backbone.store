@@ -1,7 +1,5 @@
 import _ from 'underscore';
 import {Model} from 'backbone';
-import CollectionProxy from './collection-proxy';
-import ModelProxy from './model-proxy';
 
 let InternalModel = Model.extend({
   constructor: function (attributes) {
@@ -62,50 +60,16 @@ let InternalModel = Model.extend({
     return relationship;
   },
 
-  /**
-   * Get related model. If model is cached on front-end it will be returned from cache, otherwise it will be fetched.
-   * @param {string} relationName - Name of relation to requested model.
-   * @returns {Promise} Promise for requested model.
-   */
   getRelated(relationName) {
-    let peeked = this.peekRelated(relationName);
-    if (!peeked) {
-      let model = new ModelProxy();
-      model.promise = this.fetchRelated(relationName);
-      return model;
-    } else if (peeked.hasOwnProperty('length') && peeked._incomplete) {
-      let collection = new CollectionProxy(peeked);
-      collection.promise = this.fetchRelated(relationName);
-      return collection;
-    } else if (peeked.hasOwnProperty('length')) {
-      return new CollectionProxy(peeked);
-    } else {
-      return new ModelProxy(peeked);
-    }
-  },
-
-  /**
-   * Fetch related model or collection from server.
-   * @param {string} relationName - Name of relation to requested model or collection.
-   * @returns {Promise} Promise for requested model or collection.
-   */
-  fetchRelated(relationName) {
     let link = this.getRelationshipLink(relationName);
-    let {type, id} = this.getRelationship(relationName).data;
-    return this.store.fetch(type, id);
-  },
+    let relType = this.getRelationshipType(relationName);
 
-  /**
-   * Get related model from front-end cache.
-   * @param {string} relationName - Name of relation to requested model.
-   * @returns {Promise} Promise for requested model.
-   */
-  peekRelated(relationName) {
-    let relationship = this.getRelationship(relationName);
-    if (this.getRelationshipType(relationName) === 'has-many') {
-      return this.store.peekMany(relationship.data);
-    } else if (relationship.data) {
-      return this.store.peek(relationship.data.type, relationship.data.id);
+    if (relType === 'has-many') {
+      let data = this.getRelationship(relationName).data;
+      return this.store.getHasMany(this, link, data);
+    } else {
+      let {type, id} = this.getRelationship(relationName).data;
+      return this.store.getBelongsTo(this, link, type, id);
     }
   },
 
