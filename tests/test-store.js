@@ -183,6 +183,26 @@ describe('Store', function () {
         });
     });
 
+    it('does not fork the thennable chain', function (done) {
+      let store = createStore();
+      sinon.stub(store._adapter, 'get', function () {
+        return new RSVP.Promise((_, reject) => {
+          reject(new Error('rejected!'));
+        });
+      });
+
+      RSVP.on('error', () => {
+        assert(false, 'Should not be called, there is a problem with the thennable chain');
+      });
+
+      setTimeout(done, 100);
+
+      store.fetch('/')
+        .catch(() => {
+          // caught, but don't do anything
+        });
+    });
+
     xit('returns a single promise instance if previous request has not resolved', function () {
       let link = '/mything';
       let store = createStore();
