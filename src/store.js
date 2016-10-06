@@ -128,11 +128,10 @@ class Store {
       let promise = this._adapter.get(link, query)
         .then(response => {
           return this.push(response);
+        })
+        .finally(() => {
+          this._pending[link] = null;
         });
-
-      promise.finally(() => {
-        return this._pending[link] = null;
-      });
 
       this._pending[link] = promise;
 
