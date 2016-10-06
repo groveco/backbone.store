@@ -67,7 +67,10 @@ class HttpAdapter {
         type,
         headers,
         success: (data) => resolve(data),
-        error: (err) => reject(err),
+        error: (err) => {
+          const error = new Error(`request for resource, ${url}, returned ${err.status} ${err.statusText}`);
+          reject(error);
+        },
         // being explicit about data type so jQuery doesn't "intelligent guess" wrong
         // changing this may not break tests, but does behave badly in prod
         dataType: 'text',

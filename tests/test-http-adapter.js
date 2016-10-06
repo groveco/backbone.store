@@ -37,6 +37,19 @@ describe('HTTP adapter', function () {
           assert.deepEqual(response, payload);
         });
     });
+
+    it('returns a meaningful error message', function () {
+      const path = '/api/user/42/';
+      const errorCode = 400;
+      this.server.respondWith('GET', path, [errorCode, {}, '']);
+
+      return this.adapter.get(path)
+        .catch((err) => {
+          assert.instanceOf(err, Error);
+          assert.include(err.message, path);
+          assert.include(err.message, errorCode);
+        });
+    });
   });
 
   describe('#create', function () {
