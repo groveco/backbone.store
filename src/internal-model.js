@@ -60,16 +60,16 @@ let InternalModel = Model.extend({
     return relationship;
   },
 
-  getRelated(relationName) {
+  getRelated(relationName, query) {
     let link = this.getRelationshipLink(relationName);
     let relType = this.getRelationshipType(relationName);
 
     if (relType === 'has-many') {
       let data = this.getRelationship(relationName).data;
-      return this.store.getHasMany(this, link, data);
+      return this.store.getHasMany(this, link, data, query);
     } else {
       let {type, id} = this.getRelationship(relationName).data;
-      return this.store.getBelongsTo(this, link, type, id);
+      return this.store.getBelongsTo(this, link, type, id, query);
     }
   },
 

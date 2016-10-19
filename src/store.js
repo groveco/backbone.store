@@ -185,24 +185,24 @@ class Store {
   /**
    * @private
    */
-  getBelongsTo(owner, link, type, id) {
+  getBelongsTo(owner, link, type, id, query) {
     let model = this.peek(type, id);
     if (model) {
       return model;
     } else {
-      return this.fetch(type, id, {link: link});
+      return this.fetch(type, id, {link: link}, query);
     }
   }
 
   /**
    * @private
    */
-  getHasMany(owner, link, all) {
+  getHasMany(owner, link, all, query) {
     let models = this.peekMany(all);
     if (!models.content._incomplete) {
       return models;
     } else {
-      let promise = this._fetch(link, link);
+      let promise = this._fetch(link, link, query);
       let result = new CollectionProxy(models);
       models.promise = promise;
 

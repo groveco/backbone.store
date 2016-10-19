@@ -198,7 +198,7 @@ describe('Store', function () {
 
       setTimeout(done, 100);
 
-      store.fetch('/')
+      store.fetch('user', 1).promise
         .catch(() => {
           // caught, but don't do anything
         });
