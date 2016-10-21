@@ -73,17 +73,23 @@ class ModelProxy {
   // Proxied methods and properties
   //
 
+  get _getRelationForName() { return this.content._getRelationForName; }
   get attributes() { return this.content.attributes; }
   get changed() { return this.content.changed; }
   get changedAttributes() { return this.content.changedAttributes; }
   get cid() { return this.content.cid; }
   get defaults() { return this.content.defaults; }
+  get getRelated() { return this.content.getRelated; }
+  get getRelationship() { return this.content.getRelationship; }
+  get getRelationshipLink() { return this.content.getRelationshipLink; }
+  get getRelationshipType() { return this.content.getRelationshipType; }
   get hasChanged() { return this.content.hasChanged; }
   get id() { return this.content.id; }
   get idAttribute() { return this.content.idAttribute; }
   get isNew() { return this.content.isNew; }
   get isValid() { return this.content.isValid; }
   get previousAttributes() { return this.content.previousAttributes; }
+  get relationships() { return this.content.relationships; }
   get validationError() { return this.content.validationError; }
 
   chain() { return this.content.chain(...arguments); }

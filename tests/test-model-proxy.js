@@ -38,18 +38,24 @@ function itProxiesMethod(method) {
 }
 
 describe('ModelProxy', function () {
+  itProxiesProperty('_getRelationForName');
+  itProxiesProperty('attributes');
+  itProxiesProperty('changed');
+  itProxiesProperty('changedAttributes');
+  itProxiesProperty('cid');
+  itProxiesProperty('defaults');
+  itProxiesProperty('getRelated');
+  itProxiesProperty('getRelationship');
+  itProxiesProperty('getRelationshipLink');
+  itProxiesProperty('getRelationshipType');
+  itProxiesProperty('hasChanged');
   itProxiesProperty('id');
   itProxiesProperty('idAttribute');
-  itProxiesProperty('attributes');
-  itProxiesProperty('cid');
-  itProxiesProperty('changed');
-  itProxiesProperty('defaults');
-  itProxiesProperty('validationError');
-  itProxiesProperty('isValid');
   itProxiesProperty('isNew');
-  itProxiesProperty('hasChanged');
-  itProxiesProperty('changedAttributes');
+  itProxiesProperty('isValid');
   itProxiesProperty('previousAttributes');
+  itProxiesProperty('relationships');
+  itProxiesProperty('validationError');
 
   itProxiesMethod('chain');
   itProxiesMethod('clear');
