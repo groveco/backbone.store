@@ -60,6 +60,11 @@ let InternalModel = Model.extend({
     return relationship;
   },
 
+  hasRelated(relationName) {
+    const relationship = this.getRelationship(relationName);
+    return !!(relationship && relationship.data);
+  },
+
   getRelated(relationName, query) {
     let link = this.getRelationshipLink(relationName);
     let relType = this.getRelationshipType(relationName);

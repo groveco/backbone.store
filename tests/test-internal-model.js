@@ -9,6 +9,7 @@ let createStore = function () {
   let store = new Store(adapter);
   store.register('user', {
     relationships: {
+      'so': 'user',
       'bff': 'user',
       'friends': 'user',
       'mother': 'user',
@@ -83,6 +84,13 @@ let userWithRelationships = {
       self: '/user/1/'
     },
     relationships: {
+      so: {
+        data: null,
+        links: {
+          self: '/user/1/relationships/so',
+          related: '/user/1/so'
+        }
+      },
       bff: {
         data: {id: 2, type: 'user'},
         links: {
@@ -192,6 +200,21 @@ describe('InternalModel', function () {
       }))();
 
       assert.equal(model.get('getScope'), model);
+    });
+  });
+
+  describe('hasRelated', function () {
+    beforeEach(function () {
+      let store = createStore();
+      this.resource = store.push(userWithRelationships);
+    });
+
+    it('returns true if the relationship is exists', function () {
+      return assert.equal(this.resource.hasRelated('bff'), true);
+    });
+
+    it('returns false if the relationship is exists', function () {
+      return assert.equal(this.resource.hasRelated('so'), false);
     });
   });
 

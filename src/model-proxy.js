@@ -80,6 +80,7 @@ class ModelProxy {
   get cid() { return this.content.cid; }
   get defaults() { return this.content.defaults; }
   get getRelated() { return this.content.getRelated; }
+  get hasRelated() { return this.content.hasRelated; }
   get getRelationship() { return this.content.getRelationship; }
   get getRelationshipLink() { return this.content.getRelationshipLink; }
   get getRelationshipType() { return this.content.getRelationshipType; }

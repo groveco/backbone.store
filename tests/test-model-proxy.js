@@ -45,6 +45,7 @@ describe('ModelProxy', function () {
   itProxiesProperty('cid');
   itProxiesProperty('defaults');
   itProxiesProperty('getRelated');
+  itProxiesProperty('hasRelated');
   itProxiesProperty('getRelationship');
   itProxiesProperty('getRelationshipLink');
   itProxiesProperty('getRelationshipType');
