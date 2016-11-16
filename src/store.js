@@ -222,6 +222,14 @@ class Store {
       .then(updated => resource.set(this._parser.parse(updated.data)));
   }
 
+  createOrUpdate(resource) {
+    if (resource.get('id')) {
+      return this.update(resource);
+    } else {
+      return this.create(resource);
+    }
+  }
+
   destroy(resource) {
     return this._adapter
       .destroy(resource.get('_self'))
