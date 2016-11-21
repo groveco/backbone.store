@@ -84,13 +84,14 @@ class HttpAdapter {
         type,
         headers,
         success: (data) => resolve(data),
-        error: (err) => {
-          if (err.readyState === 0 || err.status === 0) {
+        error: (response) => {
+          if (response.readyState === 0 || response.status === 0) {
             // this is a canceled request, so we literally should do nothing
             return;
           }
 
-          const error = new Error(`request for resource, ${url}, returned ${err.status} ${err.statusText}`);
+          const error = new Error(`request for resource, ${url}, returned ${response.status} ${response.statusText}`);
+          error.response = response;
           reject(error);
         },
         // being explicit about data type so jQuery doesn't "intelligent guess" wrong
