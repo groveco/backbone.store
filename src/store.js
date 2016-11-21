@@ -91,13 +91,32 @@ class Store {
       attributes = {};
     }
 
-    return this.push({
+    if (!attributes.relationships) {
+      attributes.relationships = {};
+    }
+
+    const entity = {
       data: {
         id: attributes.id,
         type,
-        attributes
+        attributes,
       }
-    });
+    };
+
+    const modelDefinition = this._modelDefinitions[type];
+    if (modelDefinition && typeof modelDefinition.relationships === 'object') {
+      Object.keys(modelDefinition.relationships).forEach((key) => {
+        if (!entity.data.attributes.relationships[key]) {
+          entity.data.attributes.relationships[key] = {
+            data: {
+              type: modelDefinition.relationships[key]
+            }
+          }
+        }
+      });
+    }
+
+    return this.push(entity);
   }
 
   /**
