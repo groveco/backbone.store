@@ -91,13 +91,32 @@ class Store {
       attributes = {};
     }
 
-    return this.push({
+    if (!attributes.relationships) {
+      attributes.relationships = {};
+    }
+
+    const entity = {
       data: {
         id: attributes.id,
         type,
-        attributes
+        attributes,
       }
-    });
+    };
+
+    const modelDefinition = this._modelDefinitions[type];
+    if (modelDefinition && typeof modelDefinition.relationships === 'object') {
+      Object.keys(modelDefinition.relationships).forEach((key) => {
+        if (!entity.data.attributes.relationships[key]) {
+          entity.data.attributes.relationships[key] = {
+            data: {
+              type: modelDefinition.relationships[key]
+            }
+          }
+        }
+      });
+    }
+
+    return this.push(entity);
   }
 
   /**
@@ -220,6 +239,14 @@ class Store {
     let data = this._parser.serialize(resource.attributes);
     return this._adapter.update(resource.get('_self'), {data})
       .then(updated => resource.set(this._parser.parse(updated.data)));
+  }
+
+  createOrUpdate(resource) {
+    if (resource.get('id')) {
+      return this.update(resource);
+    } else {
+      return this.create(resource);
+    }
   }
 
   destroy(resource) {
