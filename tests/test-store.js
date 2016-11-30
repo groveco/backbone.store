@@ -4,11 +4,19 @@ import Store from '../src/store';
 import sinon from 'sinon';
 import Model from '../src/internal-model';
 
+const relationalModel = {
+  relationships: {
+    foo: 'foo',
+    bar: 'bar'
+  }
+};
+
 let createStore = function () {
   let adapter = new HttpAdapter();
   let store = new Store(adapter);
   store.register('user');
   store.register('pantry');
+  store.register('relational', relationalModel);
   return store;
 };
 
@@ -295,11 +303,51 @@ describe('Store', function () {
       assert.equal(user.store._repository._collection.findWhere({_type: 'user'}), user);
     });
 
-    it('defaults to an empty set of attributes', function () {
+    it('defaults to an empty set of attributes and relationships', function () {
       let store = createStore();
       let user = store.build('user');
 
-      assert.deepEqual(user.attributes, {id: undefined, _type: 'user'});
+      assert.deepEqual(user.attributes, {id: undefined, _type: 'user', relationships: {}});
+    });
+
+    it('defaults to an empty set of declared relationships', function () {
+      let store = createStore();
+      let user = store.build('relational');
+
+      assert.deepEqual(user.attributes.relationships, {
+        foo: {
+          data: null
+        },
+        bar: {
+          data: null
+        }
+      });
+    });
+
+    it('empty relationships do not override passed relationships', function () {
+      let store = createStore();
+      let user = store.build('relational', {
+        relationships: {
+          foo: {
+            data: {
+              type: 'foo',
+              id: 42
+            }
+          }
+        }
+      });
+
+      assert.deepEqual(user.attributes.relationships, {
+        foo: {
+          data: {
+            type: 'foo',
+            id: 42
+          }
+        },
+        bar: {
+          data: null
+        }
+      });
     });
 
     it('sets the resource id from attributes', function () {
