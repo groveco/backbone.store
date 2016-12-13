@@ -49,12 +49,12 @@ let InternalModel = Model.extend({
   getRelationship(relationName) {
     let modelName = this._getRelationForName(relationName);
     if (modelName == null) {
-      throw new Error('Relation for "' + relationName + '" is not defined in the model.');
+      throw new Error('Relation for "' + relationName + '" is not defined on the model.');
     }
 
     let relationship = this.get('relationships') && this.get('relationships')[relationName];
     if (relationship == null) {
-      throw new Error('There is no related model "' + modelName + '".');
+      throw new Error('There is no relationship "' + relationName + '" in the resource.');
     }
 
     return relationship;
