@@ -214,6 +214,13 @@ class Store {
   /**
    * @private
    */
+  fetchBelongsTo(owner, link, type, id, query) {
+    return this.fetch(type, id, {link: link}, query);
+  }
+
+  /**
+   * @private
+   */
   getHasMany(owner, link, all, query) {
     let models = this.peekMany(all);
     if (!models.content._incomplete) {
@@ -225,6 +232,18 @@ class Store {
 
       return result;
     }
+  }
+
+  /**
+   * @private
+   */
+  fetchHasMany(owner, link, query) {
+    const models = new Collection();
+    let promise = this._fetch(link, link, query);
+    let result = new CollectionProxy(models);
+    models.promise = promise;
+
+    return result;
   }
 
   create(resource) {

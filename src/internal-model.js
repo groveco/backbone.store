@@ -78,6 +78,18 @@ let InternalModel = Model.extend({
     }
   },
 
+  fetchRelated(relationName, query) {
+    let link = this.getRelationshipLink(relationName);
+    let relType = this.getRelationshipType(relationName);
+
+    if (relType === 'has-many') {
+      return this.store.fetchHasMany(this, link, query);
+    } else {
+      let {type, id} = this.getRelationship(relationName).data;
+      return this.store.fetchBelongsTo(this, link, type, id, query);
+    }
+  },
+
   _getRelationForName(relationName) {
     return this.relationships && this.relationships[relationName];
   },
