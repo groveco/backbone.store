@@ -234,6 +234,9 @@ class Store {
    * @private
    */
   fetchHasMany(owner, models, link, query) {
+    if (!models) {
+      models = new CollectionProxy();
+    }
     let promise = this._fetch(link, link, query);
     let result = new CollectionProxy(models);
     models.promise = promise;

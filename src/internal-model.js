@@ -83,7 +83,7 @@ let InternalModel = Model.extend({
     let relType = this.getRelationshipType(relationName);
 
     if (relType === 'has-many') {
-      return this.store.fetchHasMany(this, link, query);
+      return this.store.fetchHasMany(this, null, link, query);
     } else {
       let {type, id} = this.getRelationship(relationName).data;
       return this.store.fetchBelongsTo(this, link, type, id, query);
