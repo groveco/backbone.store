@@ -207,8 +207,15 @@ class Store {
     if (model) {
       return model;
     } else {
-      return this.fetch(type, id, {link: link}, query);
+      return this.fetchBelongsTo(owner, link, type, id, query);
     }
+  }
+
+  /**
+   * @private
+   */
+  fetchBelongsTo(owner, link, type, id, query) {
+    return this.fetch(type, id, {link: link}, query);
   }
 
   /**
@@ -219,12 +226,19 @@ class Store {
     if (!models.content._incomplete) {
       return models;
     } else {
-      let promise = this._fetch(link, link, query);
-      let result = new CollectionProxy(models);
-      models.promise = promise;
-
-      return result;
+      return this.fetchHasMany(owner, models, link, query);
     }
+  }
+
+  /**
+   * @private
+   */
+  fetchHasMany(owner, models, link, query) {
+    let promise = this._fetch(link, link, query);
+    let result = new CollectionProxy(models);
+    models.promise = promise;
+
+    return result;
   }
 
   create(resource) {
