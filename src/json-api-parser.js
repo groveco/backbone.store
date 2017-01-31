@@ -18,7 +18,7 @@ class JsonApiParser {
   parse(resource) {
     let result = {};
     if (resource.attributes) {
-      _.extend(result, this._parseWithNames(resource.attributes));
+      _.extend(result, resource.attributes);
     }
     result.id = resource.id;
     result._type = resource.type;
@@ -28,7 +28,8 @@ class JsonApiParser {
     if (resource.relationships) {
       result.relationships = resource.relationships;
     }
-    return result;
+
+    return this._parseWithNames(result);
   }
 
   /**
