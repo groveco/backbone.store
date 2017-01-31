@@ -9,13 +9,13 @@ let createStore = function () {
   let store = new Store(adapter);
   store.register('user', {
     relationships: {
-      'so': 'user',
-      'bff': 'user',
-      'friends': 'user',
-      'mother': 'user',
-      'siblings': 'user',
-      'all-together-now': 'user',
-      'enemy': 'two-face'
+      so: 'user',
+      bff: 'user',
+      friends: 'user',
+      mother: 'user',
+      siblings: 'user',
+      allTogetherNow: 'user',
+      enemy: 'two-face'
     }
   });
   return store;
@@ -125,7 +125,7 @@ let userWithRelationships = {
           related: '/user/1/siblings'
         }
       },
-      'all-together-now': {
+      allTogetherNow: {
         data: [
           {id: 2, type: 'user'},
           {id: 3, type: 'user'},
@@ -259,7 +259,7 @@ describe('InternalModel', function () {
 
     it('hasMany returns a partial collection models from the cache, and hits the network for remaining models', function () {
       this.server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow));
-      let relationship = this.resource.getRelated('all-together-now');
+      let relationship = this.resource.getRelated('allTogetherNow');
       assert.equal(relationship.length, 2);
       return relationship
         .then(() => assert.equal(relationship.length, 5));
@@ -267,7 +267,7 @@ describe('InternalModel', function () {
 
     it('hasMany partial collection will resolve to a collection of models', function () {
       this.server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow));
-      let relationship = this.resource.getRelated('all-together-now');
+      let relationship = this.resource.getRelated('allTogetherNow');
       assert.equal(relationship.length, 2);
       return relationship
         .then((rest) => assert.instanceOf(rest, Collection));
