@@ -215,7 +215,7 @@ class Store {
    * @private
    */
   fetchBelongsTo(owner, link, type, id, query) {
-    return this.fetch(type, id, {link: link}, query);
+    return this.fetch(type, id, {link, query});
   }
 
   /**
