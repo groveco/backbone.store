@@ -358,6 +358,77 @@ describe('Store', function () {
     });
   });
 
+  describe('clone', function () {
+    it('creates new model', function () {
+      let store = createStore();
+      let user = store.build('user', {id: 42, name: 'Hello'});
+      let anotherUser = store.clone(user);
+      assert.notEqual(user, anotherUser);
+    });
+
+    it('doesn\'t clone id ans _self', function () {
+      let store = createStore();
+      let user = store.build('user', {id: 42, _self: 'self://link', name: 'Hello'});
+      let anotherUser = store.clone(user);
+      assert.isUndefined(anotherUser.get('id'));
+      assert.isUndefined(anotherUser.get('_self'));
+    });
+
+    it('clones all flat attributes except id and _self', function () {
+      let store = createStore();
+      let user = store.build('user', {id: 42, _self: 'self://link', name: 'Hello', slug: 'hello'});
+      let anotherUser = store.clone(user);
+      Object.keys(user.attributes).forEach((key) => {
+        if (key !== 'id' && key !== '_self' && key !== 'relationships') {
+          assert.strictEqual(user.get(key), anotherUser.get(key));
+        }
+      });
+    });
+
+    it('deep clones nested objects', function () {
+      let store = createStore();
+      let model = store.build('relational', {
+        id: 42,
+        _self: 'self://link',
+        name: 'Hello',
+        slug: 'hello',
+        relationships: {
+          foo: {
+            data: {
+              id: 22
+            }
+          }
+        }
+      });
+      let anotherModel = store.clone(model);
+      anotherModel.getRelationship('foo').data.id++;
+      assert.notEqual(model.getRelationship('foo').data.id, anotherModel.getRelationship('foo').data.id)
+    });
+
+    it('doesn\'t clone relationship links', function () {
+      let store = createStore();
+      let model = store.build('relational', {
+        id: 42,
+        _self: 'self://link',
+        name: 'Hello',
+        slug: 'hello',
+        relationships: {
+          foo: {
+            data: {
+              id: 22
+            },
+            links: {
+              related: 'related://link',
+              self: 'self://link',
+            }
+          }
+        }
+      });
+      let anotherModel = store.clone(model);
+      assert.isUndefined(anotherModel.getRelationship('foo').links)
+    });
+  });
+
   describe('create', function () {
     it('POSTs a serialized resource', function () {
       let store = createStore();

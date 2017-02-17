@@ -2,8 +2,9 @@
  * Store.
  * @module
  */
-import _ from 'underscore';
 import {Collection} from 'backbone';
+import _ from 'underscore';
+import clone from 'clone';
 import JsonApiParser from './json-api-parser';
 import Repository from './repository';
 import Model from './internal-model';
@@ -115,6 +116,18 @@ class Store {
     }
 
     return this.push(entity);
+  }
+
+  clone(model) {
+    const newAttributes = clone(model.attributes);
+    delete newAttributes.id;
+    delete newAttributes._self;
+    if (typeof newAttributes.relationships === 'object') {
+      Object.keys(newAttributes.relationships).forEach((key) => {
+        delete newAttributes.relationships[key].links;
+      });
+    }
+    return this.build(newAttributes._type, newAttributes);
   }
 
   /**
