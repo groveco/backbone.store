@@ -62,7 +62,7 @@ let InternalModel = Model.extend({
 
   hasRelated(relationName) {
     const relationship = this.getRelationship(relationName);
-    return !!(relationship && relationship.data);
+    return !!(relationship && relationship.data && relationship.data.id);
   },
 
   getRelated(relationName, query) {
