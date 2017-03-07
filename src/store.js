@@ -10,6 +10,7 @@ import Repository from './repository';
 import Model from './internal-model';
 import ModelProxy from './model-proxy';
 import CollectionProxy from './collection-proxy';
+import querystring from 'querystring';
 
 /**
  * Backbone Store class that manages all repositories.
@@ -250,7 +251,8 @@ class Store {
     if (!models) {
       models = new CollectionProxy();
     }
-    let promise = this._fetch(link, link, query);
+    const queryString = querystring.stringify(query);
+    let promise = this._fetch(`${link}?${queryString}`, link, query);
     let result = new CollectionProxy(models);
     models.promise = promise;
 
