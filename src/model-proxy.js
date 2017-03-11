@@ -22,6 +22,7 @@ class ModelProxy {
     if (oldContent !== val) {
       this._content = val;
       this._migrateEvents(oldContent);
+      if (this._content) this._content.trigger('sync');
     }
   }
 
