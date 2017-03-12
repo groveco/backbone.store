@@ -413,7 +413,7 @@ describe('Store', function () {
       });
       let anotherModel = store.clone(model);
       anotherModel.getRelationship('foo').data.id++;
-      assert.notEqual(model.getRelationship('foo').data.id, anotherModel.getRelationship('foo').data.id)
+      assert.notEqual(model.getRelationship('foo').data.id, anotherModel.getRelationship('foo').data.id);
     });
 
     it('doesn\'t clone relationship links', function () {
@@ -436,7 +436,7 @@ describe('Store', function () {
         }
       });
       let anotherModel = store.clone(model);
-      assert.isUndefined(anotherModel.getRelationship('foo').links)
+      assert.isUndefined(anotherModel.getRelationship('foo').links);
     });
   });
 
