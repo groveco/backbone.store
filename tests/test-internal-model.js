@@ -278,7 +278,7 @@ describe('InternalModel', function () {
     });
 
     it('throws an exception for an unregistered relationship type', function () {
-      assert.throws(() => this.resource.getRelated('enemy'), 'There is no related model');
+      assert.throws(() => this.resource.getRelated('enemy'), 'There is no relationship "enemy" in the resource.');
     });
 
     it('pends request until parent promise has resolved');
