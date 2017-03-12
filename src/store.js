@@ -170,14 +170,21 @@ class Store {
       let promise = this._adapter.get(link, query)
         .then(response => {
           return this.push(response);
+        });
+
+      // We want to attach a final handler, but do not want an error on this
+      // promise to go unresolved so we catch it first and then proceed. The
+      // returned promise will still raise a global exception if not caught,
+      // which is the intended behavior, and should be handled accordingly.
+      promise
+        .catch(() => {
+          // no op
         })
         .finally(() => {
           this._pending[key] = null;
         });
 
       this._pending[key] = promise;
-
-      promise;
     }
 
     return this._pending[key];

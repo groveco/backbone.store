@@ -192,23 +192,34 @@ describe('Store', function () {
         });
     });
 
+    // If we're not careful, the internal wiring of `fetch` will cause global
+    // errors that cannot be caught with normal `thennable.catch()` which is
+    // annoying and dangerous! So this test runs `fetch` through it's paces
+    // and ensures we are returning well behaving promises.
     it('does not fork the thennable chain', function (done) {
       let store = createStore();
+
+      // Force the eventual `fetch` call to fail.
       sinon.stub(store._adapter, 'get', function () {
         return new RSVP.Promise((_, reject) => {
           reject(new Error('rejected!'));
         });
       });
 
+      let spy = sinon.spy();
+
+      // Make sure no global errors are being triggered
       RSVP.on('error', () => {
         assert(false, 'Should not be called, there is a problem with the thennable chain');
       });
 
-      setTimeout(done, 100);
-
-      store.fetch('user', 1).promise
-        .catch(() => {
-          // caught, but don't do anything
+      return store.fetch('user', 1)
+        // If no global errors are triggered, we should still be able to catch
+        // the rejection here.
+        .catch(() => spy())
+        .finally(() => {
+          sinon.assert.calledOnce(spy);
+          done();
         });
     });
 
