@@ -124,6 +124,12 @@ let dashData = {
       }]
     }
   },
+  relationships: {
+    'dashed-relationship': {
+      id: 11,
+      type: 'dashed-relationship'
+    }
+  },
   links: {
     self: '/api/user/12/'
   }
@@ -137,6 +143,12 @@ let parsedDashData = {
     fooBar: [{
       barFoo: 'foobar'
     }]
+  },
+  relationships: {
+    dashedRelationship: {
+      id: 11,
+      type: 'dashed-relationship'
+    }
   },
   _self: '/api/user/12/'
 };

@@ -49,9 +49,11 @@ class JsonApiParser {
       };
     }
     if (obj.relationships) {
-      result.relationships = obj.relationships;
+      result.relationships = this._serializeWithNames(obj.relationships);
     }
-    _.extend(result.attributes, this._serializeWithNames(obj));
+    const serializedAttributes = this._serializeWithNames(obj);
+    delete serializedAttributes.id;
+    _.extend(result.attributes, serializedAttributes);
     return result;
   }
 
@@ -76,7 +78,7 @@ class JsonApiParser {
 
   _serializeWithNames(obj) {
     return Object.keys(obj).reduce((result, key) => {
-      if (!_.contains(['relationships', 'id', '_type', '_self'], key)) {
+      if (!_.contains(['relationships', '_type', '_self'], key)) {
         let value = obj[key];
         let newKey = decamelize(key);
 
