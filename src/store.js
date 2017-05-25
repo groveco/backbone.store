@@ -76,11 +76,9 @@ class Store {
   }
 
   _pushInternalModel(data) {
-    let model = this.modelFor(data.type);
     let record = this._repository.get(`${data.type}__${data.id}`);
     if (record == null) {
-      record = new model(this._parser.parse(data));
-      record.store = this;
+      record = this.build(data.type, this._parser.parse(data));
       this._repository.set(record);
     } else {
       record.set(this._parser.parse(data));
@@ -88,35 +86,40 @@ class Store {
     return record;
   }
 
+  pushModel(model) {
+    let cachedModel = this._repository.get(`${model.get('_type')}__${model.id}`);
+    if (!cachedModel) {
+      this._repository.set(model);
+    } else {
+      throw new Error(`Model of type ${model.get('_type')} and id=${model.id} already exists`);
+    }
+    return model;
+  }
+
   build(type, attributes) {
     if (attributes == null) {
       attributes = {};
     }
 
-    if (!attributes.relationships) {
-      attributes.relationships = {};
-    }
+    let Model = this.modelFor(type);
 
-    const entity = {
-      data: {
-        id: attributes.id,
-        type,
-        attributes,
-      }
-    };
+    attributes.relationships = attributes.relationships || {};
+    attributes._type = attributes._type || type;
 
-    const modelDefinition = this._modelDefinitions[type];
-    if (modelDefinition && typeof modelDefinition.relationships === 'object') {
-      Object.keys(modelDefinition.relationships).forEach((key) => {
-        if (!entity.data.attributes.relationships[key]) {
-          entity.data.attributes.relationships[key] = {
+    if (Model && typeof Model.prototype.relationships === 'object') {
+      Object.keys(Model.prototype.relationships).forEach((key) => {
+        if (!attributes.relationships[key]) {
+          attributes.relationships[key] = {
             data: null
           }
         }
       });
     }
 
-    return this.push(entity);
+    const model = new Model(attributes);
+    model.store = this;
+
+    return model;
   }
 
   clone(model) {
@@ -269,7 +272,10 @@ class Store {
   create(resource) {
     let data = this._parser.serialize(resource.attributes);
     return this._adapter.create(this._adapter.buildUrl(resource.get('_type'), resource.get('id')), {data})
-      .then(created => resource.set(this._parser.parse(created.data)));
+      .then(created => {
+        resource.set(this._parser.parse(created.data));
+        return this.pushModel(resource);
+      });
   }
 
   update(resource) {

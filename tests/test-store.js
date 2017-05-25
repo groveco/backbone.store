@@ -46,9 +46,14 @@ describe('Store', function () {
 
     it('triggers update when pushing updates to an existing resource', function () {
       let store = createStore();
-      let user = store.build('user', {
-        id: 2,
-        name: 'foo'
+      let user = store.push({
+        data: {
+          id: 2,
+          type: 'user',
+          attributes: {
+            name: 'foo'
+          }
+        }
       });
 
       let spy = sinon.spy();
@@ -246,9 +251,14 @@ describe('Store', function () {
 
     it('updates an existing resource in the store', function () {
       let store = createStore();
-      let obj = store.build('user', {
-        id: 1,
-        name: 'foo'
+      let obj = store.push({
+        data: {
+          id: 1,
+          type: 'user',
+          attributes: {
+            name: 'foo'
+          }
+        }
       });
 
       let objChangeSpy = sinon.spy();
@@ -305,27 +315,18 @@ describe('Store', function () {
       assert.equal(user.get('name'), 'Hello');
     });
 
-    it('adds the resource to the store', function () {
-      let store = createStore();
-      let user = store.build('user', {
-        name: 'Hello'
-      });
-
-      assert.equal(user.store._repository._collection.findWhere({_type: 'user'}), user);
-    });
-
     it('defaults to an empty set of attributes and relationships', function () {
       let store = createStore();
       let user = store.build('user');
 
-      assert.deepEqual(user.attributes, {id: undefined, _type: 'user', relationships: {}});
+      assert.deepEqual(user.attributes, {_type: 'user', relationships: {}});
     });
 
     it('defaults to an empty set of declared relationships', function () {
       let store = createStore();
       let user = store.build('relational');
 
-      assert.deepEqual(user.attributes.relationships, {
+      assert.deepEqual(user.get('relationships'), {
         foo: {
           data: null
         },
@@ -449,6 +450,7 @@ describe('Store', function () {
           resolve({
             data: {
               id: 1,
+              type: 'user',
               attributes: {
                 name: 'Hello',
                 status: 'awesome'
@@ -477,6 +479,7 @@ describe('Store', function () {
           resolve({
             data: {
               id: 1,
+              type: 'user',
               attributes: {
                 name: 'Goodbye'
               }
