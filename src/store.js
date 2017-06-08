@@ -273,8 +273,10 @@ class Store {
     let data = this._parser.serialize(resource.attributes);
     return this._adapter.create(this._adapter.buildUrl(resource.get('_type'), resource.get('id')), {data})
       .then(created => {
-        resource.set(this._parser.parse(created.data));
-        return this.pushModel(resource);
+        if (created) {
+          resource.set(this._parser.parse(created.data));
+          return this.pushModel(resource);
+        }
       });
   }
 

@@ -45,7 +45,7 @@ class HttpAdapter {
    */
   create(link, payload) {
     return this._ajax('POST', link, payload)
-      .then(body => JSON.parse(body));
+      .then(body => body && JSON.parse(body));
   }
 
   /**
@@ -83,7 +83,12 @@ class HttpAdapter {
         url,
         type,
         headers,
-        success: (data) => resolve(data),
+        success: (data, textStatus, jqXhr) => {
+          if (!data && jqXhr.status !== 204) {
+            throw new Error(`request returned ${jqXhr.status} status without data`);
+          }
+          return resolve(data);
+        },
         error: (response) => {
           if (response.readyState === 0 || response.status === 0) {
             // this is a canceled request, so we literally should do nothing
