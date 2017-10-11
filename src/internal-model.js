@@ -41,7 +41,7 @@ let InternalModel = Model.extend({
   getRelationshipLink(relationName) {
     let link = this.getRelationship(relationName).links.related;
     if (link == null) {
-      throw new Error('link is undefined, can\'t do that');
+      throw new Error('link for, "' + relationName + '", is undefined, can\'t do that');
     }
     return link;
   },
