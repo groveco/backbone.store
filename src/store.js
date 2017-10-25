@@ -281,7 +281,11 @@ class Store {
   }
 
   update(resource) {
-    let data = this._parser.serialize(resource.attributes);
+    let data = this._parser.serialize({
+      id: resource.get('id'),
+      _type: resource.get('_type'),
+      ...resource.changed,
+    });
     return this._adapter.update(resource.get('_self'), {data})
       .then(updated => resource.set(this._parser.parse(updated.data)));
   }
