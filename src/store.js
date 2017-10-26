@@ -280,12 +280,30 @@ class Store {
       });
   }
 
-  update(resource) {
-    let data = this._parser.serialize({
-      id: resource.get('id'),
-      _type: resource.get('_type'),
-      ...resource.changed,
-    });
+  update(resource, options) {
+    let data;
+    let partial;
+
+    if (options == null) {
+      options = {};
+    }
+
+    if (!options.hasOwnProperty('partial')) {
+      partial = true;
+    } else {
+      partial = options.partial;
+    }
+
+    if (partial) {
+      data = this._parser.serialize({
+        id: resource.get('id'),
+        _type: resource.get('_type'),
+        ...resource.changed,
+      });
+    } else {
+      data = this._parser.serialize(resource.attributes);
+    }
+
     return this._adapter.update(resource.get('_self'), {data})
       .then(updated => resource.set(this._parser.parse(updated.data)));
   }
