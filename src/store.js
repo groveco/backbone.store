@@ -156,8 +156,7 @@ class Store {
    */
   fetch(type, id, options={}) {
     let {query, link} = options;
-    let key = `${type}__${id}`;
-    let promise = this._fetch(key, link || this._adapter.buildUrl(type, id), query);
+    let promise = this._fetch(link || this._adapter.buildUrl(type, id), query);
 
     let _Model = this.modelFor(type);
     let model = new ModelProxy(new _Model());
@@ -166,7 +165,8 @@ class Store {
     return model;
   }
 
-  _fetch(key, link, query) {
+  _fetch(link, query) {
+    const key = `${link}?${querystring.stringify(query)}`;
     let existingPromise = this._pending[key];
 
     if (existingPromise == null) {
@@ -261,8 +261,7 @@ class Store {
     if (!models) {
       models = new CollectionProxy();
     }
-    const queryString = querystring.stringify(query);
-    let promise = this._fetch(`${link}?${queryString}`, link, query);
+    let promise = this._fetch(link, query);
     let result = new CollectionProxy(models);
     models.promise = promise;
 
