@@ -1,4 +1,4 @@
-import JsonApiParser from '../src/json-api-parser';
+import JsonApiParser from '../src/json-api-parser'
 
 let jsonApiData = {
   id: 12,
@@ -37,7 +37,7 @@ let jsonApiData = {
       }
     }
   }
-};
+}
 
 let parsedData = {
   name: 'foo',
@@ -72,7 +72,7 @@ let parsedData = {
       }
     }
   }
-};
+}
 
 let serializedData = {
   id: 12,
@@ -111,7 +111,7 @@ let serializedData = {
       }
     }
   }
-};
+}
 
 let dashData = {
   id: 12,
@@ -133,7 +133,7 @@ let dashData = {
   links: {
     self: '/api/user/12/'
   }
-};
+}
 
 let parsedDashData = {
   id: 12,
@@ -151,30 +151,32 @@ let parsedDashData = {
     }
   },
   _self: '/api/user/12/'
-};
+}
 
 describe('JSON API parser', () => {
-  before(function () {
-    this.parser = new JsonApiParser();
-  });
+  let parser
 
-  it('parses data', function () {
-    let parsed = this.parser.parse(jsonApiData);
-    assert.deepEqual(parsed, parsedData);
-  });
+  beforeAll(() => {
+    parser = new JsonApiParser()
+  })
 
-  it('serializes data', function () {
-    let serialized = this.parser.serialize(parsedData);
-    assert.deepEqual(serialized, serializedData);
-  });
+  it('parses data', () => {
+    let parsed = parser.parse(jsonApiData)
+    expect(parsed).toEqual(parsedData)
+  })
 
-  it('parses with dash attributes', function () {
-    let parsed = this.parser.parse(dashData);
-    assert.deepEqual(parsed, parsedDashData);
-  });
+  it('serializes data', () => {
+    let serialized = parser.serialize(parsedData)
+    expect(serialized).toEqual(serializedData)
+  })
 
-  it('serializes with camelCase attributes', function () {
-    let serialized = this.parser.serialize(parsedDashData);
-    assert.deepEqual(serialized, dashData);
-  });
-});
+  it('parses with dash attributes', () => {
+    let parsed = parser.parse(dashData)
+    expect(parsed).toEqual(parsedDashData)
+  })
+
+  it('serializes with camelCase attributes', () => {
+    let serialized = parser.serialize(parsedDashData)
+    expect(serialized).toEqual(dashData)
+  })
+})

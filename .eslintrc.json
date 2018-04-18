@@ -1,33 +1,10 @@
 {
+  "extends": "standard",
+  "plugins": [
+    "promise",
+    "jest"
+  ],
   "env": {
-    "browser": true,
-    "es6": true,
-    "mocha": true
-  },
-  "extends": "eslint:recommended",
-  "parserOptions": {
-    "sourceType": "module"
-  },
-  "globals": {
-    "assert": true,
-    "sinon": true
-  },
-  "rules": {
-    "indent": [
-      "error",
-      2
-    ],
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
-    "quotes": [
-      "error",
-      "single"
-    ],
-    "semi": [
-      "error",
-      "always"
-    ]
+    "jest/globals": true
   }
 }

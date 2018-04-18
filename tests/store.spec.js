@@ -1,51 +1,51 @@
-import HttpAdapter from '../src/http-adapter';
-import RSVP from 'rsvp';
-import Store from '../src/store';
-import sinon from 'sinon';
-import Model from '../src/internal-model';
+import HttpAdapter from '../src/http-adapter'
+import RSVP from 'rsvp'
+import Store from '../src/store'
+import sinon from 'sinon'
+import Model from '../src/internal-model'
 
 const relationalModel = {
   relationships: {
     foo: 'foo',
     bar: 'bar'
   }
-};
+}
 
 let createStore = function () {
-  let adapter = new HttpAdapter();
-  let store = new Store(adapter);
-  store.register('user');
-  store.register('pantry');
-  store.register('relational', relationalModel);
-  return store;
-};
+  let adapter = new HttpAdapter()
+  let store = new Store(adapter)
+  store.register('user')
+  store.register('pantry')
+  store.register('relational', relationalModel)
+  return store
+}
 
 describe('Store', function () {
   describe('register', function () {
     it('registers model definition', function () {
-      let store = createStore();
-      let name = 'test';
-      let model = {};
-      store.register('test', model);
-      assert.equal(store._modelDefinitions[name], model);
-    });
+      let store = createStore()
+      let name = 'test'
+      let model = {}
+      store.register('test', model)
+      expect(store._modelDefinitions[name]).toEqual(model)
+    })
 
     it('registers an empty obcject by default', function () {
-      let store = createStore();
-      let name = 'test';
-      store.register('test');
-      assert.deepEqual(store._modelDefinitions[name], {});
-    });
-  });
+      let store = createStore()
+      let name = 'test'
+      store.register('test')
+      expect(store._modelDefinitions[name]).toEqual({})
+    })
+  })
 
   describe('push', function () {
     it('throws an error if data does not exist', function () {
-      let store = createStore();
-      assert.throws(() => store.push({}), 'include a top level property `data`');
-    });
+      let store = createStore()
+      expect(() => store.push({})).toThrow('include a top level property `data`')
+    })
 
     it('triggers update when pushing updates to an existing resource', function () {
-      let store = createStore();
+      let store = createStore()
       let user = store.push({
         data: {
           id: 2,
@@ -54,11 +54,11 @@ describe('Store', function () {
             name: 'foo'
           }
         }
-      });
+      })
 
-      let spy = sinon.spy();
-      user.on('change', spy);
-      user.on('change:name', spy);
+      let spy = sinon.spy()
+      user.on('change', spy)
+      user.on('change:name', spy)
 
       store.push({
         data: {
@@ -68,18 +68,18 @@ describe('Store', function () {
             name: 'bar'
           }
         }
-      });
+      })
 
-      sinon.assert.calledTwice(spy);
-      assert.equal(user.get('name'), 'bar');
-    });
-  });
+      sinon.assert.calledTwice(spy)
+      expect(user.get('name')).toEqual('bar')
+    })
+  })
 
   describe('get', function () {
     it('adds model to cache on get with type and id', function () {
-      let store = createStore();
-      let link = '/user/1/';
-      let stub = sinon.stub(store._adapter, 'get');
+      let store = createStore()
+      let link = '/user/1/'
+      let stub = sinon.stub(store._adapter, 'get')
 
       stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
         resolve({
@@ -90,19 +90,17 @@ describe('Store', function () {
               self: link
             }
           }
-        });
-      }));
+        })
+      }))
 
       return store.get('user', 1)
-        .then(() => {
-          assert.isDefined(store._repository._collection.find({_self: link}));
-        });
-    });
+        .then(() => expect(store._repository._collection.find({_self: link})).toBeDefined())
+    })
 
     it('caches included models as well', function () {
-      let store = createStore();
-      let pantryLink = '/pantry/42/';
-      let stub = sinon.stub(store._adapter, 'get');
+      let store = createStore()
+      let pantryLink = '/pantry/42/'
+      let stub = sinon.stub(store._adapter, 'get')
 
       stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
         resolve({
@@ -113,18 +111,18 @@ describe('Store', function () {
             attributes: {name: 'bar'},
             links: {self: pantryLink}
           }]
-        });
-      }));
+        })
+      }))
 
       return store.get('user', 1)
         .then(() => {
-          assert.isDefined(store._repository._collection.find({_self: pantryLink}));
-        });
-    });
+          expect(store._repository._collection.find({_self: pantryLink})).toBeDefined()
+        })
+    })
 
     it('adds a collection of models to the cache', function () {
-      let store = createStore();
-      let stub = sinon.stub(store._adapter, 'get');
+      let store = createStore()
+      let stub = sinon.stub(store._adapter, 'get')
 
       stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
         resolve({
@@ -134,29 +132,29 @@ describe('Store', function () {
             links: {
               self: '/user/1/'
             }
-          },{
+          }, {
             id: 2,
             type: 'user',
             links: {
               self: '/user/2/'
             }
           }]
-        });
-      }));
+        })
+      }))
 
       return store.get('user', 1)
         .then(() => {
-          assert.isDefined(store._repository._collection.find({_self: '/user/1/'}));
-          assert.isDefined(store._repository._collection.find({_self: '/user/2/'}));
-        });
-    });
-  });
+          expect(store._repository._collection.find({_self: '/user/1/'})).toBeDefined()
+          expect(store._repository._collection.find({_self: '/user/2/'})).toBeDefined()
+        })
+    })
+  })
 
   describe('fetch', function () {
     it('adds model to cache on get with link', function () {
-      let store = createStore();
-      let link = '/user/1/';
-      let stub = sinon.stub(store._adapter, 'get');
+      let store = createStore()
+      let link = '/user/1/'
+      let stub = sinon.stub(store._adapter, 'get')
       stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
         resolve({
           data: {
@@ -166,19 +164,19 @@ describe('Store', function () {
               self: link
             }
           }
-        });
-      }));
+        })
+      }))
 
       return store.fetch('user', 1)
         .then(() => {
-          assert.isDefined(store._repository._collection.find({_self: link}));
-        });
-    });
+          expect(store._repository._collection.find({_self: link})).toBeDefined()
+        })
+    })
 
     it('caches included models as well', function () {
-      let store = createStore();
-      let pantryLink = '/pantry/42/';
-      let stub = sinon.stub(store._adapter, 'get');
+      let store = createStore()
+      let pantryLink = '/pantry/42/'
+      let stub = sinon.stub(store._adapter, 'get')
       stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
         resolve({
           data: null,
@@ -188,69 +186,68 @@ describe('Store', function () {
             attributes: {name: 'bar'},
             links: {self: pantryLink}
           }]
-        });
-      }));
+        })
+      }))
 
       return store.fetch('user', 1)
         .then(() => {
-          assert.isDefined(store._repository._collection.find({_self: pantryLink}));
-        });
-    });
+          expect(store._repository._collection.find({_self: pantryLink})).toBeDefined()
+        })
+    })
 
     // If we're not careful, the internal wiring of `fetch` will cause global
     // errors that cannot be caught with normal `thennable.catch()` which is
     // annoying and dangerous! So this test runs `fetch` through it's paces
     // and ensures we are returning well behaving promises.
     it('does not fork the thennable chain', function (done) {
-      let store = createStore();
+      let store = createStore()
 
       // Force the eventual `fetch` call to fail.
       sinon.stub(store._adapter, 'get', function () {
         return new RSVP.Promise((_, reject) => {
-          reject(new Error('rejected!'));
-        });
-      });
+          reject(new Error('rejected!'))
+        })
+      })
 
-      let spy = sinon.spy();
+      let spy = sinon.spy()
 
       // Make sure no global errors are being triggered
       RSVP.on('error', () => {
-        assert(false, 'Should not be called, there is a problem with the thennable chain');
-      });
+        assert(false, 'Should not be called, there is a problem with the thennable chain')
+      })
 
       return store.fetch('user', 1)
         // If no global errors are triggered, we should still be able to catch
         // the rejection here.
         .catch(() => spy())
         .finally(() => {
-          sinon.assert.calledOnce(spy);
-          done();
-        });
-    });
+          sinon.assert.calledOnce(spy)
+          done()
+        })
+    })
 
     xit('returns a single promise instance if previous request has not resolved', function () {
-      let store = createStore();
-      let resolver;
+      let store = createStore()
+      let resolver
       sinon.stub(store._adapter, 'get', function () {
-        return new RSVP.Promise((resolve, reject) => resolver = {resolve, reject});
-      });
+        return new RSVP.Promise((resolve, reject) => resolver = {resolve, reject})
+      })
 
+      let first = store.fetch('mything')
+      let second = store.fetch('mything')
+      resolver.resolve()
 
-      let first = store.fetch('mything');
-      let second = store.fetch('mything');
-      resolver.resolve();
-
-      let third = store.fetch('mything');
-      resolver.resolve();
+      let third = store.fetch('mything')
+      resolver.resolve()
 
       return RSVP.all([first, second, third]).finally(() => {
-        assert.equal(first, second);
-        assert.notEqual(first, third);
-      });
-    });
+        assert.equal(first, second)
+        assert.notEqual(first, third)
+      })
+    })
 
     it('updates an existing resource in the store', function () {
-      let store = createStore();
+      let store = createStore()
       let obj = store.push({
         data: {
           id: 1,
@@ -259,12 +256,12 @@ describe('Store', function () {
             name: 'foo'
           }
         }
-      });
+      })
 
-      let objChangeSpy = sinon.spy();
-      obj.on('change:name', objChangeSpy);
+      let objChangeSpy = sinon.spy()
+      obj.on('change:name', objChangeSpy)
 
-      let stub = sinon.stub(store._adapter, 'get');
+      let stub = sinon.stub(store._adapter, 'get')
       stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
         resolve({
           data: {
@@ -273,18 +270,18 @@ describe('Store', function () {
             attributes: {
               name: 'bar'
             }
-          },
-        });
-      }));
+          }
+        })
+      }))
 
       return store.fetch('user', 1)
-        .then(() => sinon.assert.calledOnce(objChangeSpy));
-    });
-  });
+        .then(() => sinon.assert.calledOnce(objChangeSpy))
+    })
+  })
 
   describe('peek', function () {
     it('returns a previously cached resource', function () {
-      let store = createStore();
+      let store = createStore()
       store.push({
         data: {
           id: 1,
@@ -293,51 +290,51 @@ describe('Store', function () {
             self: '/user/1/'
           }
         }
-      });
-      assert.equal(store.peek('user', 1).get('id'), 1);
-    });
+      })
+      expect(store.peek('user', 1).get('id')).toEqual(1)
+    })
 
     it('returns undefined if the requested resource is not cached', function () {
-      let store = createStore();
-      assert.isUndefined(store.peek('user', 1));
-    });
-  });
+      let store = createStore()
+      expect(store.peek('user', 1)).toBeUndefined()
+    })
+  })
 
   describe('build', function () {
     it('returns a new resource', function () {
-      let store = createStore();
+      let store = createStore()
       let user = store.build('user', {
         name: 'Hello'
-      });
+      })
 
-      assert.instanceOf(user, Model);
-      assert.equal(user.get('_type'), 'user');
-      assert.equal(user.get('name'), 'Hello');
-    });
+      expect(user).toBeInstanceOf(Model)
+      expect(user.get('_type')).toEqual('user')
+      expect(user.get('name')).toEqual('Hello')
+    })
 
     it('defaults to an empty set of attributes and relationships', function () {
-      let store = createStore();
-      let user = store.build('user');
+      let store = createStore()
+      let user = store.build('user')
 
-      assert.deepEqual(user.attributes, {_type: 'user', relationships: {}});
-    });
+      expect(user.attributes).toEqual({_type: 'user', relationships: {}})
+    })
 
     it('defaults to an empty set of declared relationships', function () {
-      let store = createStore();
-      let user = store.build('relational');
+      let store = createStore()
+      let user = store.build('relational')
 
-      assert.deepEqual(user.get('relationships'), {
+      expect(user.get('relationships')).toEqual({
         foo: {
           data: null
         },
         bar: {
           data: null
         }
-      });
-    });
+      })
+    })
 
     it('empty relationships do not override passed relationships', function () {
-      let store = createStore();
+      let store = createStore()
       let user = store.build('relational', {
         relationships: {
           foo: {
@@ -347,9 +344,9 @@ describe('Store', function () {
             }
           }
         }
-      });
+      })
 
-      assert.deepEqual(user.attributes.relationships, {
+      expect(user.attributes.relationships).toEqual({
         foo: {
           data: {
             type: 'foo',
@@ -359,46 +356,46 @@ describe('Store', function () {
         bar: {
           data: null
         }
-      });
-    });
+      })
+    })
 
     it('sets the resource id from attributes', function () {
-      let store = createStore();
-      let user = store.build('user', {id: 4});
+      let store = createStore()
+      let user = store.build('user', {id: 4})
 
-      assert.deepEqual(user.get('id'), 4);
-    });
-  });
+      expect(user.get('id')).toEqual(4)
+    })
+  })
 
   describe('clone', function () {
     it('creates new model', function () {
-      let store = createStore();
-      let user = store.build('user', {id: 42, name: 'Hello'});
-      let anotherUser = store.clone(user);
-      assert.notEqual(user, anotherUser);
-    });
+      let store = createStore()
+      let user = store.build('user', {id: 42, name: 'Hello'})
+      let anotherUser = store.clone(user)
+      expect(user).not.toEqual(anotherUser)
+    })
 
     it('doesn\'t clone id ans _self', function () {
-      let store = createStore();
-      let user = store.build('user', {id: 42, _self: 'self://link', name: 'Hello'});
-      let anotherUser = store.clone(user);
-      assert.isUndefined(anotherUser.get('id'));
-      assert.isUndefined(anotherUser.get('_self'));
-    });
+      let store = createStore()
+      let user = store.build('user', {id: 42, _self: 'self://link', name: 'Hello'})
+      let anotherUser = store.clone(user)
+      expect(anotherUser.get('id')).toBeUndefined()
+      expect(anotherUser.get('_self')).toBeUndefined()
+    })
 
     it('clones all flat attributes except id and _self', function () {
-      let store = createStore();
-      let user = store.build('user', {id: 42, _self: 'self://link', name: 'Hello', slug: 'hello'});
-      let anotherUser = store.clone(user);
+      let store = createStore()
+      let user = store.build('user', {id: 42, _self: 'self://link', name: 'Hello', slug: 'hello'})
+      let anotherUser = store.clone(user)
       Object.keys(user.attributes).forEach((key) => {
         if (key !== 'id' && key !== '_self' && key !== 'relationships') {
-          assert.strictEqual(user.get(key), anotherUser.get(key));
+          expect(user.get(key)).toBe(anotherUser.get(key))
         }
-      });
-    });
+      })
+    })
 
     it('deep clones nested objects', function () {
-      let store = createStore();
+      let store = createStore()
       let model = store.build('relational', {
         id: 42,
         _self: 'self://link',
@@ -411,14 +408,14 @@ describe('Store', function () {
             }
           }
         }
-      });
-      let anotherModel = store.clone(model);
-      anotherModel.getRelationship('foo').data.id++;
-      assert.notEqual(model.getRelationship('foo').data.id, anotherModel.getRelationship('foo').data.id);
-    });
+      })
+      let anotherModel = store.clone(model)
+      anotherModel.getRelationship('foo').data.id++
+      expect(model.getRelationship('foo').data.id).not.toEqual(anotherModel.getRelationship('foo').data.id)
+    })
 
     it('doesn\'t clone relationship links', function () {
-      let store = createStore();
+      let store = createStore()
       let model = store.build('relational', {
         id: 42,
         _self: 'self://link',
@@ -431,20 +428,20 @@ describe('Store', function () {
             },
             links: {
               related: 'related://link',
-              self: 'self://link',
+              self: 'self://link'
             }
           }
         }
-      });
-      let anotherModel = store.clone(model);
-      assert.isUndefined(anotherModel.getRelationship('foo').links);
-    });
-  });
+      })
+      let anotherModel = store.clone(model)
+      expect(anotherModel.getRelationship('foo').links).toBeUndefined()
+    })
+  })
 
   describe('create', function () {
     it('POSTs a serialized resource', function () {
-      let store = createStore();
-      let user = store.build('user', {name: 'Hello'});
+      let store = createStore()
+      let user = store.build('user', {name: 'Hello'})
       sinon.stub(store._adapter, 'create', function () {
         return new RSVP.Promise((resolve) => {
           resolve({
@@ -455,25 +452,25 @@ describe('Store', function () {
                 name: 'Hello',
                 status: 'awesome'
               }
-            },
-          });
-        });
-      });
+            }
+          })
+        })
+      })
 
-      return store.create(user).then(function(created) {
-        assert.equal(user.get('id'), 1);
-        assert.equal(user.get('status'), 'awesome');
-        assert.equal(created, user);
-      });
-    });
+      return store.create(user).then(function (created) {
+        expect(user.get('id')).toEqual(1)
+        expect(user.get('status')).toEqual('awesome')
+        expect(created).toEqual(user)
+      })
+    })
 
-    it('makes request with a valid request body');
-  });
+    it('makes request with a valid request body')
+  })
 
   describe('update', function () {
     it('PATCHes a serialized resource', function () {
-      let store = createStore();
-      let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'});
+      let store = createStore()
+      let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'})
       sinon.stub(store._adapter, 'update', function () {
         return new RSVP.Promise((resolve) => {
           resolve({
@@ -483,45 +480,45 @@ describe('Store', function () {
               attributes: {
                 name: 'Goodbye'
               }
-            },
-          });
-        });
-      });
+            }
+          })
+        })
+      })
 
-      return store.update(user).then(function(updated) {
-        assert.equal(user.get('id'), 1);
-        assert.equal(user.get('name'), 'Goodbye');
-        assert.equal(updated, user);
-      });
-    });
+      return store.update(user).then(function (updated) {
+        expect(user.get('id')).toEqual(1)
+        expect(user.get('name')).toEqual('Goodbye')
+        expect(updated).toEqual(user)
+      })
+    })
 
-    it('only PATCHes dirty attributes');
-    it('makes request with a valid request body');
-  });
+    it('only PATCHes dirty attributes')
+    it('makes request with a valid request body')
+  })
 
   describe('destroy', function () {
     it('DELETEs a serialized resource', function () {
-      let store = createStore();
-      let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'});
+      let store = createStore()
+      let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'})
       sinon.stub(store._adapter, 'destroy', function () {
         return new RSVP.Promise((resolve) => {
-          resolve();
-        });
-      });
+          resolve()
+        })
+      })
 
-      return store.destroy(user).then(function(destroyed) {
-        assert.equal(user.get('isDeleted'), true);
-        assert.equal(destroyed, user);
-      });
-    });
+      return store.destroy(user).then(function (destroyed) {
+        expect(user.get('isDeleted')).toBeTruthy()
+        expect(destroyed).toEqual(user)
+      })
+    })
 
     // maybe this is wrong, maybe the store should simply not return deteled records?
-    it('removes a record from the store');
-    it('makes request with an empty request body');
-  });
+    it('removes a record from the store')
+    it('makes request with an empty request body')
+  })
 
   describe('reload', function () {
-    it('fetches a single resource');
-    it('updates the resource with the response');
-  });
-});
+    it('fetches a single resource')
+    it('updates the resource with the response')
+  })
+})

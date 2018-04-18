@@ -1,12 +1,12 @@
-import HttpAdapter from '../src/http-adapter';
-import sinon from 'sinon';
-import Store from '../src/store';
-import {Collection} from 'backbone';
-import InternalModel from '../src/internal-model';
+import HttpAdapter from '../src/http-adapter'
+import sinon from 'sinon'
+import Store from '../src/store'
+import {Collection} from 'backbone'
+import InternalModel from '../src/internal-model'
 
 let createStore = function () {
-  let adapter = new HttpAdapter();
-  let store = new Store(adapter);
+  let adapter = new HttpAdapter()
+  let store = new Store(adapter)
   store.register('user', {
     relationships: {
       so: 'user',
@@ -17,9 +17,9 @@ let createStore = function () {
       allTogetherNow: 'user',
       enemy: 'two-face'
     }
-  });
-  return store;
-};
+  })
+  return store
+}
 
 let Jo = {
   id: 4,
@@ -30,7 +30,7 @@ let Jo = {
   links: {
     self: '/user/4/'
   }
-};
+}
 let Riggs = {
   id: 5,
   type: 'user',
@@ -40,7 +40,7 @@ let Riggs = {
   links: {
     self: '/user/5/'
   }
-};
+}
 let Murtaugh = {
   id: 6,
   type: 'user',
@@ -50,7 +50,7 @@ let Murtaugh = {
   links: {
     self: '/user/6/'
   }
-};
+}
 let Bonnie = {
   id: 2,
   type: 'user',
@@ -60,7 +60,7 @@ let Bonnie = {
   links: {
     self: '/user/2/'
   }
-};
+}
 let Clyde = {
   id: 3,
   type: 'user',
@@ -70,11 +70,11 @@ let Clyde = {
   links: {
     self: '/user/3/'
   }
-};
+}
 
-let mother = {data: Jo};
-let siblings = {data: [Riggs, Murtaugh]};
-let allTogetherNow = {data: [Bonnie, Clyde, Jo, Riggs, Murtaugh]};
+let mother = {data: Jo}
+let siblings = {data: [Riggs, Murtaugh]}
+let allTogetherNow = {data: [Bonnie, Clyde, Jo, Riggs, Murtaugh]}
 
 let userWithRelationships = {
   data: {
@@ -101,7 +101,7 @@ let userWithRelationships = {
       friends: {
         data: [
           {id: 2, type: 'user'},
-          {id: 3, type: 'user'},
+          {id: 3, type: 'user'}
         ],
         links: {
           self: '/user/1/relationships/friends',
@@ -131,7 +131,7 @@ let userWithRelationships = {
           {id: 3, type: 'user'},
           {id: 4, type: 'user'},
           {id: 5, type: 'user'},
-          {id: 6, type: 'user'},
+          {id: 6, type: 'user'}
         ],
         links: {
           self: '/user/1/relationships/all-together-now',
@@ -141,146 +141,146 @@ let userWithRelationships = {
     }
   },
   included: [Bonnie, Clyde]
-};
+}
 
 describe('InternalModel', function () {
-  it('triggers a change event when a new relationship is added');
-  it('peeks a new related resource when a relationship is added');
+  it('triggers a change event when a new relationship is added')
+  it('peeks a new related resource when a relationship is added')
 
   describe('toJSON', function () {
     it('returns a hash of all attributes and computed properties', function () {
       let Model = InternalModel.extend({
         computed: {
           amazing: function () {
-            return `much more than just ${this.get('something')}`;
+            return `much more than just ${this.get('something')}`
           }
         }
-      });
+      })
       let model = new Model({
         something: 'else'
-      });
+      })
 
-      assert.deepEqual(model.toJSON(), {
+      expect(model.toJSON()).toEqual({
         amazing: 'much more than just else',
         something: 'else'
-      });
-    });
-  });
+      })
+    })
+  })
 
   describe('attributes', function () {
     it('#get() returns an attributes value', function () {
       let model = new InternalModel({
         amazing: 'boom'
-      });
+      })
 
-      assert.equal(model.get('amazing'), 'boom');
-    });
-  });
+      expect(model.get('amazing')).toEqual('boom')
+    })
+  })
 
   describe('computed properties', function () {
     it('#get() returns a computed property', function () {
       let model = new (InternalModel.extend({
         computed: {
           amazing: function () {
-            return 'a really random value';
+            return 'a really random value'
           }
         }
-      }))();
+      }))()
 
-      assert.equal(model.get('amazing'), 'a really random value');
-    });
+      expect(model.get('amazing')).toEqual('a really random value')
+    })
 
     it('are scoped to the model instance', function () {
       let model = new (InternalModel.extend({
         computed: {
           getScope: function () {
-            return this;
+            return this
           }
         }
-      }))();
+      }))()
 
-      assert.equal(model.get('getScope'), model);
-    });
-  });
+      expect(model.get('getScope')).toEqual(model)
+    })
+  })
 
   describe('hasRelated', function () {
+    let resource
     beforeEach(function () {
-      let store = createStore();
-      this.resource = store.push(userWithRelationships);
-    });
+      let store = createStore()
+      resource = store.push(userWithRelationships)
+    })
 
     it('returns true if the relationship is exists', function () {
-      return assert.equal(this.resource.hasRelated('bff'), true);
-    });
+      expect(resource.hasRelated('bff')).toBeTruthy()
+    })
 
     it('returns false if the relationship is exists', function () {
-      return assert.equal(this.resource.hasRelated('so'), false);
-    });
-  });
+      expect(resource.hasRelated('so')).toBeFalsy()
+    })
+  })
 
   describe('getRelated', function () {
-    before(function () {
-      this.server = sinon.fakeServer.create({autoRespond: true});
-      this.server.respondImmediately = true;
-    });
+    let resource, server
+    beforeAll(function () {
+      server = sinon.fakeServer.create({autoRespond: true})
+      server.respondImmediately = true
+    })
 
     beforeEach(function () {
-      let store = createStore();
-      this.resource = store.push(userWithRelationships);
-    });
+      let store = createStore()
+      resource = store.push(userWithRelationships)
+    })
 
     it('hasOne returns a single model from the cache', function () {
-      return this.resource.getRelated('bff')
-        .then((bff) => assert.equal(bff.get('name'), 'Bonnie'));
-    });
+      return resource.getRelated('bff')
+        .then((bff) => expect(bff.get('name')).toEqual('Bonnie'))
+    })
 
     it('hasOne returns a single model from the network, if it is not cached', function () {
-      this.server.respondWith('GET', '/user/1/mother', JSON.stringify(mother));
-      return this.resource.getRelated('mother')
-        .then((mother) => assert.equal(mother.get('name'), 'Jo'));
-    });
+      server.respondWith('GET', '/user/1/mother', JSON.stringify(mother))
+      return resource.getRelated('mother')
+        .then((mother) => expect(mother.get('name')).toEqual('Jo'))
+    })
 
     it('hasMany returns a collection of models from the cache', function () {
-      return this.resource.getRelated('friends')
+      return resource.getRelated('friends')
         .then((friends) => {
-          assert.equal(friends.at(0).get('name'), 'Bonnie');
-          assert.equal(friends.at(1).get('name'), 'Clyde');
-        });
-    });
+          expect(friends.at(0).get('name')).toEqual('Bonnie')
+          expect(friends.at(1).get('name')).toEqual('Clyde')
+        })
+    })
 
     it('hasMany returns a collection models from the network, if they are not cached', function () {
-      this.server.respondWith('GET', '/user/1/siblings', JSON.stringify(siblings));
-      return this.resource.getRelated('siblings')
+      server.respondWith('GET', '/user/1/siblings', JSON.stringify(siblings))
+      return resource.getRelated('siblings')
         .then((siblings) => {
-          assert.equal(siblings.at(0).get('name'), 'Riggs');
-          assert.equal(siblings.at(1).get('name'), 'Murtaugh');
-        });
-    });
+          expect(siblings.at(0).get('name')).toEqual('Riggs')
+          expect(siblings.at(1).get('name')).toEqual('Murtaugh')
+        })
+    })
 
-    it('hasMany returns a partial collection models from the cache, and hits the network for remaining models', function () {
-      this.server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow));
-      let relationship = this.resource.getRelated('allTogetherNow');
-      assert.equal(relationship.length, 2);
-      return relationship
-        .then(() => assert.equal(relationship.length, 5));
-    });
+    it('hasMany returns a partial collection models from the cache, and hits the network for remaining models', async () => {
+      server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow))
+      let relationship = resource.getRelated('allTogetherNow')
+      expect(relationship).toHaveLength(2)
+      return expect(relationship).resolves.toHaveLength(5)
+    })
 
     it('hasMany partial collection will resolve to a collection of models', function () {
-      this.server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow));
-      let relationship = this.resource.getRelated('allTogetherNow');
-      assert.equal(relationship.length, 2);
-      return relationship
-        .then((rest) => assert.instanceOf(rest, Collection));
-    });
+      server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow))
+      let relationship = resource.getRelated('allTogetherNow')
+      expect(relationship.length).toEqual(2)
+      return expect(relationship).resolves.toBeInstanceOf(Collection)
+    })
 
-    it('throws an exception for an unknown relationship', function () {
-      assert.throws(() => this.resource.getRelated('foo'), 'Relation for "foo" is not defined');
-    });
+    it('throws an exception for an unknown relationship', () => {
+      return expect(() => resource.getRelated('foo')).toThrow('Relation for "foo" is not defined')
+    })
 
-    it('throws an exception for an undefined relationship type', function () {
-      assert.throws(() => this.resource.getRelated('unregistered'), 'Relation for "unregistered" is not defined on the model.');
-    });
+    it('throws an exception for an undefined relationship type', () => {
+      return expect(() => resource.getRelated('unregistered')).toThrow('Relation for "unregistered" is not defined on the model.')
+    })
 
-    it('pends request until parent promise has resolved');
-  });
-});
+    it('pends request until parent promise has resolved')
+  })
+})
