@@ -85,7 +85,7 @@ jobs:
 
       - run:
           name: Publish NPM module
-          command: npm publish
+          command: npm publish --access public
 
 workflows:
   version: 2

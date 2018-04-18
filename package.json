@@ -1,5 +1,5 @@
 {
-  "name": "backbone.store",
+  "name": "@grove/backbone.store",
   "main": "index.js",
   "version": "0.1.0",
   "scripts": {
