@@ -1,6 +1,5 @@
 import _ from 'underscore'
 import {Events, Model} from 'backbone'
-import {Promise} from 'rsvp'
 
 class ModelProxy {
   constructor (content) {

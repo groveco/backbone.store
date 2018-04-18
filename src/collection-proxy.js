@@ -1,6 +1,5 @@
 import _ from 'underscore'
 import {Collection, Events} from 'backbone'
-import {Promise} from 'rsvp'
 
 class CollectionProxy {
   constructor (content) {

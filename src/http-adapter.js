@@ -3,7 +3,6 @@
  * @module
  */
 import {ajax} from 'jquery'
-import {Promise} from 'rsvp'
 
 /**
  * Adapter which works with data over HTTP.
