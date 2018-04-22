@@ -1,6 +1,5 @@
 import {Collection} from 'backbone'
 import CollectionProxy from '../src/collection-proxy'
-import RSVP from 'rsvp'
 import sinon from 'sinon'
 
 function itProxiesProperty (property) {
@@ -165,11 +164,9 @@ describe('CollectionProxy', function () {
 
   it('sets the content when the promise is resolved', function () {
     let collection = new CollectionProxy(new Collection([{something: 'nothing'}]))
-    let deferred = RSVP.defer()
     let resource = new Collection([{something: 'everything'}])
 
-    collection.promise = deferred.promise
-    deferred.resolve(resource)
+    collection.promise = Promise.resolve(resource)
 
     expect(collection.at(0).get('something')).toEqual('nothing')
     return collection.then((result) => {
@@ -180,10 +177,8 @@ describe('CollectionProxy', function () {
 
   it('#then is called when the promise resolves', function () {
     let promiseCollection = new CollectionProxy()
-    let deferred = RSVP.defer()
 
-    promiseCollection.promise = deferred.promise
-    deferred.resolve('ping')
+    promiseCollection.promise = Promise.resolve('ping')
 
     return promiseCollection.then(function (message) {
       expect(message)
@@ -192,10 +187,8 @@ describe('CollectionProxy', function () {
 
   it('#catch is called when the promise is rejected', function () {
     let promiseCollection = new CollectionProxy()
-    let deferred = RSVP.defer()
 
-    promiseCollection.promise = deferred.promise
-    deferred.reject(new Error('ping'))
+    promiseCollection.promise = Promise.reject(new Error('pong'))
 
     return promiseCollection.catch(function (message) {
       expect(message)
@@ -204,11 +197,8 @@ describe('CollectionProxy', function () {
 
   it('#finally is called when the promise is resolved', function () {
     let promiseCollection = new CollectionProxy()
-    let deferred = RSVP.defer()
 
-    promiseCollection.promise = deferred.promise
-    deferred.resolve('ping')
-    promiseCollection.catch(() => {})
+    promiseCollection.promise = Promise.resolve('ping')
 
     return promiseCollection.finally(function () {
       expect(true)
@@ -217,10 +207,8 @@ describe('CollectionProxy', function () {
 
   it('#finally is called when the promise is rejected', function () {
     let promiseCollection = new CollectionProxy()
-    let deferred = RSVP.defer()
 
-    promiseCollection.promise = deferred.promise
-    deferred.reject(new Error('ping'))
+    promiseCollection.promise = Promise.reject(new Error('ping'))
 
     return promiseCollection
       .finally(function () {

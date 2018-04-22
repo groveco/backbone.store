@@ -1,6 +1,5 @@
 import {Model} from 'backbone'
 import ModelProxy from '../src/model-proxy'
-import RSVP from 'rsvp'
 import sinon from 'sinon'
 
 function itProxiesProperty (property) {
@@ -151,11 +150,9 @@ describe('ModelProxy', function () {
 
   it('sets the content when the promise is resolved', function () {
     let model = new ModelProxy(new Model({something: 'nothing'}))
-    let deferred = RSVP.defer()
     let resource = new Model({something: 'everything'})
 
-    model.promise = deferred.promise
-    deferred.resolve(resource)
+    model.promise = Promise.resolve(resource)
 
     expect(model.get('something')).toEqual('nothing')
     return model.then((result) => {
@@ -166,41 +163,32 @@ describe('ModelProxy', function () {
 
   it('#then is called when the promise resolves', function () {
     let model = new ModelProxy()
-    let deferred = RSVP.defer()
 
-    model.promise = deferred.promise
-    deferred.resolve('ping')
+    model.promise = Promise.resolve('ping')
 
     return model.then(message => expect(message))
   })
 
   it('#catch is called when the promise is rejected', function () {
     let model = new ModelProxy()
-    let deferred = RSVP.defer()
 
-    model.promise = deferred.promise
-    deferred.reject(new Error('ping'))
+    model.promise = Promise.reject(new Error('ping'))
 
     return model.catch(message => expect(message))
   })
 
   it('#finally is called when the promise is resolved', function () {
     let model = new ModelProxy()
-    let deferred = RSVP.defer()
 
-    model.promise = deferred.promise
-    deferred.resolve('ping')
-    model.catch(() => {})
+    model.promise = Promise.resolve('ping')
 
     return model.finally(() => expect(true))
   })
 
   it('#finally is called when the promise is rejected', function () {
     let model = new ModelProxy()
-    let deferred = RSVP.defer()
 
-    model.promise = deferred.promise
-    deferred.reject(new Error('ping'))
+    model.promise = Promise.reject(new Error('ping'))
 
     return model
       .finally(() => expect(true))

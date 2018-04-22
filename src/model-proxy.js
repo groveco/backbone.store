@@ -9,6 +9,7 @@ class ModelProxy {
 
     this.eventProxy = _.extend({}, Events)
     this.content = content
+    this.error = null
     this.promise = new Promise(resolve => resolve(content))
   }
 
@@ -22,6 +23,14 @@ class ModelProxy {
       this._content = val
       this._migrateEvents(oldContent)
     }
+  }
+
+  get error () {
+    return this._error
+  }
+
+  set error (val) {
+    this._error = val
   }
 
   _migrateEvents (oldObj) {
@@ -45,11 +54,17 @@ class ModelProxy {
 
   set promise (promise) {
     this._promise = promise
-    return promise
+    this._promise
       .then(resource => {
+        this.error = null
         this.content = resource
         return resource
       })
+      .catch(err => {
+        this.content = null
+        this.error = err
+      })
+    return promise
   }
 
   then () {

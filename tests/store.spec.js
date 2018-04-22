@@ -1,5 +1,4 @@
 import HttpAdapter from '../src/http-adapter'
-import RSVP from 'rsvp'
 import Store from '../src/store'
 import sinon from 'sinon'
 import Model from '../src/internal-model'
@@ -81,7 +80,7 @@ describe('Store', function () {
       let link = '/user/1/'
       let stub = sinon.stub(store._adapter, 'get')
 
-      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+      stub.withArgs('/user/1/').returns(new Promise((resolve) => {
         resolve({
           data: {
             id: 1,
@@ -102,7 +101,7 @@ describe('Store', function () {
       let pantryLink = '/pantry/42/'
       let stub = sinon.stub(store._adapter, 'get')
 
-      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+      stub.withArgs('/user/1/').returns(new Promise((resolve) => {
         resolve({
           data: null,
           included: [{
@@ -124,7 +123,7 @@ describe('Store', function () {
       let store = createStore()
       let stub = sinon.stub(store._adapter, 'get')
 
-      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+      stub.withArgs('/user/1/').returns(new Promise((resolve) => {
         resolve({
           data: [{
             id: 1,
@@ -155,7 +154,7 @@ describe('Store', function () {
       let store = createStore()
       let link = '/user/1/'
       let stub = sinon.stub(store._adapter, 'get')
-      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+      stub.withArgs('/user/1/').returns(new Promise((resolve) => {
         resolve({
           data: {
             id: 1,
@@ -177,7 +176,7 @@ describe('Store', function () {
       let store = createStore()
       let pantryLink = '/pantry/42/'
       let stub = sinon.stub(store._adapter, 'get')
-      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+      stub.withArgs('/user/1/').returns(new Promise((resolve) => {
         resolve({
           data: null,
           included: [{
@@ -204,19 +203,15 @@ describe('Store', function () {
 
       // Force the eventual `fetch` call to fail.
       sinon.stub(store._adapter, 'get', function () {
-        return new RSVP.Promise((_, reject) => {
+        return new Promise((_, reject) => {
           reject(new Error('rejected!'))
         })
       })
 
       let spy = sinon.spy()
+      const promise = store.fetch('user', 1)
 
-      // Make sure no global errors are being triggered
-      RSVP.on('error', () => {
-        assert(false, 'Should not be called, there is a problem with the thennable chain')
-      })
-
-      return store.fetch('user', 1)
+      return promise
         // If no global errors are triggered, we should still be able to catch
         // the rejection here.
         .catch(() => spy())
@@ -224,13 +219,19 @@ describe('Store', function () {
           sinon.assert.calledOnce(spy)
           done()
         })
+        // Make sure no global errors are being triggered
+        .catch(() => {
+          throw new Error('Should not be called, there is a problem with the thennable chain')
+        })
     })
 
     xit('returns a single promise instance if previous request has not resolved', function () {
       let store = createStore()
       let resolver
       sinon.stub(store._adapter, 'get', function () {
-        return new RSVP.Promise((resolve, reject) => resolver = {resolve, reject})
+        return new Promise((resolve, reject) => {
+          resolver = {resolve, reject}
+        })
       })
 
       let first = store.fetch('mything')
@@ -240,9 +241,9 @@ describe('Store', function () {
       let third = store.fetch('mything')
       resolver.resolve()
 
-      return RSVP.all([first, second, third]).finally(() => {
-        assert.equal(first, second)
-        assert.notEqual(first, third)
+      return Promise.all([first, second, third]).finally(() => {
+        expect(first).toEqual(second)
+        expect(first).not.toEqual(third)
       })
     })
 
@@ -262,7 +263,7 @@ describe('Store', function () {
       obj.on('change:name', objChangeSpy)
 
       let stub = sinon.stub(store._adapter, 'get')
-      stub.withArgs('/user/1/').returns(new RSVP.Promise((resolve) => {
+      stub.withArgs('/user/1/').returns(new Promise((resolve) => {
         resolve({
           data: {
             id: 1,
@@ -443,7 +444,7 @@ describe('Store', function () {
       let store = createStore()
       let user = store.build('user', {name: 'Hello'})
       sinon.stub(store._adapter, 'create', function () {
-        return new RSVP.Promise((resolve) => {
+        return new Promise((resolve) => {
           resolve({
             data: {
               id: 1,
@@ -472,7 +473,7 @@ describe('Store', function () {
       let store = createStore()
       let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'})
       sinon.stub(store._adapter, 'update', function () {
-        return new RSVP.Promise((resolve) => {
+        return new Promise((resolve) => {
           resolve({
             data: {
               id: 1,
@@ -501,7 +502,7 @@ describe('Store', function () {
       let store = createStore()
       let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'})
       sinon.stub(store._adapter, 'destroy', function () {
-        return new RSVP.Promise((resolve) => {
+        return new Promise((resolve) => {
           resolve()
         })
       })
