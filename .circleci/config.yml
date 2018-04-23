@@ -28,7 +28,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}-{{ checksum ".circleci/config.yml" }}
+            - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum ".circleci/config.yml" }}
 
       - run: yarn install
 
@@ -40,7 +40,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}-{{ checksum ".circleci/config.yml" }}
+          key: v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum ".circleci/config.yml" }}
 
   lint:
     <<: *defaults
@@ -51,7 +51,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}-{{ checksum ".circleci/config.yml" }}
+            - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum ".circleci/config.yml" }}
 
       - run: yarn lint
 
@@ -64,7 +64,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}-{{ checksum ".circleci/config.yml" }}
+            - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum ".circleci/config.yml" }}
 
       - run: yarn test
 
@@ -77,7 +77,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}-{{ checksum ".circleci/config.yml" }}
+            - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum ".circleci/config.yml" }}
 
       - run:
           name: Authenticating NPM
