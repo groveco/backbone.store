@@ -1,9 +1,9 @@
 {
   "name": "@groveco/backbone.store",
-  "main": "index.js",
+  "main": "dist/index.js",
   "version": "0.2.0",
   "scripts": {
-    "prepack": "babel ./src > ./index.js",
+    "prepack": "babel src --out-dir dist",
     "test": "jest ./tests",
     "lint": "eslint ./src/index.js"
   },
@@ -32,10 +32,5 @@
     "collectCoverage": true,
     "coverageDirectory": "./coverage",
     "testResultsProcessor": "jest-junit"
-  },
-  "browserify": {
-    "transform": [
-      "babelify"
-    ]
   }
 }
