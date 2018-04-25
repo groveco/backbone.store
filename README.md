@@ -80,7 +80,3 @@ let store = BackboneStore.Store.instance();
 // model name is the same as in defining models
 store.register('blog', repo); 
 ```
-
-### Putting everything together
-
-You can see examples [here](https://github.com/groveco/backbone.store/tree/master/examples).
