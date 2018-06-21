@@ -53,7 +53,7 @@ class Store {
    * @param {Function} resource - a JSON API document
    */
   push (resource) {
-    let {data, included} = resource
+    let {data, included, meta, links} = resource
 
     if (!resource.hasOwnProperty('data')) {
       throw new Error('Expected the resource pushed to include a top level property `data`')
@@ -63,15 +63,21 @@ class Store {
       included.forEach(model => this._pushInternalModel(model))
     }
 
+    let result
     if (_.isArray(data)) {
-      return new Collection(data.map(model => this._pushInternalModel(model)))
+      result = new Collection(data.map(model => this._pushInternalModel(model)))
+    } else if (data != null) {
+      result = this._pushInternalModel(data)
+    } else {
+      result = null
     }
 
-    if (data == null) {
-      return null
+    if (result) {
+      result.meta = meta
+      result.links = links
     }
 
-    return this._pushInternalModel(data)
+    return result
   }
 
   _pushInternalModel (data) {
