@@ -31,6 +31,7 @@
   "jest": {
     "collectCoverage": true,
     "coverageDirectory": "./coverage",
-    "testResultsProcessor": "jest-junit"
+    "testResultsProcessor": "jest-junit",
+    "testURL": "http://localhost/"
   }
 }
