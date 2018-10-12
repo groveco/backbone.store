@@ -245,14 +245,12 @@ class Store {
    * @private
    */
   getHasMany (owner, link, all, query) {
-    let models
-    if (all != null) {
-      models = this.peekMany(all)
-      if (!models.content._incomplete) {
-        return models
-      }
+    let models = this.peekMany(all)
+    if (!models.content._incomplete) {
+      return models
+    } else {
+      return this.fetchHasMany(owner, models, link, query)
     }
-    return this.fetchHasMany(owner, models, link, query)
   }
 
   /**
@@ -267,6 +265,13 @@ class Store {
     models.promise = promise
 
     return result
+  }
+
+  /**
+   * @private
+   */
+  fetchUnknown (link, query) {
+    return this._fetch(link, query)
   }
 
   create (resource) {
