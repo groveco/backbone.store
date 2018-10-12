@@ -1,7 +1,7 @@
 {
   "name": "@groveco/backbone.store",
   "main": "dist/index.js",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "scripts": {
     "prepack": "babel src --out-dir dist",
     "test": "jest ./tests",
