@@ -78,17 +78,23 @@ class HttpAdapter {
     }
 
     return new Promise((resolve, reject) => {
-      let request = {
+      return ajax({
         url,
         type,
         headers,
-        success: (data, textStatus, jqXhr) => {
+        // being explicit about data type so jQuery doesn't "intelligent guess" wrong
+        // changing this may not break tests, but does behave badly in prod
+        dataType: 'text',
+        data
+      })
+      .then(
+        function HttpAdapter_ajax_success (data, textStatus, jqXhr) {
           if (!data && jqXhr.status !== 204) {
             throw new Error(`request returned ${jqXhr.status} status without data`)
           }
           return resolve(data)
         },
-        error: (response) => {
+        function HttpAdapter_ajax_error (response) {
           if (response.readyState === 0 || response.status === 0) {
             // this is a canceled request, so we literally should do nothing
             return
@@ -97,14 +103,8 @@ class HttpAdapter {
           const error = new Error(`request for resource, ${url}, returned ${response.status} ${response.statusText}`)
           error.response = response
           reject(error)
-        },
-        // being explicit about data type so jQuery doesn't "intelligent guess" wrong
-        // changing this may not break tests, but does behave badly in prod
-        dataType: 'text',
-        data
-      }
-
-      ajax(request)
+        }
+      );
     })
   }
 }
