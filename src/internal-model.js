@@ -45,23 +45,16 @@ export default Model.extend({
     return undefined
   },
 
-  getRelationshipType (relationName) {
-    let relationship = this.getRelationship(relationName)
-    if (_.isArray(relationship.data)) {
-      return 'has-many'
-    } else if (relationship.data) {
-      return 'belongs-to'
-    } else {
-      return 'unknown'
-    }
-  },
-
   getRelationshipLink (relationName) {
     let link = this.getRelationship(relationName).links.related
     if (link == null) {
       throw new Error(`link for, "${relationName}", is undefined for ${this.get('_type')}-${this.id}`)
     }
     return link
+  },
+
+  _getRelationForName (relationName) {
+    return this.relationships && this.relationships[relationName]
   },
 
   getRelationship (relationName) {
@@ -76,6 +69,16 @@ export default Model.extend({
     }
 
     return relationship
+  },
+
+  getRelationshipType (relationName) {
+    let relationship = _.result(this.getRelationship(relationName), 'data')
+
+    if (_.isArray(relationship)) return 'has-many'
+
+    if (relationship) return 'belongs-to'
+
+    return null
   },
 
   hasRelated (relationName) {
@@ -112,8 +115,5 @@ export default Model.extend({
     }
   },
 
-  _getRelationForName (relationName) {
-    return this.relationships && this.relationships[relationName]
-  }
 })
 
