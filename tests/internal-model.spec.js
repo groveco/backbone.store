@@ -203,19 +203,22 @@ describe('InternalModel', function () {
     })
   })
 
-  describe('hasRelated', function () {
+  describe('hasRelated', () => {
     let resource
-    beforeEach(function () {
-      let store = createStore()
-      resource = store.push(userWithRelationships)
+    beforeEach(() => {
+      resource = createStore().push(userWithRelationships)
     })
 
-    it('returns true if the relationship is exists', function () {
+    it('returns true if the relationship exists', () => {
       expect(resource.hasRelated('bff')).toBeTruthy()
     })
 
-    it('returns false if the relationship is exists', function () {
+    it('returns false if the relationship does NOT exist', () => {
       expect(resource.hasRelated('so')).toBeFalsy()
+    })
+
+    it('returns false if the relationship is invalid', () => {
+      expect(resource.hasRelated('nada')).toBeFalsy()
     })
   })
 

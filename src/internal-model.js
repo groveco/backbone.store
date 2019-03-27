@@ -59,16 +59,21 @@ export default Model.extend({
     return this.relationships && this.relationships[relationName]
   },
 
-  getRelationship (relationName) {
+  getRelationship (relationName, strict = true) {
     let modelName = this._getRelationForName(relationName)
-    if (modelName == null) {
-      throw new Error('Relation for "' + relationName + '" is not defined on the model.')
+
+    if (modelName == null && strict) {
+      if (strict) throw new Error('Relation for "' + relationName + '" is not defined on the model.')
+
+      return null
     }
 
     let relationship = _.result(this.get('relationships'), relationName)
 
     if (relationship == null) {
-      throw new Error('There is no relationship "' + relationName + '" in the resource.')
+      if (strict) throw new Error('There is no relationship "' + relationName + '" in the resource.')
+
+      return null
     }
 
     return relationship
@@ -85,7 +90,7 @@ export default Model.extend({
   },
 
   hasRelated (relationName) {
-    const relationship = this.getRelationship(relationName)
+    const relationship = this.getRelationship(relationName, false)
 
     return !!_.result(relationship, ['data', 'id'])
   },
