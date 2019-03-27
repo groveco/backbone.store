@@ -3,7 +3,9 @@
   "main": "dist/index.js",
   "version": "0.2.3",
   "scripts": {
-    "prepack": "babel src --out-dir dist",
+    "prepack": "npm run build",
+    "build": "babel src --out-dir dist",
+    "build:watch": "babel --watch src --out-dir dist",
     "test": "jest ./tests",
     "lint": "eslint ./src/index.js"
   },
