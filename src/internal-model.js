@@ -46,10 +46,12 @@ export default Model.extend({
   },
 
   getRelationshipLink (relationName) {
-    let link = this.getRelationship(relationName).links.related
+    let link = _.result(this.getRelationship(relationName), ['links', 'related'])
+
     if (link == null) {
       throw new Error(`link for, "${relationName}", is undefined for ${this.get('_type')}-${this.id}`)
     }
+
     return link
   },
 
@@ -63,7 +65,8 @@ export default Model.extend({
       throw new Error('Relation for "' + relationName + '" is not defined on the model.')
     }
 
-    let relationship = this.get('relationships') && this.get('relationships')[relationName]
+    let relationship = _.result(this.get('relationships'), relationName)
+
     if (relationship == null) {
       throw new Error('There is no relationship "' + relationName + '" in the resource.')
     }
@@ -83,7 +86,8 @@ export default Model.extend({
 
   hasRelated (relationName) {
     const relationship = this.getRelationship(relationName)
-    return !!(relationship && relationship.data && relationship.data.id)
+
+    return !!_.result(relationship, ['data', 'id'])
   },
 
   getRelated (relationName, query) {
