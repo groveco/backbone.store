@@ -1,17 +1,27 @@
 import _ from 'underscore'
-import {Model} from 'backbone'
+import { Model } from 'backbone'
 
-let InternalModel = Model.extend({
+function attributesWithDefaults(attributes, defaults) {
+  return _.defaults(_.extend({}, defaults, attributes), defaults)
+}
+
+export default Model.extend({
   constructor: function (attributes) {
-    let defaults = _.result(this, 'defaults')
-    attributes || (attributes = {})
+    _.defaults(this, {
+      defaults: { },
+      attributes: { },
+      computed: { },
+      changed: { },
+    })
 
-    this.cid = _.uniqueId(this.cidPrefix)
-    this.attributes = {}
-    if (this.computed == null) this.computed = {}
-    attributes = _.defaults(_.extend({}, defaults, attributes), defaults)
-    this.set(attributes)
-    this.changed = {}
+    _.extend(this, {
+      cid: _.uniqueId(this.cidPrefix)
+    })
+
+    const defaults = _.result(this, 'defaults')
+
+    this.set(attributesWithDefaults(attributes, defaults))
+
     this.initialize.apply(this, arguments)
   },
 
@@ -101,4 +111,3 @@ let InternalModel = Model.extend({
   }
 })
 
-export default InternalModel
