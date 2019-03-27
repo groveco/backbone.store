@@ -96,33 +96,26 @@ export default Model.extend({
   },
 
   getRelated (relationName, query) {
-    let link = this.getRelationshipLink(relationName)
-    let relType = this.getRelationshipType(relationName)
+    const link = this.getRelationshipLink(relationName)
 
-    if (relType === 'unknown') {
-      return this.fetchRelated(relationName, query)
-    } else if (relType === 'has-many') {
-      let data = this.getRelationship(relationName).data
-      return this.store.getHasMany(this, link, data, query)
-    } else {
-      let {type, id} = this.getRelationship(relationName).data
-      return this.store.getBelongsTo(this, link, type, id, query)
-    }
+    const related = _.result(this.getRelationship(relationName), 'data')
+
+    if (!related) return this.fetchRelated(relationName, query)
+
+    return _.isArray(related)
+      ? this.store.getHasMany(this, link, related, query)
+      : this.store.getBelongsTo(this, link, related.type, related.id, query)
   },
 
   fetchRelated (relationName, query) {
     let link = this.getRelationshipLink(relationName)
-    let relType = this.getRelationshipType(relationName)
 
-    if (relType === 'unknown') {
-      return this.store.fetchUnknown(link, query)
-    } else if (relType === 'has-many') {
-      return this.store.fetchHasMany(this, null, link, query)
-    } else {
-      let {type, id} = this.getRelationship(relationName).data
-      return this.store.fetchBelongsTo(this, link, type, id, query)
-    }
+    const related = _.result(this.getRelationship(relationName), 'data')
+
+    if (!related) return this.store.fetchUnknown(link, query)
+
+    return (_.isArray(related))
+      ? this.store.fetchHasMany(this, null, link, query)
+      : this.store.fetchBelongsTo(this, link, related.type, related.id, query)
   },
-
 })
-
