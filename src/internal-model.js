@@ -31,12 +31,18 @@ export default Model.extend({
     return _.extend(attributes, computed)
   },
 
+  /**
+   * {Backbone.Model} does not provide "computed" properties.
+   *
+   * @param {string} attr name
+   * @return {mixed|undefined} via {attributes[attr]} or {computed[attr]}
+   */
   get (attr) {
-    if (this.attributes.hasOwnProperty(attr)) {
-      return this.attributes[attr]
-    } else if (this.computed.hasOwnProperty(attr)) {
-      return this.computed[attr].call(this)
-    }
+    if (this.attributes.hasOwnProperty(attr)) return this.attributes[attr]
+
+    if (this.computed.hasOwnProperty(attr)) return this.computed[attr].call(this)
+
+    return undefined
   },
 
   getRelationshipType (relationName) {
