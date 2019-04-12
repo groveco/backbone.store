@@ -26,8 +26,8 @@ export default Model.extend({
   },
 
   toJSON () {
-    let attributes = _.clone(this.attributes)
-    let computed = _.mapObject(this.computed, (cp) => cp.call(this))
+    const attributes = _.clone(this.attributes)
+    const computed = _.mapObject(this.computed, (cp) => cp.call(this))
     return _.extend(attributes, computed)
   },
 
@@ -46,7 +46,7 @@ export default Model.extend({
   },
 
   getRelationshipLink (relationName) {
-    let link = _.result(this.getRelationship(relationName), ['links', 'related'])
+    const link = _.result(this.getRelationship(relationName), ['links', 'related'])
 
     if (link == null) {
       throw new Error(`link for, "${relationName}", is undefined for ${this.get('_type')}-${this.id}`)
@@ -60,7 +60,7 @@ export default Model.extend({
   },
 
   getRelationship (relationName, strict = true) {
-    let modelName = this._getRelationForName(relationName)
+    const modelName = this._getRelationForName(relationName)
 
     if (modelName == null && strict) {
       if (strict) throw new Error('Relation for "' + relationName + '" is not defined on the model.')
@@ -68,7 +68,7 @@ export default Model.extend({
       return null
     }
 
-    let relationship = _.result(this.get('relationships'), relationName)
+    const relationship = _.result(this.get('relationships'), relationName)
 
     if (relationship == null) {
       if (strict) throw new Error('There is no relationship "' + relationName + '" in the resource.')
@@ -80,7 +80,7 @@ export default Model.extend({
   },
 
   getRelationshipType (relationName) {
-    let relationship = _.result(this.getRelationship(relationName), 'data')
+    const relationship = _.result(this.getRelationship(relationName), 'data')
 
     if (_.isArray(relationship)) return 'has-many'
 
@@ -108,7 +108,7 @@ export default Model.extend({
   },
 
   fetchRelated (relationName, query) {
-    let link = this.getRelationshipLink(relationName)
+    const link = this.getRelationshipLink(relationName)
 
     const related = _.result(this.getRelationship(relationName), 'data')
 
