@@ -1,7 +1,7 @@
 import _ from 'underscore'
 import { Model } from 'backbone'
 
-function attributesWithDefaults(attributes, defaults) {
+function attributesWithDefaults (attributes, defaults) {
   return _.defaults(_.extend({}, defaults, attributes), defaults)
 }
 
@@ -11,7 +11,7 @@ export default Model.extend({
       defaults: { },
       attributes: { },
       computed: { },
-      changed: { },
+      changed: { }
     })
 
     _.extend(this, {
@@ -117,5 +117,5 @@ export default Model.extend({
     return (_.isArray(related))
       ? this.store.fetchHasMany(this, null, link, query)
       : this.store.fetchBelongsTo(this, link, related.type, related.id, query)
-  },
+  }
 })
