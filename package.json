@@ -1,7 +1,7 @@
 {
   "name": "@groveco/backbone.store",
   "main": "dist/index.js",
-  "version": "0.3.0-2",
+  "version": "0.3.0",
   "scripts": {
     "prepack": "npm run build",
     "build": "babel src --out-dir dist",
