@@ -142,29 +142,3 @@ let parser = new BackboneStore.JsonApiParser();
 let adapter = new BackboneStore.HttpAdapter('/api/blog/', parser);
 let repo = new BackboneStore.Repository(BlogModel, adapter);
 ```
-
-### Instantiating a Store
-
-Store is a singleton with 'private' constructor. To get a Store instance use `instance` static method:
-
-```javascript
-import BackboneStore from 'backbone.store'
-
-let store = BackboneStore.Store.instance();
-```
-
-Then you register you repositories in store:
-
-```javascript
-import BackboneStore from 'backbone.store'
-import BlogModel from './path/to/blog-model'
-
-let parser = new BackboneStore.JsonApiParser();
-let adapter = new BackboneStore.HttpAdapter('/api/blog/', parser);
-let repo = new BackboneStore.Repository(BlogModel, adapter);
-
-let store = BackboneStore.Store.instance();
-
-// model name is the same as in defining models
-store.register('blog', repo);
-```
