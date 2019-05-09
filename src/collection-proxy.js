@@ -1,6 +1,12 @@
 import _ from 'underscore'
 import {Collection, Events} from 'backbone'
 
+/**
+ * A Proxy object for a { Backbone.Collection }. All methods
+ * for Backbone Collections are defined for the CollectionProxy
+ * class.
+ * @param { Collection }
+ */
 class CollectionProxy {
   constructor (content) {
     if (content == null) {

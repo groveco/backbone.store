@@ -1,11 +1,16 @@
-/**
+/***
  * HttpAdapter
  * @module
  */
 import {ajax} from 'jquery'
 
 /**
- * Adapter which works with data over HTTP.
+ * Adapter which works with data over HTTP, based on the options that
+ * are passed to it's constructor. This class is responsible for
+ * any CRUD operations that need to be carried out with your JSON:API service
+ * from within the Backbone.Store.
+ * @param {Object} options -  An object that contains a property, `urlPrefix`,
+ * that defines the REST service that will be returning a JSON:API response
  */
 class HttpAdapter {
   constructor (options = {}) {
@@ -28,6 +33,7 @@ class HttpAdapter {
 
   /**
    * Get entity by link.
+   * @private
    * @param {string} link - Link to entity.
    * @returns {Promise} Promise for fetched data.
    */
@@ -38,6 +44,7 @@ class HttpAdapter {
 
   /**
    * Create entity.
+   * @private
    * @param {string} link - Entity url.
    * @param {object} attributes - Data to create entity with.
    * @returns {Promise} Promise for created data.
@@ -49,6 +56,7 @@ class HttpAdapter {
 
   /**
    * Update entity.
+   * @private
    * @param {string} link - Entity url.
    * @param {object} attributes - Data to update entity with.
    * @returns {Promise} Promise for updated data.
@@ -60,6 +68,7 @@ class HttpAdapter {
 
   /**
    * Destroy entity.
+   * @private
    * @param {string} link - Entity self link.
    * @returns {Promise} Promise for destroy.
    */

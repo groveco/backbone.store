@@ -1,10 +1,11 @@
-/**
+/***
  * Repository.
  * @module
  */
 import RepositoryCollection from './repository-collection'
 
 /**
+ * @private
  * Repository class which provides access to entities and stores them.
  */
 class Repository {

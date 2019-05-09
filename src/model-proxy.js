@@ -1,6 +1,12 @@
 import _ from 'underscore'
 import {Events, Model} from 'backbone'
 
+/**
+ * A Proxy object for an {internal-store}. All methods
+ * for Backbone Models as well as methods from internal-model
+ * are defined.
+ * @param { content: internal-model }
+ */
 class ModelProxy {
   constructor (content) {
     if (content == null) {
