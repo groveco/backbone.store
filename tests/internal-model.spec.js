@@ -108,6 +108,13 @@ let userWithRelationships = {
           related: '/user/1/friends'
         }
       },
+      enemies: {
+        data: [],
+        links: {
+          self: '/user/1/relationships/enemies',
+          related: '/user/1/enemies'
+        }
+      },
       mother: {
         data: {id: 4, type: 'user'},
         links: {
@@ -210,15 +217,23 @@ describe('InternalModel', function () {
     })
 
     it('returns true if the relationship exists', () => {
-      expect(resource.hasRelated('bff')).toBeTruthy()
+      expect(resource.hasRelated('bff')).toBe(true)
+    })
+
+    it('returns true if relationship has a collection of models', () => {
+      expect(resource.hasRelated('friends')).toBe(true)
+    })
+
+    it('returns false if relationship is empty', () => {
+      expect(resource.hasRelated('enemies')).toBe(false)
     })
 
     it('returns false if the relationship does NOT exist', () => {
-      expect(resource.hasRelated('so')).toBeFalsy()
+      expect(resource.hasRelated('so')).toBe(false)
     })
 
     it('returns false if the relationship is invalid', () => {
-      expect(resource.hasRelated('nada')).toBeFalsy()
+      expect(resource.hasRelated('nada')).toBe(false)
     })
   })
 
