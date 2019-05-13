@@ -68,6 +68,39 @@ jobs:
 
       - run: yarn test
 
+  docs-build:
+     <<: *defaults
+     steps:
+       - restore_cache:
+           keys:
+             - v5-repo-{{ .Environment.CIRCLE_SHA1 }}
+ 
+       - restore_cache:
+           keys:
+             - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum ".circleci/config.yml" }}
+ 
+       - run:
+           name: Generate docs to build
+           command: npm run docs:build
+
+       - run:
+          name: Disable jekyll builds
+          command: touch docs/.nojekyll
+ 
+       - run:
+           name: Configure CircleCi deployment
+           command: |
+             git config user.email "icunningham@grove.co"
+             git config user.name "CircleCi Doc Deploy Backbone.Store"
+
+       - add_ssh_keys:
+           fingerprints:
+             - "cf:11:c6:b2:2d:e3:31:b9:a9:ca:18:dd:99:27:ae:ab"
+
+       - run:
+           name: Deploy docs to gh-pages branch
+           command: npm run gh-pages-deploy
+
   publish:
     <<: *defaults
     steps:
@@ -104,10 +137,15 @@ workflows:
           requires:
             - install-deps
 
+      - docs-build:
+         requires:
+           - install-deps
+
       - publish:
           requires:
             - lint
             - test
+            - docs-build
           filters:
             branches:
               only: -none-

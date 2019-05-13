@@ -8,7 +8,9 @@
     "build:watch": "babel --watch src --out-dir dist",
     "test": "jest ./tests",
     "lint": "eslint ./src/index.js",
-    "docs:build": "documentation build src/** -f html -o docs-html --project-name Backbone.Store"
+    "docs:build-dev": "node_modules/.bin/jsdoc --readme README.md src/* -d ./docs",
+    "docs:build": "jsdoc --readme README.md src/* -d ./docs",
+    "gh-pages-deploy": "gh-pages --dotfiles --message '[skip ci] Updates' --dist docs"
   },
   "dependencies": {
     "backbone": "^1.3.3",
@@ -27,8 +29,10 @@
     "eslint-plugin-jest": "^19.0.1",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
+    "gh-pages": "^2.0.1",
     "jest": "^22.4.0",
     "jest-junit": "^1.3.0",
+    "jsdoc": "^3.6.2",
     "sinon": "^1.17.2"
   },
   "jest": {
