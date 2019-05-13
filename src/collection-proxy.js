@@ -2,7 +2,7 @@ import _ from 'underscore'
 import {Collection, Events} from 'backbone'
 
 /**
- * A Proxy object for a { Backbone.Collection }. All methods
+ * A Proxy object for a {@link https://backbonejs.org/#Collection Backbone.Collection}. All methods
  * for Backbone Collections are defined for the CollectionProxy
  * class.
  * @param { Collection }

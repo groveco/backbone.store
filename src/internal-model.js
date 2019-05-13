@@ -5,7 +5,16 @@ function attributesWithDefaults (attributes, defaults) {
   return _.defaults(_.extend({}, defaults, attributes), defaults)
 }
 
+/**
+ * Exports a Backbone model extended with utility methods that enables the
+ * retrieval of data based on {@link https://jsonapi.org/ JSON:API} formatted responses
+ * @module internal-model
+ */
 export default Model.extend({
+  /**
+   * Constructs a Backbone Model with the given attributes passed to it
+   * @param {Object} attributes - Object with attributes
+   */
   constructor: function (attributes) {
     _.defaults(this, {
       defaults: { },
@@ -59,6 +68,16 @@ export default Model.extend({
     return this.relationships && this.relationships[relationName]
   },
 
+  /**
+   * Get the relationship's {@link https://jsonapi.org/format/#document-resource-object-relationships resource object}
+   * from the {@link https://jsonapi.org/ JSON:API} response. If the given `relationName` does not
+   * exist or the relationship object returned is null, then an
+   * exception is thrown. Otherwise, the relationship object for the
+   * given `relationName` is returned
+   * @param {String} relationName - The name of a given resource found within the response's relationship's object
+   * @param {Boolean} strict - A boolean indicating whether method is ran in strict mode.
+   * @returns {Object} - The relationships object from the {@link https://jsonapi.org/ JSON:API}
+   */
   getRelationship (relationName, strict = true) {
     const modelName = this._getRelationForName(relationName)
 
@@ -93,31 +112,52 @@ export default Model.extend({
     return null
   },
 
+  /**
+   * Check if the given relation exists
+   * @param {string} relationName - The name of a registered Model in a responses relationship
+   * @returns {Boolean} true if relationship exists
+   */
   hasRelated (relationName) {
     return !_.isEmpty(this.getRelationshipData(relationName, false))
   },
 
-  getRelated (relationName, query) {
+  /**
+   * Get a stores related model. Will return the model in the cache
+   * if it has already been fetched. If not, then we fetch the response
+   * from the server
+   * @param {string} relationName - The name of a registered Model in a responses relationship
+   * @param {Object} queryObj - An object that will have it's key:value pairs converted to a
+   * query string.
+   * @returns { CollectionProxy | ModelProxy }
+   */
+  getRelated (relationName, queryObj) {
     const link = this.getRelationshipLink(relationName)
 
     const related = this.getRelationshipData(relationName)
 
-    if (!related) return this.fetchRelated(relationName, query)
+    if (!related) return this.fetchRelated(relationName, queryObj)
 
     return _.isArray(related)
-      ? this.store.getHasMany(this, link, related, query)
-      : this.store.getBelongsTo(this, link, related.type, related.id, query)
+    ? this.store.getHasMany(this, link, related, queryObj)
+    : this.store.getBelongsTo(this, link, related.type, related.id, queryObj)
   },
 
-  fetchRelated (relationName, query) {
+  /**
+   * Fetch a stores related model from the server.
+   * @param {string} relationName - The name of a registered Model in a responses relationship
+   * @param {Object} queryObj - An object that will have it's key:value pairs converted to a
+   * query string.
+   * @returns { CollectionProxy | ModelProxy }
+   */
+  fetchRelated (relationName, queryObj) {
     const link = this.getRelationshipLink(relationName)
 
     const related = this.getRelationshipData(relationName)
 
-    if (!related) return this.store.fetchUnknown(link, query)
+    if (!related) return this.store.fetchUnknown(link, queryObj)
 
     return (_.isArray(related))
-      ? this.store.fetchHasMany(this, null, link, query)
-      : this.store.fetchBelongsTo(this, link, related.type, related.id, query)
+    ? this.store.fetchHasMany(this, null, link, queryObj)
+    : this.store.fetchBelongsTo(this, link, related.type, related.id, queryObj)
   }
 })

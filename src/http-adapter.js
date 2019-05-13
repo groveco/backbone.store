@@ -7,10 +7,10 @@ import {ajax} from 'jquery'
 /**
  * Adapter which works with data over HTTP, based on the options that
  * are passed to it's constructor. This class is responsible for
- * any CRUD operations that need to be carried out with your JSON:API service
+ * any CRUD operations that need to be carried out with your {@link https://jsonapi.org/ JSON:API} service
  * from within the Backbone.Store.
  * @param {Object} options -  An object that contains a property, `urlPrefix`,
- * that defines the REST service that will be returning a JSON:API response
+ * that defines the REST service that will be returning a {@link https://jsonapi.org/ JSON:API} response
  */
 class HttpAdapter {
   constructor (options = {}) {
