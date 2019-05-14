@@ -54,7 +54,7 @@ jobs:
             - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum ".circleci/config.yml" }}
 
       - run: yarn lint
-
+          
   test:
     <<: *defaults
     steps:
@@ -67,6 +67,30 @@ jobs:
             - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum ".circleci/config.yml" }}
 
       - run: yarn test
+
+  docs-deploy:
+    <<: *defaults
+    steps:
+      - restore_cache:
+          keys:
+            - v5-repo-{{ .Environment.CIRCLE_SHA1 }}
+
+      - restore_cache:
+          keys:
+            - v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum ".circleci/config.yml" }}
+
+      - run:
+          name: Install npm dependency for documentation
+          command: npm install -g --silent documentation
+
+      - run:
+          name: Generate docs to build to docs directory
+          command: npm run docs:build
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v5-npm-dependencies-{{ checksum "package.json" }}-{{ checksum ".circleci/config.yml" }}
 
   publish:
     <<: *defaults
@@ -104,10 +128,15 @@ workflows:
           requires:
             - install-deps
 
+      - docs-deploy:
+          requires:
+            - install-deps
+
       - publish:
           requires:
             - lint
             - test
+            - docs-deploy
           filters:
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
