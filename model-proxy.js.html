@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: model-proxy.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: model-proxy.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import _ from 'underscore'
+import {Events, Model} from 'backbone'
+
+/**
+ * A Proxy object for an {internal-model}. All methods
+ * for {@link https://backbonejs.org/#Model Backbone.Model} as well as methods from internal-model
+ * are defined.
+ * @param { internal-model }
+ */
+class ModelProxy {
+  constructor (content) {
+    if (content == null) {
+      content = new Model()
+    }
+
+    this.eventProxy = _.extend({}, Events)
+    this.content = content
+    this.error = null
+    this.promise = new Promise(resolve => resolve(content))
+  }
+
+  get content () {
+    return this._content
+  }
+
+  set content (val) {
+    let oldContent = this._content
+    if (oldContent !== val) {
+      this._content = val
+      this._migrateEvents(oldContent)
+    }
+  }
+
+  get error () {
+    return this._error
+  }
+
+  set error (val) {
+    this._error = val
+  }
+
+  _migrateEvents (oldObj) {
+    if (oldObj == null) return
+    let oldEvents = oldObj._events
+
+    if (oldEvents != null) {
+      Object.keys(oldEvents).forEach((name) => {
+        let events = _.filter(oldEvents[name], {context: this.eventProxy})
+        let callbacks = _.pluck(events, 'callback')
+        callbacks.forEach((callback) => this.on(name, callback))
+      })
+    }
+
+    this.eventProxy.stopListening(oldObj)
+  }
+
+  get promise () {
+    return this._promise
+  }
+
+  set promise (promise) {
+    this._promise = promise
+    this._promise
+      .then(resource => {
+        this.error = null
+        this.content = resource
+        return resource
+      })
+      .catch(err => {
+        this.content = null
+        this.error = err
+      })
+    return promise
+  }
+
+  then () {
+    return this.promise.then(...arguments)
+  }
+
+  catch () {
+    return this.promise.catch(...arguments)
+  }
+
+  finally () {
+    return this.promise.finally(...arguments)
+  }
+
+  off () { return this.eventProxy.stopListening(this.content, ...arguments) }
+  on () { return this.eventProxy.listenTo(this.content, ...arguments) }
+  once () { return this.eventProxy.listenToOnce(this.content, ...arguments) }
+
+  //
+  // Proxied methods and properties
+  //
+
+  get _getRelationForName () { return this.content._getRelationForName }
+  get attributes () { return this.content.attributes }
+  get changed () { return this.content.changed }
+  get changedAttributes () { return this.content.changedAttributes }
+  get cid () { return this.content.cid }
+  get defaults () { return this.content.defaults }
+  get getRelated () { return this.content.getRelated }
+  get hasRelated () { return this.content.hasRelated }
+  get getRelationship () { return this.content.getRelationship }
+  get getRelationshipLink () { return this.content.getRelationshipLink }
+  get getRelationshipType () { return this.content.getRelationshipType }
+  get hasChanged () { return this.content.hasChanged }
+  get id () { return this.content.id }
+  get idAttribute () { return this.content.idAttribute }
+  get isNew () { return this.content.isNew }
+  get isValid () { return this.content.isValid }
+  get previousAttributes () { return this.content.previousAttributes }
+  get relationships () { return this.content.relationships }
+  get validationError () { return this.content.validationError }
+
+  chain () { return this.content.chain(...arguments) }
+  clear () { return this.content.clear(...arguments) }
+  escape () { return this.content.escape(...arguments) }
+  get () { return this.content.get(...arguments) }
+  has () { return this.content.has(...arguments) }
+  invert () { return this.content.invert(...arguments) }
+  isEmpty () { return this.content.isEmpty(...arguments) }
+  keys () { return this.content.keys(...arguments) }
+  omit () { return this.content.omit(...arguments) }
+  pairs () { return this.content.pairs(...arguments) }
+  pick () { return this.content.pick(...arguments) }
+  previous () { return this.content.previous(...arguments) }
+  set () { return this.content.set(...arguments) }
+  toJSON () { return this.content.toJSON(...arguments) }
+  unset () { return this.content.unset(...arguments) }
+  validate () { return this.content.validate(...arguments) }
+  values () { return this.content.values(...arguments) }
+}
+
+export default ModelProxy
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-internal-model.html">internal-model</a></li></ul><h3>Classes</h3><ul><li><a href="CollectionProxy.html">CollectionProxy</a></li><li><a href="HttpAdapter.html">HttpAdapter</a></li><li><a href="ModelProxy.html">ModelProxy</a></li><li><a href="Store.html">Store</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Thu May 16 2019 03:07:43 GMT+0000 (UTC)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

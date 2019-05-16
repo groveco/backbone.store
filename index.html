@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>Backbone Store</h1>
+<p>Backbone Store is a library for managing and caching data in Backbone applications.</p>
+<h2>Contributing to Backbone Store</h2>
+<p>If you're using <code>@groveco/backbone.store</code> in your own project:</p>
+<ol>
+<li>Clone this repo locally, e.g.</li>
+</ol>
+<pre class="prettyprint source lang-sh"><code>$> git clone https://github.com/groveco/backbone.store ~/Projects/backbone.store && cd $_
+Cloning https://github.com/groveco/backbone.store into ~/Projects/backbone.store
+. . .
+cd ~/Projects/backbone.store
+$> pwd
+~/Projects/backbone.store
+</code></pre>
+<ol start="2">
+<li>Link your work-tree as the globally installed package:</li>
+</ol>
+<pre class="prettyprint source lang-sh"><code>$> pwd
+~/Projects/backbone.store
+$> npm link
+npm install...
+linking @groveco/backbone.store
+$> npm ls --global --depth=0
+/path/to/global/node_modules
+├── @groveco/backbone.store@X.Y.Z -> ~/Projects/backbone.store
+├── nodemon@1.18.9
+└── npm@6.1.0
+</code></pre>
+<ol start="3">
+<li>Link the globally linked version of <code>backbone.store</code> in the work-tree of the project that is consuming <code>backbone.store</code>:</li>
+</ol>
+<pre class="prettyprint source lang-sh"><code>$> pwd
+~/Projects/backbone.store
+$> pushd ../other-project ## e.g. `groveco/grove`
+~/Projects/other-project  ~/Projects/backbone.store
+$> npm link @groveco/backbone.store
+~/other-project/node_modules/@groveco/backbone.store -> /path/to/global/node_modules/@groveco/backbone.store -> ~/Projects/backbone.store
+</code></pre>
+<ol start="4">
+<li>Switch back to your local clone of <code>groveco/backbone.store</code> and get to work!</li>
+</ol>
+<pre class="prettyprint source lang-sh"><code>$> pwd
+~/Projects/other-project
+$> popd
+~/Projects/backbone.store
+</code></pre>
+<ol start="5">
+<li>Run <code>npm run build</code> to recompile the library:</li>
+</ol>
+<pre class="prettyprint source lang-sh"><code>$> pwd
+~/Projects/backbone.store
+$> npm run build
+
+> @groveco/backbone.store@0.2.3 build ~/Projects/backbone.store
+> babel src --out-dir dist
+
+src/camelcase-dash.js -> dist/camelcase-dash.js
+src/collection-proxy.js -> dist/collection-proxy.js
+src/http-adapter.js -> dist/http-adapter.js
+src/index.js -> dist/index.js
+src/internal-model.js -> dist/internal-model.js
+src/json-api-parser.js -> dist/json-api-parser.js
+src/model-proxy.js -> dist/model-proxy.js
+src/repository-collection.js -> dist/repository-collection.js
+src/repository.js -> dist/repository.js
+src/store.js -> dist/store.js
+
+$> tree dist/
+dist
+├── camelcase-dash.js
+├── collection-proxy.js
+├── http-adapter.js
+├── index.js
+├── internal-model.js
+├── json-api-parser.js
+├── model-proxy.js
+├── repository-collection.js
+├── repository.js
+└── store.js
+
+0 directories, 10 files
+</code></pre>
+<ol start="6">
+<li>Rebuild <code>other-project</code> to pick up the changes to <code>backbone.store</code></li>
+</ol>
+<blockquote>
+<p><strong>Bonus:</strong> Run <code>npm run build:watch</code> to rebuild when any file updates. If
+your <code>other-project</code> build is <em>also</em> watching for filesystem changes, the
+rebuild in <code>backbone.store</code> will trigger it as well.</p>
+</blockquote>
+<blockquote>
+<p><strong>Caveat:</strong> Running <code>npm install</code> in <code>other-project</code> will destroy the link
+that you made in Step 3 above, so if your build process runs <code>npm install</code>,
+you'll have to rerun <code>npm link</code> per Step 3 after the build starts... or pass
+<code>--link</code> to <code>npm install</code>.</p>
+</blockquote>
+<h2>Using Backbone Store</h2>
+<h3>Defining models</h3>
+<p>Backbone Store provides relational models structure. To define relations between models use <code>relatedModels</code> and
+<code>relatedCollections</code> fields in Backbone.Model.</p>
+<p>For instance we have blogs with comments:</p>
+<pre class="prettyprint source lang-javascript"><code>import Backbone from 'backbone'
+
+let Blog = Backbone.Model.extend({
+  relatedCollections: {
+    comments: 'comment'
+  }
+});
+
+let Comment = Backbone.Model.extend({
+  relatedModels: {
+    blog: 'blog'
+  }
+});
+</code></pre>
+<p>Here in <code>relatedModels</code> and <code>relatedCollections</code> objects keys are fields in model where we can find location of related
+model/collection (id or url). Values are types of related model.</p>
+<h3>Adapter</h3>
+<p>Adapter is a thing which knows how to manipulate with data on server (or even other sources in general). Currently there
+is HttpAdapter which manipulates data with server over HTTP.</p>
+<h3>Parser</h3>
+<p>Parser is class which parses data from server from specific format to Backbone Store format and vice versa. Currently
+there is JsonApiParser which parses data from <a href="http://jsonapi.org/">JSON API</a> format.</p>
+<h3>Repository</h3>
+<p>Repository is used to provide access to data and cache data on front-end to prevent same multiple requests.</p>
+<p>That's how you create a repository with adapter and parser:</p>
+<pre class="prettyprint source lang-javascript"><code>import BackboneStore from 'backbone.store'
+import BlogModel from './path/to/blog-model'
+
+let parser = new BackboneStore.JsonApiParser();
+let adapter = new BackboneStore.HttpAdapter('/api/blog/', parser);
+let repo = new BackboneStore.Repository(BlogModel, adapter);
+</code></pre></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-internal-model.html">internal-model</a></li></ul><h3>Classes</h3><ul><li><a href="CollectionProxy.html">CollectionProxy</a></li><li><a href="HttpAdapter.html">HttpAdapter</a></li><li><a href="ModelProxy.html">ModelProxy</a></li><li><a href="Store.html">Store</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Thu May 16 2019 03:07:43 GMT+0000 (UTC)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
