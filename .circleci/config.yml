@@ -144,6 +144,7 @@ workflows:
       - docs-build:
          requires:
            - install-deps
+           - test
 
       - publish:
           requires:
