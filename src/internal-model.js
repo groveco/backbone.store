@@ -79,8 +79,12 @@ export default Model.extend({
     return relationship
   },
 
+  getRelationshipData (relationName, strict = true) {
+    return _.result(this.getRelationship(relationName, strict), 'data')
+  },
+
   getRelationshipType (relationName) {
-    const relationship = _.result(this.getRelationship(relationName), 'data')
+    const relationship = this.getRelationshipData(relationName)
 
     if (_.isArray(relationship)) return 'has-many'
 
@@ -90,15 +94,13 @@ export default Model.extend({
   },
 
   hasRelated (relationName) {
-    const relationship = this.getRelationship(relationName, false)
-
-    return !!_.result(relationship, ['data', 'id'])
+    return !_.isEmpty(this.getRelationshipData(relationName, false))
   },
 
   getRelated (relationName, query) {
     const link = this.getRelationshipLink(relationName)
 
-    const related = _.result(this.getRelationship(relationName), 'data')
+    const related = this.getRelationshipData(relationName)
 
     if (!related) return this.fetchRelated(relationName, query)
 
@@ -110,7 +112,7 @@ export default Model.extend({
   fetchRelated (relationName, query) {
     const link = this.getRelationshipLink(relationName)
 
-    const related = _.result(this.getRelationship(relationName), 'data')
+    const related = this.getRelationshipData(relationName)
 
     if (!related) return this.store.fetchUnknown(link, query)
 
