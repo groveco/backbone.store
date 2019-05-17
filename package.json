@@ -6,10 +6,9 @@
     "prepack": "npm run build",
     "build": "babel src --out-dir dist",
     "build:watch": "babel --watch src --out-dir dist",
+    "build:docs": "jsdoc --readme README.md src/* -d ./docs",
     "test": "jest ./tests",
     "lint": "eslint ./src/index.js",
-    "docs:build-dev": "node_modules/.bin/jsdoc --readme README.md src/* -d ./docs",
-    "docs:build": "jsdoc --readme README.md src/* -d ./docs",
     "gh-pages-deploy": "gh-pages --dotfiles --message '[skip ci] Updates' --dist docs"
   },
   "dependencies": {
