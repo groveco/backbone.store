@@ -305,7 +305,7 @@ class Store {
    * Creates an internal-model that will be stored in the Store's
    * cache.
    * @param {internal-model} resource
-   * @returns {void}
+   * @returns { Promise<ModelProxy> }
    */
   create (resource) {
     let data = this._parser.serialize(resource.attributes)
@@ -322,7 +322,7 @@ class Store {
    * Updates a given model
    * @param {Model} resource - Model to be updated
    * @param {Object} options - Object that contains the data that will be used in the update
-   * @returns {Promise}
+   * @returns { Promise }
    */
   update (resource, options) {
     let data
