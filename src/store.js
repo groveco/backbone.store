@@ -1,4 +1,4 @@
-/**
+/***
  * Store.
  * @module
  */
@@ -13,13 +13,11 @@ import CollectionProxy from './collection-proxy'
 import querystring from 'querystring'
 
 /**
- * Backbone Store class that manages all repositories.
+ * Backbone Store class that manages all {@link https://jsonapi.org/ JSON:API} formatted responses
+ * and caching.
+ * @param {HttpAdapter} adapter - Adapter to any data source.
  */
 class Store {
-  /**
-   * Create Store.
-   * @param {HttpAdapter} adapter - Adapter to any data source.
-   */
   constructor (adapter) {
     this._parser = new JsonApiParser()
     this._adapter = adapter
@@ -29,14 +27,20 @@ class Store {
   }
 
   /**
-   * Register repository in Store.
-   * @param {string} modelName - model name that is used in relations definitions.
+   * Register a Model to be added into a store
+   * @param {String} modelName - model name that is used in relations definitions.
    * @param {Function} definition - Model or collection class.
+   * @returns {void}
    */
   register (modelName, definition = {}) {
     this._modelDefinitions[modelName] = definition
   }
 
+  /***
+   *
+   * @param {String} modelName - Name of the model to be returned
+   * @returns {internal-model}
+   */
   modelFor (modelName) {
     let definition = this._modelDefinitions[modelName]
 
@@ -48,9 +52,9 @@ class Store {
   }
 
   /**
-   * Push a raw JSON API document into the store.
-   * @param {string} modelName - model name that is used in relations definitions.
-   * @param {Function} resource - a JSON API document
+   * Push a raw {@link https://jsonapi.org/ JSON:API} formatted resource into the store.
+   * @param {Object} resource - a {@link https://jsonapi.org/ JSON:API} resource
+   * @returns {internal-model | Collection}
    */
   push (resource) {
     let {data, included} = resource
@@ -95,15 +99,22 @@ class Store {
     return model
   }
 
-  build (type, attributes) {
+  /**
+   * Build an internal model for the store with the objects attributes
+   * attached.
+   * @param {String} modelName - The name of the model that has been registered within the Store
+   * @param {Object} attributes - {@link https://jsonapi.org/ JSON:API} formatted object literal used to build
+   * @returns {internal-model}
+   */
+  build (modelName, attributes) {
     if (attributes == null) {
       attributes = {}
     }
 
-    let Model = this.modelFor(type)
+    let Model = this.modelFor(modelName)
 
     attributes.relationships = attributes.relationships || {}
-    attributes._type = attributes._type || type
+    attributes._type = attributes._type || modelName
 
     if (Model && typeof Model.prototype.relationships === 'object') {
       Object.keys(Model.prototype.relationships).forEach((key) => {
@@ -121,6 +132,12 @@ class Store {
     return model
   }
 
+  /**
+   * Clones (copies) an Object using deep copying.
+   *
+   * @param { Object } model -  A {@link https://jsonapi.org/ JSON:API} formatted object
+   * @returns { internal-model }
+   */
   clone (model) {
     const newAttributes = clone(model.attributes)
     delete newAttributes.id
@@ -136,8 +153,8 @@ class Store {
   /**
    * Get model by Id or link. If model is cached on front-end it will be returned from cache, otherwise it will be
    * fetched.
-   * @param {string} link - Model link.
-   * @returns {Promise} Promise for requested model.
+   * @param { String } link - Model link.
+   * @returns { Promise<ModelProxy> } Promise for requested model.
    */
   get (type, id, query) {
     let model = this.peek(type, id)
@@ -150,8 +167,8 @@ class Store {
 
   /**
    * Fetch model by Id or link from server.
-   * @param {string} link - Model link.
-   * @returns {Promise} Promise for requested model.
+   * @param {String} link - Model link.
+   * @returns {Promise<ModelProxy>} Promise for requested model of type ModelProxy.
    */
   fetch (type, id, options = {}) {
     let {query, link} = options
@@ -194,9 +211,10 @@ class Store {
 
   /**
    * Get model by Type and Id from front-end cache.
-   * @param {string} type - Model type.
-   * @param {string|number} id - Model id.
-   * @returns {object} Requested model.
+   * @param {String} type - Model type.
+   * @param {String | Number} id - Model id.
+   * @returns {ModelProxy | void} A ModelProxy if the requesting model
+   * is already cached, else nothing is returned.
    */
   peek (type, id) {
     let resource = this._repository.get(`${type}__${id}`)
@@ -206,6 +224,11 @@ class Store {
     }
   }
 
+  /***
+   *
+   * @param {Object} all - All objects
+   * @returns {CollectionProxy}
+   */
   peekMany (all) {
     let result = new Collection()
     result._incomplete = false
@@ -224,6 +247,7 @@ class Store {
 
   /**
    * @private
+   * @returns {ModelProxy}
    */
   getBelongsTo (owner, link, type, id, query) {
     let model = this.peek(type, id)
@@ -236,6 +260,7 @@ class Store {
 
   /**
    * @private
+   * @returns {ModelProxy}
    */
   fetchBelongsTo (owner, link, type, id, query) {
     return this.fetch(type, id, {link, query})
@@ -255,6 +280,7 @@ class Store {
 
   /**
    * @private
+   * @returns {CollectionProxy}
    */
   fetchHasMany (owner, models, link, query) {
     if (!models) {
@@ -269,11 +295,18 @@ class Store {
 
   /**
    * @private
+   * @returns {Object}
    */
   fetchUnknown (link, query) {
     return this._fetch(link, query)
   }
 
+  /**
+   * Creates an internal-model that will be stored in the Store's
+   * cache.
+   * @param {internal-model} resource
+   * @returns { Promise<ModelProxy> }
+   */
   create (resource) {
     let data = this._parser.serialize(resource.attributes)
     return this._adapter.create(this._adapter.buildUrl(resource.get('_type'), resource.get('id')), {data})
@@ -285,6 +318,12 @@ class Store {
       })
   }
 
+  /**
+   * Updates a given model
+   * @param {Model} resource - Model to be updated
+   * @param {Object} options - Object that contains the data that will be used in the update
+   * @returns { Promise }
+   */
   update (resource, options) {
     let data
     let partial
@@ -313,6 +352,11 @@ class Store {
       .then(updated => resource.set(this._parser.parse(updated.data)))
   }
 
+  /**
+   * Remove a record from a server and then from the cache.
+   * @param {Model} resource - A Model to be deleted
+   * @return {Promise}
+   */
   destroy (resource) {
     return this._adapter
       .destroy(resource.get('_self'))

@@ -1,4 +1,4 @@
-/**
+/***
  * JsonApiParser.
  * @module
  */
@@ -6,6 +6,7 @@ import _ from 'underscore'
 import {camelize, decamelize} from './camelcase-dash'
 
 /**
+ * @private
  * Parser that parses a resource in JSON API format to BackboneStore format.
  */
 class JsonApiParser {

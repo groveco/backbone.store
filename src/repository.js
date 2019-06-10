@@ -1,4 +1,4 @@
-/**
+/***
  * Repository.
  * @module
  */
@@ -6,6 +6,7 @@ import RepositoryCollection from './repository-collection'
 
 /**
  * Repository class which provides access to entities and stores them.
+ * @private
  */
 class Repository {
   constructor () {
