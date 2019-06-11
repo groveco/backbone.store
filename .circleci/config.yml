@@ -84,6 +84,11 @@ jobs:
             - "cf:11:c6:b2:2d:e3:31:b9:a9:ca:18:dd:99:27:ae:ab"
 
       - checkout
+
+      - run:
+          name: Fetch `gh-pages`
+          command: git fetch origin gh-pages:gh-pages
+
       - run:
           name: Checkout existing `gh-pages` as `docs`
           command: git worktree add docs gh-pages
