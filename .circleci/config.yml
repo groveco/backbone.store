@@ -86,8 +86,11 @@ jobs:
       - checkout
 
       - run:
-          name: Fetch `gh-pages`
-          command: git fetch origin gh-pages:gh-pages
+          name: Fetch `gh-pages` and set user
+          command: |
+            git fetch origin gh-pages:gh-pages
+            get config user.email "engineering@grove.co"
+            get config user.name "CircleCI"
 
       - run:
           name: Checkout existing `gh-pages` as `docs`
