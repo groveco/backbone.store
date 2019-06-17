@@ -3,7 +3,7 @@
   "main": "dist/index.js",
   "version": "0.3.2",
   "scripts": {
-    "prepack": "npm run build",
+    "prepack": "NODE_ENV=development npm install && npm run build",
     "build": "babel src --out-dir dist",
     "build:watch": "babel --watch src --out-dir dist",
     "build:docs": "jsdoc --readme README.md src/* -d ./docs",
