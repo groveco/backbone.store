@@ -26,6 +26,14 @@ class Store {
     this._modelDefinitions = {}
   }
 
+  get serializeRequests() {
+    return this._adapter.serializeRequests
+  }
+
+  set serializeRequests(value) {
+    this._adapter.serializeRequests = value
+  }
+
   /**
    * Register a Model to be added into a store
    * @param {String} modelName - model name that is used in relations definitions.

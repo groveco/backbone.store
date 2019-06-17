@@ -15,6 +15,9 @@ import {ajax} from 'jquery'
 class HttpAdapter {
   constructor (options = {}) {
     this.urlPrefix = options.urlPrefix
+
+    this.serializeRequests = false
+    this._outstandingRequests = new Set()
   }
 
   buildUrl (type, id) {
@@ -86,35 +89,54 @@ class HttpAdapter {
       data = JSON.stringify(data)
     }
 
-    return new Promise((resolve, reject) => {
-      let request = {
-        url,
-        type,
-        headers,
-        success: (data, textStatus, jqXhr) => {
-          if (!data && jqXhr.status !== 204) {
-            throw new Error(`request returned ${jqXhr.status} status without data`)
-          }
-          return resolve(data)
-        },
-        error: (response) => {
-          if (response.readyState === 0 || response.status === 0) {
-            // this is a canceled request, so we literally should do nothing
-            return
-          }
+    const makeRequest = () => {
+      return new Promise((resolve, reject) => {
+        let request = {
+          url,
+          type,
+          headers,
+          success: (data, textStatus, jqXhr) => {
+            if (!data && jqXhr.status !== 204) {
+              throw new Error(`request returned ${jqXhr.status} status without data`)
+            }
+            return resolve(data)
+          },
+          error: (response) => {
+            if (response.readyState === 0 || response.status === 0) {
+              // this is a canceled request, so we literally should do nothing
+              return
+            }
 
-          const error = new Error(`request for resource, ${url}, returned ${response.status} ${response.statusText}`)
-          error.response = response
-          reject(error)
-        },
-        // being explicit about data type so jQuery doesn't "intelligent guess" wrong
-        // changing this may not break tests, but does behave badly in prod
-        dataType: 'text',
-        data
-      }
+            const error = new Error(`request for resource, ${url}, returned ${response.status} ${response.statusText}`)
+            error.response = response
+            reject(error)
+          },
+          // being explicit about data type so jQuery doesn't "intelligent guess" wrong
+          // changing this may not break tests, but does behave badly in prod
+          dataType: 'text',
+          data
+        }
 
-      ajax(request)
-    })
+        ajax(request)
+      })
+    }
+
+    let promise
+    if (this._serializeRequests) {
+      // Wait for all requests to settle (either with success or rejection) before making request
+      promise = Promise.all(Array.from(this._outstandingRequests).map(promise => promise.catch(() => {})))
+        .then(makeRequest)
+    } else {
+      promise = makeRequest()
+    }
+
+    this._outstandingRequests.add(promise)
+    const removeFromOutstandingRequests = () =>{
+      this._outstandingRequests.delete(promise)
+    }
+    promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests)
+
+    return promise
   }
 }
 
