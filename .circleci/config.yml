@@ -86,8 +86,11 @@ jobs:
       - checkout
 
       - run:
-          name: Fetch `gh-pages`
-          command: git fetch origin gh-pages:gh-pages
+          name: Fetch `gh-pages` and set user
+          command: |
+            git fetch origin gh-pages:gh-pages
+            git config user.email "engineering@grove.co"
+            git config user.name "CircleCI"
 
       - run:
           name: Checkout existing `gh-pages` as `docs`
@@ -102,7 +105,7 @@ jobs:
           command: |
             pushd docs
             git add .
-            git commit -m '[skip ci] publishing docs' --author 'CircleCI <engineering@grove.co>'
+            git commit -m '[skip ci] publishing docs'
             git push origin gh-pages
 
   publish:
