@@ -85,40 +85,10 @@ class HttpAdapter {
       'Content-Type': 'application/vnd.api+json'
     }
 
+    // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
+    // some instrumented Vue data)
     if (data && ['PATCH', 'POST'].indexOf(type) > -1) {
       data = JSON.stringify(data)
-    }
-
-    const makeRequest = () => {
-      return new Promise((resolve, reject) => {
-        let request = {
-          url,
-          type,
-          headers,
-          success: (data, textStatus, jqXhr) => {
-            if (!data && jqXhr.status !== 204) {
-              throw new Error(`request returned ${jqXhr.status} status without data`)
-            }
-            return resolve(data)
-          },
-          error: (response) => {
-            if (response.readyState === 0 || response.status === 0) {
-              // this is a canceled request, so we literally should do nothing
-              return
-            }
-
-            const error = new Error(`request for resource, ${url}, returned ${response.status} ${response.statusText}`)
-            error.response = response
-            reject(error)
-          },
-          // being explicit about data type so jQuery doesn't "intelligent guess" wrong
-          // changing this may not break tests, but does behave badly in prod
-          dataType: 'text',
-          data
-        }
-
-        ajax(request)
-      })
     }
 
     let promise
@@ -128,18 +98,50 @@ class HttpAdapter {
         .map(promise => promise.catch(() => {}))
 
       promise = Promise.all(promises)
-        .then(makeRequest)
+        .then(() => this._makeRequest({ url, type, headers, data }))
     } else {
-      promise = makeRequest()
+      promise = this._makeRequest({ url, type, headers, data })
     }
 
     this._outstandingRequests.add(promise)
-    const removeFromOutstandingRequests = () =>{
+    const removeFromOutstandingRequests = () => {
       this._outstandingRequests.delete(promise)
     }
     promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests)
 
     return promise
+  }
+
+  _makeRequest ({ url, type, headers, data }) {
+    return new Promise((resolve, reject) => {
+      let request = {
+        url,
+        type,
+        headers,
+        success: (data, textStatus, jqXhr) => {
+          if (!data && jqXhr.status !== 204) {
+            throw new Error(`request returned ${jqXhr.status} status without data`)
+          }
+          return resolve(data)
+        },
+        error: (response) => {
+          if (response.readyState === 0 || response.status === 0) {
+            // this is a canceled request, so we literally should do nothing
+            return
+          }
+
+          const error = new Error(`request for resource, ${url}, returned ${response.status} ${response.statusText}`)
+          error.response = response
+          reject(error)
+        },
+        // being explicit about data type so jQuery doesn't "intelligent guess" wrong
+        // changing this may not break tests, but does behave badly in prod
+        dataType: 'text',
+        data
+      }
+
+      ajax(request)
+    })
   }
 }
 

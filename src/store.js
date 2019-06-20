@@ -49,7 +49,7 @@ class Store {
   }
 
   set serializeRequests (value) {
-    this._adapter.serializeRequests = value
+    this._adapter.serializeRequests = !!value
   }
 
   /**
