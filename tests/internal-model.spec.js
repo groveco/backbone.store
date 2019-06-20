@@ -115,6 +115,45 @@ let userWithRelationships = {
           related: '/user/1/enemies'
         }
       },
+      idol: {
+        data: {
+          id: null,
+          type: 'idol'
+        },
+        links: {
+          self: '/user/1/relationships/idol',
+          related: '/user/1/idol'
+        }
+      },
+      missingIdol: {
+        data: {
+          type: 'idol'
+        },
+        links: {
+          self: '/user/1/relationships/idol',
+          related: '/user/1/idol'
+        }
+      },
+      unknownIdol: {
+        data: {
+          id: 4
+        },
+        links: {
+          self: '/user/1/relationships/idol',
+          related: '/user/1/idol'
+        }
+      },
+      idols: {
+        data: [
+          {id: null, type: 'idol'},
+          {type: 'idol'},
+          {id: 1, type: 'idol'}
+        ],
+        links: {
+          self: '/user/1/relationships/idols',
+          related: '/user/1/idols'
+        }
+      },
       mother: {
         data: {id: 4, type: 'user'},
         links: {
@@ -230,6 +269,22 @@ describe('InternalModel', function () {
 
     it('returns false if the relationship does NOT exist', () => {
       expect(resource.hasRelated('so')).toBe(false)
+    })
+
+    it('returns false if the relationship has data with null id', () => {
+      expect(resource.hasRelated('idol')).toBe(false)
+    })
+
+    it('returns false if the relationship has data with missing id', () => {
+      expect(resource.hasRelated('missingIdol')).toBe(false)
+    })
+
+    it('returns false if the relationship has data with missing type', () => {
+      expect(resource.hasRelated('unknownIdol')).toBe(false)
+    })
+
+    it('returns false if the relationship has-many contains null/missing id', () => {
+      expect(resource.hasRelated('idols')).toBe(false)
     })
 
     it('returns false if the relationship is invalid', () => {

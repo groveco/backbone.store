@@ -6,6 +6,17 @@ function attributesWithDefaults (attributes, defaults) {
 }
 
 /**
+ * Check if an object is a valid resource identifier
+ * @see https://jsonapi.org/format/#document-resource-identifier-objects
+ *
+ * @param {object} relationship Resource Identifier
+ * @returns {boolean} Returns true if valid
+ */
+function isValidResourceIdentifier (relationship) {
+  return Boolean(_.result(relationship, 'id') && _.result(relationship, 'type'))
+}
+
+/**
  * Exports a Backbone model extended with utility methods that enables the
  * retrieval of data based on {@link https://jsonapi.org/ JSON:API} formatted responses
  * @module internal-model
@@ -118,7 +129,13 @@ export default Model.extend({
    * @returns {Boolean} true if relationship exists
    */
   hasRelated (relationName) {
-    return !_.isEmpty(this.getRelationshipData(relationName, false))
+    const relatedData = this.getRelationshipData(relationName, false)
+
+    if (_.isEmpty(relatedData)) return false
+
+    if (_.isArray(relatedData)) return _.reduce(relatedData, (acc, data) => acc && isValidResourceIdentifier(data), true)
+
+    return isValidResourceIdentifier(relatedData)
   },
 
   /**
