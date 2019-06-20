@@ -15,6 +15,9 @@ import {ajax} from 'jquery'
 class HttpAdapter {
   constructor (options = {}) {
     this.urlPrefix = options.urlPrefix
+
+    this.serializeRequests = false
+    this._outstandingRequests = new Set()
   }
 
   buildUrl (type, id) {
@@ -82,10 +85,34 @@ class HttpAdapter {
       'Content-Type': 'application/vnd.api+json'
     }
 
+    // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
+    // some instrumented Vue data)
     if (data && ['PATCH', 'POST'].indexOf(type) > -1) {
       data = JSON.stringify(data)
     }
 
+    let promise
+    if (this.serializeRequests) {
+      // Wait for all requests to settle (either with success or rejection) before making request
+      const promises = Array.from(this._outstandingRequests)
+        .map(promise => promise.catch(() => {}))
+
+      promise = Promise.all(promises)
+        .then(() => this._makeRequest({ url, type, headers, data }))
+    } else {
+      promise = this._makeRequest({ url, type, headers, data })
+    }
+
+    this._outstandingRequests.add(promise)
+    const removeFromOutstandingRequests = () => {
+      this._outstandingRequests.delete(promise)
+    }
+    promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests)
+
+    return promise
+  }
+
+  _makeRequest ({ url, type, headers, data }) {
     return new Promise((resolve, reject) => {
       let request = {
         url,
