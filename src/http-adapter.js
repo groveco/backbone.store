@@ -124,7 +124,10 @@ class HttpAdapter {
     let promise
     if (this.serializeRequests) {
       // Wait for all requests to settle (either with success or rejection) before making request
-      promise = Promise.all(Array.from(this._outstandingRequests).map(promise => promise.catch(() => {})))
+      const promises = Array.from(this._outstandingRequests)
+        .map(promise => promise.catch(() => {}))
+
+      promise = Promise.all(promises)
         .then(makeRequest)
     } else {
       promise = makeRequest()
