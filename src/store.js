@@ -26,11 +26,29 @@ class Store {
     this._modelDefinitions = {}
   }
 
-  get serializeRequests() {
+  /**
+   * Toggles whether requests are forced to run sequentially.
+   *
+   * Defaults to `false`.
+   *
+   * @example
+   *    const store = new Store(new HttpAdapter({urlPrefix: '/api/'}))
+   *
+   *    const fetch1 = store.get('customer', '20')
+   *    store.serializeRequests = true
+   *    // Will not start until fetch1 completes
+   *    const fetch2 = store.get('offer', '30')
+   *    // Will not start until fetch2 (and transitively fetch1) complete
+   *    const fetch3 = store.get('whatever', '90')
+   *    store.serializeRequests = false
+   *    // Will start immediately
+   *    const fetch4 = store.get('something', '120')
+   */
+  get serializeRequests () {
     return this._adapter.serializeRequests
   }
 
-  set serializeRequests(value) {
+  set serializeRequests (value) {
     this._adapter.serializeRequests = value
   }
 
