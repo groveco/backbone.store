@@ -189,6 +189,89 @@ and caching.</div>
     
 
     
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="serializeRequests"><span class="type-signature"></span>serializeRequests<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Toggles whether requests are forced to run sequentially.
+
+Defaults to `false`.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="store.js.html">store.js</a>, <a href="store.js.html#line47">line 47</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const store = new Store(new HttpAdapter({urlPrefix: '/api/'}))
+
+   const fetch1 = store.get('customer', '20')
+   store.serializeRequests = true
+   // Will not start until fetch1 completes
+   const fetch2 = store.get('offer', '30')
+   // Will not start until fetch2 (and transitively fetch1) complete
+   const fetch3 = store.get('whatever', '90')
+   store.serializeRequests = false
+   // Will start immediately
+   const fetch4 = store.get('something', '120')</code></pre>
+
+
+
+        
+    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -324,7 +407,7 @@ attached.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="store.js.html">store.js</a>, <a href="store.js.html#line109">line 109</a>
+        <a href="store.js.html">store.js</a>, <a href="store.js.html#line135">line 135</a>
     </li></ul></dd>
     
 
@@ -479,7 +562,7 @@ attached.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="store.js.html">store.js</a>, <a href="store.js.html#line141">line 141</a>
+        <a href="store.js.html">store.js</a>, <a href="store.js.html#line167">line 167</a>
     </li></ul></dd>
     
 
@@ -635,7 +718,7 @@ cache.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="store.js.html">store.js</a>, <a href="store.js.html#line310">line 310</a>
+        <a href="store.js.html">store.js</a>, <a href="store.js.html#line336">line 336</a>
     </li></ul></dd>
     
 
@@ -790,7 +873,7 @@ cache.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="store.js.html">store.js</a>, <a href="store.js.html#line360">line 360</a>
+        <a href="store.js.html">store.js</a>, <a href="store.js.html#line386">line 386</a>
     </li></ul></dd>
     
 
@@ -945,7 +1028,7 @@ cache.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="store.js.html">store.js</a>, <a href="store.js.html#line173">line 173</a>
+        <a href="store.js.html">store.js</a>, <a href="store.js.html#line199">line 199</a>
     </li></ul></dd>
     
 
@@ -1105,7 +1188,7 @@ fetched.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="store.js.html">store.js</a>, <a href="store.js.html#line159">line 159</a>
+        <a href="store.js.html">store.js</a>, <a href="store.js.html#line185">line 185</a>
     </li></ul></dd>
     
 
@@ -1290,7 +1373,7 @@ fetched.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="store.js.html">store.js</a>, <a href="store.js.html#line219">line 219</a>
+        <a href="store.js.html">store.js</a>, <a href="store.js.html#line245">line 245</a>
     </li></ul></dd>
     
 
@@ -1453,7 +1536,7 @@ is already cached, else nothing is returned.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="store.js.html">store.js</a>, <a href="store.js.html#line59">line 59</a>
+        <a href="store.js.html">store.js</a>, <a href="store.js.html#line85">line 85</a>
     </li></ul></dd>
     
 
@@ -1634,7 +1717,7 @@ is already cached, else nothing is returned.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="store.js.html">store.js</a>, <a href="store.js.html#line35">line 35</a>
+        <a href="store.js.html">store.js</a>, <a href="store.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -1812,7 +1895,7 @@ is already cached, else nothing is returned.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="store.js.html">store.js</a>, <a href="store.js.html#line327">line 327</a>
+        <a href="store.js.html">store.js</a>, <a href="store.js.html#line353">line 353</a>
     </li></ul></dd>
     
 
@@ -1882,7 +1965,7 @@ is already cached, else nothing is returned.
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Tue Jun 18 2019 14:31:57 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Thu Jun 20 2019 22:09:15 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
