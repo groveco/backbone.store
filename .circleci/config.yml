@@ -131,18 +131,31 @@ workflows:
   version: 2
   build:
     jobs:
-      - checkout-code
+      - checkout-code:
+          filters:
+            tags:
+              only: /^v[0-9]+(\.[0-9]+){2}$/
+
       - install-deps:
           requires:
             - checkout-code
+          filters:
+            tags:
+              only: /^v[0-9]+(\.[0-9]+){2}$/
 
       - lint:
           requires:
             - install-deps
+          filters:
+            tags:
+              only: /^v[0-9]+(\.[0-9]+){2}$/
 
       - test:
           requires:
             - install-deps
+          filters:
+            tags:
+              only: /^v[0-9]+(\.[0-9]+){2}$/
 
       - docs:
           requires:
