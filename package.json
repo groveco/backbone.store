@@ -35,11 +35,5 @@
     "jsdoc": "^3.6.2",
     "node-fetch": "^2.6.0",
     "sinon": "^1.17.2"
-  },
-  "jest": {
-    "collectCoverage": true,
-    "coverageDirectory": "./coverage",
-    "testResultsProcessor": "jest-junit",
-    "testURL": "http://localhost/"
   }
 }

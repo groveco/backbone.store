@@ -3,6 +3,7 @@ import sinon from 'sinon'
 import Store from '../src/store'
 import {Collection} from 'backbone'
 import InternalModel from '../src/internal-model'
+import fetchMock from 'fetch-mock'
 
 let createStore = function () {
   let adapter = new HttpAdapter()
@@ -293,10 +294,9 @@ describe('InternalModel', function () {
   })
 
   describe('getRelated', function () {
-    let resource, server
+    let resource
     beforeAll(function () {
-      server = sinon.fakeServer.create({autoRespond: true})
-      server.respondImmediately = true
+      fetchMock.reset()
     })
 
     beforeEach(function () {
@@ -304,43 +304,51 @@ describe('InternalModel', function () {
       resource = store.push(userWithRelationships)
     })
 
-    it('hasOne returns a single model from the cache', function () {
-      return resource.getRelated('bff')
-        .then((bff) => expect(bff.get('name')).toEqual('Bonnie'))
+    it('hasOne returns a single model from the cache', async done => {
+      const bff = resource.getRelated('bff')
+      expect(bff.get('name')).toEqual('Bonnie')
+      done()
     })
 
-    it('hasOne returns a single model from the network, if it is not cached', function () {
-      server.respondWith('GET', '/user/1/mother', JSON.stringify(mother))
-      return resource.getRelated('mother')
-        .then((mother) => expect(mother.get('name')).toEqual('Jo'))
+    it('hasOne returns a single model from the network, if it is not cached', async done => {
+      fetchMock.mock(/.*user\/1\/mother/g, mother, {
+        method: 'GET'
+      })
+      const motherResp = await resource.getRelated('mother')
+      expect(motherResp.get('name')).toEqual('Jo')
+      done()
     })
 
-    it('hasMany returns a collection of models from the cache', function () {
-      return resource.getRelated('friends')
-        .then((friends) => {
-          expect(friends.at(0).get('name')).toEqual('Bonnie')
-          expect(friends.at(1).get('name')).toEqual('Clyde')
-        })
+    it('hasMany returns a collection of models from the cache', async done => {
+      const friends = await resource.getRelated('friends')
+      expect(friends.at(0).get('name')).toEqual('Bonnie')
+      expect(friends.at(1).get('name')).toEqual('Clyde')
+      done()
     })
 
-    it('hasMany returns a collection models from the network, if they are not cached', function () {
-      server.respondWith('GET', '/user/1/siblings', JSON.stringify(siblings))
-      return resource.getRelated('siblings')
-        .then((siblings) => {
-          expect(siblings.at(0).get('name')).toEqual('Riggs')
-          expect(siblings.at(1).get('name')).toEqual('Murtaugh')
-        })
+    it('hasMany returns a collection models from the network, if they are not cached', async done => {
+      fetchMock.mock(/.*user\/1\/siblings/g, siblings, {
+        method: 'GET'
+      })
+      const siblingsResp = await resource.getRelated('siblings')
+      expect(siblingsResp.at(0).get('name')).toEqual('Riggs')
+      expect(siblingsResp.at(1).get('name')).toEqual('Murtaugh')
+      done()
     })
 
     it('hasMany returns a partial collection models from the cache, and hits the network for remaining models', async () => {
-      server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow))
+      fetchMock.mock(/.*user\/1\/all-together-now/g, allTogetherNow, {
+        method: 'GET'
+      })
       let relationship = resource.getRelated('allTogetherNow')
       expect(relationship).toHaveLength(2)
       return expect(relationship).resolves.toHaveLength(5)
     })
 
     it('hasMany partial collection will resolve to a collection of models', function () {
-      server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow))
+      fetchMock.mock(/.*user\/1\/all-together-now/g, allTogetherNow, {
+        method: 'GET'
+      })
       let relationship = resource.getRelated('allTogetherNow')
       expect(relationship.length).toEqual(2)
       return expect(relationship).resolves.toBeInstanceOf(Collection)
