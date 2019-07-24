@@ -1,23 +1,9 @@
-/***
- * HttpAdapter
- * @module
- */
-
-/**
- * Adapter which works with data over HTTP, based on the options that
- * are passed to it's constructor. This class is responsible for
- * any CRUD operations that need to be carried out with your {@link https://jsonapi.org/ JSON:API} service
- * from within the Backbone.Store.
- * @param {Object} options -  An object that contains a property, `urlPrefix`,
- * that defines the REST service that will be returning a {@link https://jsonapi.org/ JSON:API} response
- */
-
-const METHOD = {
+const METHOD = Object.freeze({
   GET: 'GET',
   PATCH: 'PATCH',
   POST: 'POST',
   DELETE: 'DELETE'
-}
+})
 
 class HttpAdapter {
   constructor (options = {}) {
@@ -83,36 +69,40 @@ class HttpAdapter {
     return this._http(METHOD.DELETE, link)
   }
 
-  async _http (method = '', url = '', data = {}) {
-    let init = {
-      method,
-      headers: {
-        'Accept': 'application/vnd.api+json',
-        'Content-Type': 'application/vnd.api+json'
-      }
-    }
+  async _http (method = METHOD.GET, url = '', data = {}) {
+    if (!url) throw new Error('url is not defined!')
 
+    const headers = {
+      'Accept': 'application/vnd.api+json',
+      'Content-Type': 'application/vnd.api+json'
+    }
+    
+    let body = null
+    
     url = new URL(url, location.origin)
 
-    if (method.includes(METHOD.GET)) {
+    if (method === METHOD.GET) {
       // serialize query params
-      Object.keys(data).forEach(key => url.searchParams.append(key, data[key]))
+      for (let [key, value] of Object.entries(data)) {
+        url.searchParams.append(key, value)
+      }
     } else if (method.includes(METHOD.POST) || method.includes(METHOD.PATCH)) {
       // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
       // some instrumented Vue data)
-      init.body = JSON.stringify(data)
+      body = JSON.stringify(data)
     }
 
     let promise
     if (this.serializeRequests) {
       // Wait for all requests to settle (either with success or rejection) before making request
-      const promises = [...this._outstandingRequests].map(promise =>
+      const promises = Array.from(this._outstandingRequests).map(promise =>
         promise.catch(() => {})
       )
-
-      await Promise.all(promises)
+      
+      promise = Promise.all(promises).then(() => this._fetch({ url, method, headers, body }))
+    } else {
+      promise = this._fetch({ url, method, headers, body })
     }
-    promise = this._fetch({ url, init })
 
     this._outstandingRequests.add(promise)
     const removeFromOutstandingRequests = () => {
@@ -120,11 +110,16 @@ class HttpAdapter {
     }
     promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests)
 
-    return promise
+    return await promise
   }
 
-  async _fetch ({ url, init }) {
-    let response = await fetch(url, init)
+  async _fetch ({method, url, headers, body}) {
+    let response = await fetch(url, {
+      method,
+      url,
+      headers,
+      ...(body || {})
+    })
     switch (response.status) {
       case 200:
       case 201:
@@ -132,16 +127,14 @@ class HttpAdapter {
       case 203:
       case 205:
       case 206:
-        let data = await response.json()
-        return data
-      case 204:
-        if (init.method == METHOD.DELETE) {
-          return {}
-        } else {
+        if (response.body == null) {
           throw new Error(
             `request returned ${response.status} status without data`
           )
         }
+        return await response.json()
+      case 204:
+        return {}
       default:
         throw new Error(
           `request for resource, ${url}, returned ${response.status} ${response.statusText}`
