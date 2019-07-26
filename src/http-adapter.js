@@ -82,8 +82,9 @@ class HttpAdapter {
 
     if (method === METHOD.GET) {
       // serialize query params
+      body = new URLSearchParams()
       for (let [key, value] of Object.entries(data)) {
-        url.searchParams.append(key, value)
+        body.append(key, value)
       }
     } else if (method.includes(METHOD.POST) || method.includes(METHOD.PATCH)) {
       // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
@@ -115,7 +116,6 @@ class HttpAdapter {
   async _fetch ({method, url, headers, body}) {
     let response = await fetch(url, {
       method,
-      url,
       headers,
       body
     })
