@@ -8,7 +8,6 @@ const METHOD = Object.freeze({
 class HttpAdapter {
   constructor (options = {}) {
     this.urlPrefix = options.urlPrefix
-
     this.serializeRequests = false
     this._outstandingRequests = new Set()
   }
@@ -77,7 +76,7 @@ class HttpAdapter {
       'Content-Type': 'application/vnd.api+json'
     }
     
-    let body = null
+    let body = {}
     
     url = new URL(url, location.origin)
 
@@ -118,28 +117,19 @@ class HttpAdapter {
       method,
       url,
       headers,
-      ...(body || {})
+      body
     })
-    switch (response.status) {
-      case 200:
-      case 201:
-      case 202:
-      case 203:
-      case 205:
-      case 206:
-        if (response.body == null) {
-          throw new Error(
-            `request returned ${response.status} status without data`
-          )
-        }
-        return await response.json()
-      case 204:
-        return {}
-      default:
+    if (response.status < 300 && response.status >= 200) {
+      if (response.body == null && response.status !== 204) {
         throw new Error(
-          `request for resource, ${url}, returned ${response.status} ${response.statusText}`
+          `request returned ${response.status} status without data`
         )
+      }
+      return await response.json()
     }
+    throw new Error(
+      `request for resource, ${url}, returned ${response.status} ${response.statusText}`
+    )
   }
 }
 
