@@ -2,7 +2,6 @@
  * HttpAdapter
  * @module
  */
-import {ajax} from 'jquery'
 
 /**
  * Adapter which works with data over HTTP, based on the options that
@@ -12,10 +11,15 @@ import {ajax} from 'jquery'
  * @param {Object} options -  An object that contains a property, `urlPrefix`,
  * that defines the REST service that will be returning a {@link https://jsonapi.org/ JSON:API} response
  */
+const METHOD = Object.freeze({
+  GET: 'GET',
+  PATCH: 'PATCH',
+  POST: 'POST',
+  DELETE: 'DELETE'
+})
 class HttpAdapter {
   constructor (options = {}) {
     this.urlPrefix = options.urlPrefix
-
     this.serializeRequests = false
     this._outstandingRequests = new Set()
   }
@@ -41,8 +45,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for fetched data.
    */
   get (link, query) {
-    return this._ajax('GET', link, query)
-      .then(body => JSON.parse(body))
+    return this._http(METHOD.GET, link, query)
   }
 
   /**
@@ -53,8 +56,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for created data.
    */
   create (link, payload) {
-    return this._ajax('POST', link, payload)
-      .then(body => body && JSON.parse(body))
+    return this._http(METHOD.POST, link, payload)
   }
 
   /**
@@ -65,8 +67,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for updated data.
    */
   update (link, payload) {
-    return this._ajax('PATCH', link, payload)
-      .then(body => JSON.parse(body))
+    return this._http(METHOD.PATCH, link, payload)
   }
 
   /**
@@ -76,19 +77,32 @@ class HttpAdapter {
    * @returns {Promise} Promise for destroy.
    */
   destroy (link) {
-    return this._ajax('DELETE', link)
+    return this._http(METHOD.DELETE, link)
   }
 
-  _ajax (type, url, data) {
-    let headers = {
+  async _http (method = METHOD.GET, url = '', data = {}) {
+    if (!url) throw new Error('url is not defined!')
+
+    const headers = {
       'Accept': 'application/vnd.api+json',
       'Content-Type': 'application/vnd.api+json'
     }
 
-    // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
-    // some instrumented Vue data)
-    if (data && ['PATCH', 'POST'].indexOf(type) > -1) {
-      data = JSON.stringify(data)
+    // explicitly set body to undefined. Contrary to MDN documentation, GET methods cannot take a body. Therefore, the default must be undefined
+    let body
+
+    // eslint-disable-next-line no-undef
+    url = new URL(url, location.origin)
+
+    if (method === METHOD.GET) {
+      // serialize query params
+      for (let [key, value] of Object.entries(data)) {
+        url.searchParams.append(key, value)
+      }
+    } else if (method.includes(METHOD.POST) || method.includes(METHOD.PATCH)) {
+      // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
+      // some instrumented Vue data)
+      body = JSON.stringify(data)
     }
 
     let promise
@@ -98,9 +112,9 @@ class HttpAdapter {
         .map(promise => promise.catch(() => {}))
 
       promise = Promise.all(promises)
-        .then(() => this._makeRequest({ url, type, headers, data }))
+        .then(() => this._makeRequest({ url, method, headers, body }))
     } else {
-      promise = this._makeRequest({ url, type, headers, data })
+      promise = this._makeRequest({ url, method, headers, body })
     }
 
     this._outstandingRequests.add(promise)
@@ -109,39 +123,29 @@ class HttpAdapter {
     }
     promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests)
 
-    return promise
+    return await promise
   }
 
-  _makeRequest ({ url, type, headers, data }) {
-    return new Promise((resolve, reject) => {
-      let request = {
-        url,
-        type,
-        headers,
-        success: (data, textStatus, jqXhr) => {
-          if (!data && jqXhr.status !== 204) {
-            throw new Error(`request returned ${jqXhr.status} status without data`)
-          }
-          return resolve(data)
-        },
-        error: (response) => {
-          if (response.readyState === 0 || response.status === 0) {
-            // this is a canceled request, so we literally should do nothing
-            return
-          }
-
-          const error = new Error(`request for resource, ${url}, returned ${response.status} ${response.statusText}`)
-          error.response = response
-          reject(error)
-        },
-        // being explicit about data type so jQuery doesn't "intelligent guess" wrong
-        // changing this may not break tests, but does behave badly in prod
-        dataType: 'text',
-        data
-      }
-
-      ajax(request)
+  async _makeRequest ({method, url, headers, body}) {
+    // eslint-disable-next-line no-undef
+    let response = await fetch(url, {
+      method,
+      headers,
+      body
     })
+    if (response.status < 300 && response.status >= 200) {
+      if (response.body == null && response.status !== 204) {
+        throw new Error(
+          `request returned ${response.status} status without data`
+        )
+      } else if (response.status === 204) {
+        return {}
+      }
+      return await response.json()
+    }
+    throw new Error(
+      `request for resource, ${url}, returned ${response.status} ${response.statusText}`
+    )
   }
 }
 

@@ -1,8 +1,8 @@
 import HttpAdapter from '../src/http-adapter'
-import sinon from 'sinon'
 import Store from '../src/store'
 import {Collection} from 'backbone'
 import InternalModel from '../src/internal-model'
+import fetchMock from 'fetch-mock'
 
 let createStore = function () {
   let adapter = new HttpAdapter()
@@ -189,12 +189,12 @@ let userWithRelationships = {
   included: [Bonnie, Clyde]
 }
 
-describe('InternalModel', function () {
-  it('triggers a change event when a new relationship is added')
-  it('peeks a new related resource when a relationship is added')
+describe('InternalModel', () => {
+  it('triggers a change event when a new relationship is added', () => {})
+  it('peeks a new related resource when a relationship is added', () => {})
 
-  describe('toJSON', function () {
-    it('returns a hash of all attributes and computed properties', function () {
+  describe('toJSON', () => {
+    it('returns a hash of all attributes and computed properties', () => {
       let Model = InternalModel.extend({
         computed: {
           amazing: function () {
@@ -213,8 +213,8 @@ describe('InternalModel', function () {
     })
   })
 
-  describe('attributes', function () {
-    it('#get() returns an attributes value', function () {
+  describe('attributes', () => {
+    it('#get() returns an attributes value', () => {
       let model = new InternalModel({
         amazing: 'boom'
       })
@@ -223,8 +223,8 @@ describe('InternalModel', function () {
     })
   })
 
-  describe('computed properties', function () {
-    it('#get() returns a computed property', function () {
+  describe('computed properties', () => {
+    it('#get() returns a computed property', () => {
       let model = new (InternalModel.extend({
         computed: {
           amazing: function () {
@@ -236,7 +236,7 @@ describe('InternalModel', function () {
       expect(model.get('amazing')).toEqual('a really random value')
     })
 
-    it('are scoped to the model instance', function () {
+    it('are scoped to the model instance', () => {
       let model = new (InternalModel.extend({
         computed: {
           getScope: function () {
@@ -293,10 +293,9 @@ describe('InternalModel', function () {
   })
 
   describe('getRelated', function () {
-    let resource, server
+    let resource
     beforeAll(function () {
-      server = sinon.fakeServer.create({autoRespond: true})
-      server.respondImmediately = true
+      fetchMock.reset()
     })
 
     beforeEach(function () {
@@ -304,43 +303,47 @@ describe('InternalModel', function () {
       resource = store.push(userWithRelationships)
     })
 
-    it('hasOne returns a single model from the cache', function () {
-      return resource.getRelated('bff')
-        .then((bff) => expect(bff.get('name')).toEqual('Bonnie'))
+    it('hasOne returns a single model from the cache', async () => {
+      const bff = await resource.getRelated('bff')
+      expect(bff.get('name')).toEqual('Bonnie')
     })
 
-    it('hasOne returns a single model from the network, if it is not cached', function () {
-      server.respondWith('GET', '/user/1/mother', JSON.stringify(mother))
-      return resource.getRelated('mother')
-        .then((mother) => expect(mother.get('name')).toEqual('Jo'))
+    it('hasOne returns a single model from the network, if it is not cached', async () => {
+      fetchMock.mock(/.*user\/1\/mother/g, mother, {
+        method: 'GET'
+      })
+      const motherResp = await resource.getRelated('mother')
+      expect(motherResp.get('name')).toEqual('Jo')
     })
 
-    it('hasMany returns a collection of models from the cache', function () {
-      return resource.getRelated('friends')
-        .then((friends) => {
-          expect(friends.at(0).get('name')).toEqual('Bonnie')
-          expect(friends.at(1).get('name')).toEqual('Clyde')
-        })
+    it('hasMany returns a collection of models from the cache', async () => {
+      const friends = await resource.getRelated('friends')
+      expect(friends.at(0).get('name')).toEqual('Bonnie')
+      expect(friends.at(1).get('name')).toEqual('Clyde')
     })
 
-    it('hasMany returns a collection models from the network, if they are not cached', function () {
-      server.respondWith('GET', '/user/1/siblings', JSON.stringify(siblings))
-      return resource.getRelated('siblings')
-        .then((siblings) => {
-          expect(siblings.at(0).get('name')).toEqual('Riggs')
-          expect(siblings.at(1).get('name')).toEqual('Murtaugh')
-        })
+    it('hasMany returns a collection models from the network, if they are not cached', async () => {
+      fetchMock.mock(/.*user\/1\/siblings/g, siblings, {
+        method: 'GET'
+      })
+      const siblingsResp = await resource.getRelated('siblings')
+      expect(siblingsResp.at(0).get('name')).toEqual('Riggs')
+      expect(siblingsResp.at(1).get('name')).toEqual('Murtaugh')
     })
 
     it('hasMany returns a partial collection models from the cache, and hits the network for remaining models', async () => {
-      server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow))
+      fetchMock.mock(/.*user\/1\/all-together-now/g, allTogetherNow, {
+        method: 'GET'
+      })
       let relationship = resource.getRelated('allTogetherNow')
       expect(relationship).toHaveLength(2)
       return expect(relationship).resolves.toHaveLength(5)
     })
 
-    it('hasMany partial collection will resolve to a collection of models', function () {
-      server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow))
+    it('hasMany partial collection will resolve to a collection of models', () => {
+      fetchMock.mock(/.*user\/1\/all-together-now/g, allTogetherNow, {
+        method: 'GET'
+      })
       let relationship = resource.getRelated('allTogetherNow')
       expect(relationship.length).toEqual(2)
       return expect(relationship).resolves.toBeInstanceOf(Collection)
@@ -354,6 +357,6 @@ describe('InternalModel', function () {
       return expect(() => resource.getRelated('unregistered')).toThrow('Relation for "unregistered" is not defined on the model.')
     })
 
-    it('pends request until parent promise has resolved')
+    it('pends request until parent promise has resolved', () => {})
   })
 })
