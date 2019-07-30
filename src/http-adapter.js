@@ -92,18 +92,24 @@ class HttpAdapter {
     let body
 
     // eslint-disable-next-line no-undef
-    url = new URL(url, location.origin)
+    const requestUrl = new URL(url, location.origin)
 
     if (method === METHOD.GET) {
       // serialize query params
       for (let [key, value] of Object.entries(data)) {
-        url.searchParams.append(key, value)
+        requestUrl.searchParams.append(key, value)
       }
-    } else if (method.includes(METHOD.POST) || method.includes(METHOD.PATCH)) {
-      // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
+    } else if (method === METHOD.POST || method === METHOD.PATCH) {
+      // Stringify data before any async stuff, just in case it'
       // some instrumented Vue data)
       body = JSON.stringify(data)
     }
+
+    /**
+     * Serialize the URL object to get a stringified representation to pass to _makeRequest
+     * ex: https://domain.com/prefix/1/2/?item=a&otheritem=b
+     */
+    url = requestUrl.toString()
 
     let promise
     if (this.serializeRequests) {
@@ -126,22 +132,26 @@ class HttpAdapter {
     return await promise
   }
 
-  async _makeRequest ({method, url, headers, body}) {
+  async _makeRequest ({url, method, headers, body}) {
     // eslint-disable-next-line no-undef
-    let response = await fetch(url, {
+    const response = await fetch(url, {
       method,
       headers,
       body
     })
-    if (response.status < 300 && response.status >= 200) {
-      if (response.body == null && response.status !== 204) {
+
+    if (response.ok) {
+      if (response.status === 204) return {}
+
+      const respBodyStringified = await response.text()
+
+      if (!respBodyStringified) {
         throw new Error(
           `request returned ${response.status} status without data`
         )
-      } else if (response.status === 204) {
-        return {}
       }
-      return await response.json()
+
+      return JSON.parse(respBodyStringified)
     }
     throw new Error(
       `request for resource, ${url}, returned ${response.status} ${response.statusText}`

@@ -121,7 +121,7 @@ describe('HTTP adapter', () => {
 
       expect(adapter._makeRequest).toHaveBeenCalledTimes(1)
       expect(adapter._makeRequest).toHaveBeenNthCalledWith(1, expect.objectContaining({
-        url: new global.URL(path1, global.location.origin)
+        url: expect.stringContaining(path1)
       }))
     })
 
@@ -138,7 +138,7 @@ describe('HTTP adapter', () => {
 
       expect(adapter._makeRequest).toHaveBeenCalledTimes(1)
       expect(adapter._makeRequest).toHaveBeenNthCalledWith(1, expect.objectContaining({
-        url: new global.URL(path1, global.location.origin)
+        url: expect.stringContaining(path1)
       }))
     })
 
@@ -154,7 +154,7 @@ describe('HTTP adapter', () => {
 
       expect(adapter._makeRequest).toHaveBeenCalledTimes(1)
       expect(adapter._makeRequest).toHaveBeenNthCalledWith(1, expect.objectContaining({
-        url: new global.URL(path1, global.location.origin)
+        url: expect.stringContaining(path1)
       }))
 
       await fetch1
@@ -164,7 +164,7 @@ describe('HTTP adapter', () => {
 
       expect(adapter._makeRequest).toHaveBeenCalledTimes(2)
       expect(adapter._makeRequest).toHaveBeenNthCalledWith(2, expect.objectContaining({
-        url: new global.URL(path2, global.location.origin)
+        url: expect.stringContaining(path2)
       }))
 
       await fetch2
@@ -183,7 +183,7 @@ describe('HTTP adapter', () => {
 
       expect(adapter._makeRequest).toHaveBeenCalledTimes(1)
       expect(adapter._makeRequest).toHaveBeenNthCalledWith(1, expect.objectContaining({
-        url: new global.URL(path1, global.location.origin)
+        url: expect.stringContaining(path1)
       }))
 
       await fetch1
@@ -193,7 +193,7 @@ describe('HTTP adapter', () => {
 
       expect(adapter._makeRequest).toHaveBeenCalledTimes(2)
       expect(adapter._makeRequest).toHaveBeenNthCalledWith(2, expect.objectContaining({
-        url: new global.URL(path2, global.location.origin)
+        url: expect.stringContaining(path2)
       }))
 
       await fetch2
@@ -208,10 +208,10 @@ describe('HTTP adapter', () => {
 
       expect(adapter._makeRequest).toHaveBeenCalledTimes(4)
       expect(adapter._makeRequest).toHaveBeenNthCalledWith(3, expect.objectContaining({
-        url: new global.URL(path1, global.location.origin)
+        url: expect.stringContaining(path1)
       }))
       expect(adapter._makeRequest).toHaveBeenNthCalledWith(4, expect.objectContaining({
-        url: new global.URL(path2, global.location.origin)
+        url: expect.stringContaining(path2)
       }))
     })
   })
