@@ -57,7 +57,6 @@ class HttpAdapter {
    */
   get (link, query) {
     return this._http(this.Method.GET, link, query)
-      .then(body => JSON.parse(body))
   }
 
   /**
@@ -69,7 +68,6 @@ class HttpAdapter {
    */
   create (link, payload) {
     return this._http(this.Method.POST, link, payload)
-      .then(body => body && JSON.parse(body))
   }
 
   /**
@@ -81,7 +79,6 @@ class HttpAdapter {
    */
   update (link, payload) {
     return this._http(this.Method.PATCH, link, payload)
-      .then(body => JSON.parse(body))
   }
 
   /**
@@ -94,10 +91,27 @@ class HttpAdapter {
     return this._http(this.Method.DELETE, link)
   }
 
+  /**
+   * Make a generic request that requires more options then CRUD methods provided.
+   * Does not set default `Accept` or `Content-Type`. This must be provided!
+   * @param {string} url - URL where the request is being sent.
+   * @param {object} options - any options the user wants to pass to the request.
+   * this can contain `method`, `headers`, and `data`
+   * @returns {Promise} Promise relating to request.
+   */
+  request (url, options = {}) {
+    options.method = options.method || this.Method.GET
+    options.headers = options.headers || {}
+
+    // pass in data, even if none is defined to preverve _http method
+    // pass in headers, even if none are defined to override default headers that are set with the _http method
+    return this._http(options.method, url, options.data, options.headers, false)
+  }
+
   async _http (method = this.Method.GET, url, data, headers = {
     'Accept': 'application/vnd.api+json',
     'Content-Type': 'application/vnd.api+json'
-  }) {}
+  }, isInternal = true) {}
 }
 
 export default HttpAdapter

@@ -16,6 +16,20 @@ class JqueryAjaxHttpAdapter extends HttpAdapter {
     })
   }
 
+  get (link, query) {
+    return super.get(link, query).then(body => JSON.parse(body))
+  }
+
+  create (link, payload) {
+    return super.create(link, payload)
+      .then(body => body && JSON.parse(body))
+  }
+
+  update (link, payload) {
+    return super.update(link, payload)
+      .then(body => JSON.parse(body))
+  }
+
   _requestDecorator (xhr) {
     // see if any default headers have been added to the adapter
     if (_.isObject(this.defaultHeaders) && !_.isEmpty(this.defaultHeaders)) {
@@ -36,7 +50,7 @@ class JqueryAjaxHttpAdapter extends HttpAdapter {
   async _http (method = this.Method.GET, url, data, headers = {
     'Accept': 'application/vnd.api+json',
     'Content-Type': 'application/vnd.api+json'
-  }) {
+  }, isInternal = true) {
     // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
     // some instrumented Vue data)
     if (data && [this.Method.PATCH, this.Method.POST].indexOf(method) > -1) {
@@ -51,22 +65,22 @@ class JqueryAjaxHttpAdapter extends HttpAdapter {
       )
 
       promise = Promise.all(promises).then(() =>
-        this._makeRequest({ url, method, headers, data })
+        this._makeRequest({ url, method, headers, data, isInternal })
       )
     } else {
-      promise = this._makeRequest({ url, method, headers, data })
+      promise = this._makeRequest({ url, method, headers, data, isInternal })
     }
 
     this._outstandingRequests.add(promise)
     const removeFromOutstandingRequests = () => {
       this._outstandingRequests.delete(promise)
     }
-    promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests);
+    promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests)
 
     return promise
   }
 
-  _makeRequest ({ url, method, headers, data }) {
+  _makeRequest ({ url, method, headers, data, isInternal }) {
     return new Promise((resolve, reject) => {
       let request = {
         url,
@@ -92,10 +106,14 @@ class JqueryAjaxHttpAdapter extends HttpAdapter {
           error.response = response
           reject(error)
         },
+        data
+      }
+
+      // for methods besides `request` in the base class, we want to turn of intelligent guessing to be safe
+      if (isInternal) {
         // being explicit about data type so jQuery doesn't "intelligent guess" wrong
         // changing this may not break tests, but does behave badly in prod
-        dataType: 'text',
-        data
+        request.dataType = 'text'
       }
 
       ajax(request)

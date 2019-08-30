@@ -94,7 +94,6 @@ describe('HTTP adapter', function () {
       expect(server.requests[0].requestHeaders).toMatchObject({'some-test-header': 'test-header'})
       expect(server.requests[0].requestHeaders).toMatchObject({'some-other-header': 'test-other-header'})
     })
-
   })
 
   describe('#buildUrl', function () {
@@ -177,6 +176,38 @@ describe('HTTP adapter', function () {
       server.respondWith('DELETE', '/api/user/42/', [204, {}, ''])
 
       return adapter.destroy('/api/user/42/')
+    })
+  })
+
+  describe('#request', function () {
+    it('populates defaults', async () => {
+      adapter._http = jest.fn()
+
+      await adapter.request('test-url')
+
+      expect(adapter._http).toHaveBeenCalledTimes(1)
+      expect(adapter._http).toHaveBeenCalledWith('GET', 'test-url', undefined, {}, false)
+    })
+
+    it('populates additional fields when passed', async () => {
+      adapter._http = jest.fn()
+
+      await adapter.request('test-url', {
+        method: 'POST',
+        headers: {
+          'header-1': 'one'
+        },
+        data: {
+          'header-1': 'one'
+        }
+      })
+
+      expect(adapter._http).toHaveBeenCalledTimes(1)
+      expect(adapter._http).toHaveBeenCalledWith('POST', 'test-url', {
+        'header-1': 'one'
+      }, {
+        'header-1': 'one'
+      }, false)
     })
   })
 
