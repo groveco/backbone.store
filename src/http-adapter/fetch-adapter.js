@@ -27,7 +27,7 @@ class FetchHttpAdapter extends HttpAdapter {
         requestUrl.searchParams.append(key, value)
       }
     } else if (method === this.Method.POST || method === this.Method.PATCH) {
-      // Stringify data before any async stuff, just in case it'
+      // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
       // some instrumented Vue data)
       body = JSON.stringify(data)
     }
@@ -38,28 +38,7 @@ class FetchHttpAdapter extends HttpAdapter {
      */
     url = requestUrl.toString()
 
-    // TODO: refactor this code to the base class since it is shared between adapters
-    let promise
-    if (this.serializeRequests) {
-      // Wait for all requests to settle (either with success or rejection) before making request
-      const promises = Array.from(this._outstandingRequests).map(promise =>
-        promise.catch(() => {})
-      )
-
-      promise = Promise.all(promises).then(() =>
-        this._makeRequest({ url, method, headers, data: body, isInternal })
-      )
-    } else {
-      promise = this._makeRequest({ url, method, headers, data: body, isInternal })
-    }
-
-    this._outstandingRequests.add(promise)
-    const removeFromOutstandingRequests = () => {
-      this._outstandingRequests.delete(promise)
-    }
-    promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests)
-
-    return await promise
+    return await super._checkSerializeRequests({ url, method, headers, data: body, isInternal })
   }
 
   async _makeRequest ({ url, method, headers, data, isInternal }) {

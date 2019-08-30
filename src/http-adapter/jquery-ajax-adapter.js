@@ -56,28 +56,7 @@ class JqueryAjaxHttpAdapter extends HttpAdapter {
     if (data && [this.Method.PATCH, this.Method.POST].indexOf(method) > -1) {
       data = JSON.stringify(data)
     }
-
-    let promise
-    if (this.serializeRequests) {
-      // Wait for all requests to settle (either with success or rejection) before making request
-      const promises = Array.from(this._outstandingRequests).map(promise =>
-        promise.catch(() => {})
-      )
-
-      promise = Promise.all(promises).then(() =>
-        this._makeRequest({ url, method, headers, data, isInternal })
-      )
-    } else {
-      promise = this._makeRequest({ url, method, headers, data, isInternal })
-    }
-
-    this._outstandingRequests.add(promise)
-    const removeFromOutstandingRequests = () => {
-      this._outstandingRequests.delete(promise)
-    }
-    promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests)
-
-    return promise
+    return await super._checkSerializeRequests({ url, method, headers, data, isInternal })
   }
 
   _makeRequest ({ url, method, headers, data, isInternal }) {
