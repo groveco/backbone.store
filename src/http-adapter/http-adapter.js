@@ -108,10 +108,36 @@ class HttpAdapter {
     return this._http(options.method, url, options.data, options.headers, false)
   }
 
+  async _checkSerializeRequests ({ url, method, headers, data, isInternal }) {
+    let promise
+    if (this.serializeRequests) {
+      // Wait for all requests to settle (either with success or rejection) before making request
+      const promises = Array.from(this._outstandingRequests).map(promise =>
+        promise.catch(() => {})
+      )
+
+      promise = Promise.all(promises).then(() =>
+        this._makeRequest({ url, method, headers, data, isInternal })
+      )
+    } else {
+      promise = this._makeRequest({ url, method, headers, data, isInternal })
+    }
+
+    this._outstandingRequests.add(promise)
+    const removeFromOutstandingRequests = () => {
+      this._outstandingRequests.delete(promise)
+    }
+    promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests)
+
+    return await promise
+  }
+
   async _http (method = this.Method.GET, url, data, headers = {
     'Accept': 'application/vnd.api+json',
     'Content-Type': 'application/vnd.api+json'
   }, isInternal = true) {}
+
+  async _makeRequest ({ url, method, headers, data, isInternal }) {}
 }
 
 export default HttpAdapter
