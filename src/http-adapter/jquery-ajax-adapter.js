@@ -11,7 +11,7 @@ class JqueryAjaxHttpAdapter extends HttpAdapter {
   constructor (options = {}) {
     super(options)
   }
-  _ajax (type, url, data) {
+  _http (type, url, data) {
     let headers = {
       Accept: 'application/vnd.api+json',
       'Content-Type': 'application/vnd.api+json'
@@ -40,7 +40,7 @@ class JqueryAjaxHttpAdapter extends HttpAdapter {
     this._outstandingRequests.add(promise)
     const removeFromOutstandingRequests = () => {
       this._outstandingRequests.delete(promise)
-    };
+    }
     promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests);
 
     return promise

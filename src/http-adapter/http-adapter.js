@@ -51,7 +51,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for fetched data.
    */
   get (link, query) {
-    return this._ajax(this.Method.GET, link, query)
+    return this._http(this.Method.GET, link, query)
       .then(body => JSON.parse(body))
   }
 
@@ -63,7 +63,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for created data.
    */
   create (link, payload) {
-    return this._ajax(this.Method.POST, link, payload)
+    return this._http(this.Method.POST, link, payload)
       .then(body => body && JSON.parse(body))
   }
 
@@ -75,7 +75,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for updated data.
    */
   update (link, payload) {
-    return this._ajax(this.Method.PATCH, link, payload)
+    return this._http(this.Method.PATCH, link, payload)
       .then(body => JSON.parse(body))
   }
 
@@ -86,10 +86,10 @@ class HttpAdapter {
    * @returns {Promise} Promise for destroy.
    */
   destroy (link) {
-    return this._ajax(this.Method.DELETE, link)
+    return this._http(this.Method.DELETE, link)
   }
 
-  _ajax (type, url, data) {}
+  _http (type, url, data) {}
 }
 
 export default HttpAdapter
