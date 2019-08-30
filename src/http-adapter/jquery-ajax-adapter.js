@@ -3,13 +3,34 @@
  * @module
  */
 import HttpAdapter from './http-adapter'
-import { ajax } from 'jquery'
+import { ajax, ajaxSetup } from 'jquery'
+import _ from 'underscore'
 /**
  * Adapter which works with data over HTTP via jquery ajax
  */
 class JqueryAjaxHttpAdapter extends HttpAdapter {
   constructor (options = {}) {
     super(options)
+    ajaxSetup({
+      beforeSend: this._requestDecorator.bind(this)
+    })
+  }
+
+  _requestDecorator (xhr) {
+    // see if any default headers have been added to the adapter
+    if (_.isObject(this.defaultHeaders) && !_.isEmpty(this.defaultHeaders)) {
+      for (let [key, value] of Object.entries(this.defaultHeaders)) {
+        xhr.setRequestHeader(key, value)
+      }
+    }
+
+    // see if any dynamic headers have been calculated in the "addHeadersBeforeRequest" method
+    const dynamicHeaders = this.addHeadersBeforeRequest()
+    if (_.isObject(dynamicHeaders) && !_.isEmpty(dynamicHeaders)) {
+      for (let [key, value] of Object.entries(dynamicHeaders)) {
+        xhr.setRequestHeader(key, value)
+      }
+    }
   }
 
   async _http (method = this.Method.GET, url, data, headers = {

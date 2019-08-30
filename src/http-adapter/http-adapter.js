@@ -8,8 +8,13 @@
  * are passed to it's constructor. This class is responsible for
  * any CRUD operations that need to be carried out with your {@link https://jsonapi.org/ JSON:API} service
  * from within the Backbone.Store.
- * @param {Object} options -  An object that contains a property, `urlPrefix`,
+ * @param {Object} options -  An object that contains properties:
+ * `urlPrefix`,
  * that defines the REST service that will be returning a {@link https://jsonapi.org/ JSON:API} response
+ * `defaultHeaders`,
+ * a JSON object that contains static headers to be sent with every request
+ * `addHeadersBeforeRequest`,
+ * a function that returns a JSON object that returns an object of headers to be sent with each request
  */
 class HttpAdapter {
   constructor (options = {}) {
