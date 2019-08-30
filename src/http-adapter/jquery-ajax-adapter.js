@@ -11,15 +11,14 @@ class JqueryAjaxHttpAdapter extends HttpAdapter {
   constructor (options = {}) {
     super(options)
   }
-  _http (type, url, data) {
-    let headers = {
-      Accept: 'application/vnd.api+json',
-      'Content-Type': 'application/vnd.api+json'
-    }
 
+  async _http (method = this.Method.GET, url, data, headers = {
+    'Accept': 'application/vnd.api+json',
+    'Content-Type': 'application/vnd.api+json'
+  }) {
     // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
     // some instrumented Vue data)
-    if (data && [this.Method.PATCH, this.Method.POST].indexOf(type) > -1) {
+    if (data && [this.Method.PATCH, this.Method.POST].indexOf(method) > -1) {
       data = JSON.stringify(data)
     }
 
@@ -31,10 +30,10 @@ class JqueryAjaxHttpAdapter extends HttpAdapter {
       )
 
       promise = Promise.all(promises).then(() =>
-        this._makeRequest({ url, type, headers, data })
+        this._makeRequest({ url, method, headers, data })
       )
     } else {
-      promise = this._makeRequest({ url, type, headers, data })
+      promise = this._makeRequest({ url, method, headers, data })
     }
 
     this._outstandingRequests.add(promise)
@@ -46,11 +45,11 @@ class JqueryAjaxHttpAdapter extends HttpAdapter {
     return promise
   }
 
-  _makeRequest ({ url, type, headers, data }) {
+  _makeRequest ({ url, method, headers, data }) {
     return new Promise((resolve, reject) => {
       let request = {
         url,
-        type,
+        type: method,
         headers,
         success: (data, textStatus, jqXhr) => {
           if (!data && jqXhr.status !== 204) {

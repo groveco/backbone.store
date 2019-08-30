@@ -89,7 +89,10 @@ class HttpAdapter {
     return this._http(this.Method.DELETE, link)
   }
 
-  _http (type, url, data) {}
+  async _http (method = this.Method.GET, url, data, headers = {
+    'Accept': 'application/vnd.api+json',
+    'Content-Type': 'application/vnd.api+json'
+  }) {}
 }
 
 export default HttpAdapter
