@@ -1,11 +1,11 @@
-import HttpAdapter from '../src/http-adapter/fetch-adapter'
+import JQueryAjaxHttpAdapter from '../src/http-adapter/jquery-ajax-adapter'
 import sinon from 'sinon'
 
-describe('HTTP adapter', function () {
+describe('JQuery HTTP adapter', function () {
   let adapter, server
 
   beforeEach(function () {
-    adapter = new HttpAdapter()
+    adapter = new JQueryAjaxHttpAdapter()
     server = sinon.fakeServer.create({autoRespond: true})
     server.respondImmediately = true
   })
@@ -23,7 +23,7 @@ describe('HTTP adapter', function () {
         }
       }
 
-      adapter = new HttpAdapter(options)
+      adapter = new JQueryAjaxHttpAdapter(options)
       const mockXhr = {
         setRequestHeader: jest.fn()
       }
@@ -41,7 +41,7 @@ describe('HTTP adapter', function () {
           'some-other-header': 'test-other-header'
         }
       }
-      adapter = new HttpAdapter(options)
+      adapter = new JQueryAjaxHttpAdapter(options)
 
       server.respondWith('GET', '/my-test-url', JSON.stringify({}))
 
@@ -64,7 +64,7 @@ describe('HTTP adapter', function () {
         })
       }
 
-      adapter = new HttpAdapter(options)
+      adapter = new JQueryAjaxHttpAdapter(options)
       const mockXhr = {
         setRequestHeader: jest.fn()
       }
@@ -84,7 +84,7 @@ describe('HTTP adapter', function () {
           }
         })
       }
-      adapter = new HttpAdapter(options)
+      adapter = new JQueryAjaxHttpAdapter(options)
 
       server.respondWith('GET', '/my-test-url', JSON.stringify({}))
 
@@ -157,38 +157,6 @@ describe('HTTP adapter', function () {
       server.respondWith('DELETE', '/api/user/42/', [204, {}, ''])
 
       return adapter.destroy('/api/user/42/')
-    })
-  })
-
-  describe('#request', function () {
-    it('populates defaults', async () => {
-      adapter._http = jest.fn()
-
-      await adapter.request('test-url')
-
-      expect(adapter._http).toHaveBeenCalledTimes(1)
-      expect(adapter._http).toHaveBeenCalledWith('GET', 'test-url', undefined, {}, false)
-    })
-
-    it('populates additional fields when passed', async () => {
-      adapter._http = jest.fn()
-
-      await adapter.request('test-url', {
-        method: 'POST',
-        headers: {
-          'header-1': 'one'
-        },
-        data: {
-          'header-1': 'one'
-        }
-      })
-
-      expect(adapter._http).toHaveBeenCalledTimes(1)
-      expect(adapter._http).toHaveBeenCalledWith('POST', 'test-url', {
-        'header-1': 'one'
-      }, {
-        'header-1': 'one'
-      }, false)
     })
   })
 

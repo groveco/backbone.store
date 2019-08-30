@@ -1,11 +1,13 @@
-import HttpAdapter from '../src/http-adapter/jquery-ajax-adapter'
+import JQueryAjaxHttpAdapter from '../src/http-adapter/jquery-ajax-adapter'
+import FetchHttpAdapter from '../src/http-adapter/fetch-adapter'
 import sinon from 'sinon'
 import Store from '../src/store'
 import {Collection} from 'backbone'
 import InternalModel from '../src/internal-model'
+import fetchMock from 'fetch-mock'
 
-let createStore = function () {
-  let adapter = new HttpAdapter()
+let createStore = function (adapterType = '') {
+  let adapter = adapterType === 'fetch' ? new FetchHttpAdapter() : new JQueryAjaxHttpAdapter()
   let store = new Store(adapter)
   store.register('user', {
     relationships: {
@@ -292,7 +294,7 @@ describe('InternalModel', function () {
     })
   })
 
-  describe('getRelated', function () {
+  describe('getRelated - JQueryAjaxHttpAdapter implementation', function () {
     let resource, server
     beforeAll(function () {
       server = sinon.fakeServer.create({autoRespond: true})
@@ -341,6 +343,74 @@ describe('InternalModel', function () {
 
     it('hasMany partial collection will resolve to a collection of models', function () {
       server.respondWith('GET', '/user/1/all-together-now', JSON.stringify(allTogetherNow))
+      let relationship = resource.getRelated('allTogetherNow')
+      expect(relationship.length).toEqual(2)
+      return expect(relationship).resolves.toBeInstanceOf(Collection)
+    })
+
+    it('throws an exception for an unknown relationship', () => {
+      return expect(() => resource.getRelated('foo')).toThrow('Relation for "foo" is not defined')
+    })
+
+    it('throws an exception for an undefined relationship type', () => {
+      return expect(() => resource.getRelated('unregistered')).toThrow('Relation for "unregistered" is not defined on the model.')
+    })
+
+    it('pends request until parent promise has resolved', () => {})
+  })
+
+  describe('getRelated - FetchHttpAdapter implementation', function () {
+    let resource
+    beforeAll(function () {
+      fetchMock.reset()
+    })
+
+    beforeEach(function () {
+      let store = createStore()
+      resource = store.push(userWithRelationships)
+    })
+
+    it('hasOne returns a single model from the cache', async () => {
+      const bff = await resource.getRelated('bff')
+      expect(bff.get('name')).toEqual('Bonnie')
+    })
+
+    it('hasOne returns a single model from the network, if it is not cached', async () => {
+      fetchMock.mock(/.*user\/1\/mother/g, mother, {
+        method: 'GET'
+      })
+      const motherResp = await resource.getRelated('mother')
+      expect(motherResp.get('name')).toEqual('Jo')
+    })
+
+    it('hasMany returns a collection of models from the cache', async () => {
+      const friends = await resource.getRelated('friends')
+      expect(friends.at(0).get('name')).toEqual('Bonnie')
+      expect(friends.at(1).get('name')).toEqual('Clyde')
+    })
+
+    it('hasMany returns a collection models from the network, if they are not cached', async () => {
+      fetchMock.mock(/.*user\/1\/siblings/g, siblings, {
+        method: 'GET'
+      })
+      const siblingsResp = await resource.getRelated('siblings')
+      expect(siblingsResp.at(0).get('name')).toEqual('Riggs')
+      expect(siblingsResp.at(1).get('name')).toEqual('Murtaugh')
+    })
+
+    it('hasMany returns a partial collection models from the cache, and hits the network for remaining models', async () => {
+      fetchMock.mock(/.*user\/1\/all-together-now/g, allTogetherNow, {
+        method: 'GET'
+      })
+      let relationship = resource.getRelated('allTogetherNow')
+      expect(relationship).toHaveLength(2)
+      return expect(relationship).resolves.toHaveLength(5)
+    })
+
+    it('hasMany partial collection will resolve to a collection of models', () => {
+      fetchMock.mock(/.*user\/1\/all-together-now/g, allTogetherNow, {
+        method: 'GET'
+      })
       let relationship = resource.getRelated('allTogetherNow')
       expect(relationship.length).toEqual(2)
       return expect(relationship).resolves.toBeInstanceOf(Collection)
