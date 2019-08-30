@@ -1,4 +1,4 @@
-import HttpAdapter from '../src/http-adapter/http-adapter'
+import HttpAdapter from '../src/http-adapter/jquery-ajax-adapter'
 import sinon from 'sinon'
 
 describe('HTTP adapter', function () {
