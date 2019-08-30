@@ -366,7 +366,7 @@ describe('InternalModel', function () {
     })
 
     beforeEach(function () {
-      let store = createStore()
+      let store = createStore('fetch')
       resource = store.push(userWithRelationships)
     })
 
