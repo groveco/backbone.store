@@ -3,7 +3,6 @@
  * @module
  */
 import {ajax} from 'jquery'
-
 /**
  * Adapter which works with data over HTTP, based on the options that
  * are passed to it's constructor. This class is responsible for
@@ -18,6 +17,17 @@ class HttpAdapter {
 
     this.serializeRequests = false
     this._outstandingRequests = new Set()
+
+    this.defaultHeaders = options.headers || {}
+    this.addHeadersBeforeRequest = options.addHeadersBeforeRequest || (() => {
+      return {}
+    })
+    this.Method = Object.freeze({
+      GET: `GET`,
+      PATCH: `PATCH`,
+      POST: `POST`,
+      DELETE: `DELETE`
+    })
   }
 
   buildUrl (type, id) {
@@ -41,7 +51,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for fetched data.
    */
   get (link, query) {
-    return this._ajax('GET', link, query)
+    return this._ajax(this.Method.GET, link, query)
       .then(body => JSON.parse(body))
   }
 
@@ -53,7 +63,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for created data.
    */
   create (link, payload) {
-    return this._ajax('POST', link, payload)
+    return this._ajax(this.Method.POST, link, payload)
       .then(body => body && JSON.parse(body))
   }
 
@@ -65,7 +75,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for updated data.
    */
   update (link, payload) {
-    return this._ajax('PATCH', link, payload)
+    return this._ajax(this.Method.PATCH, link, payload)
       .then(body => JSON.parse(body))
   }
 
@@ -76,7 +86,7 @@ class HttpAdapter {
    * @returns {Promise} Promise for destroy.
    */
   destroy (link) {
-    return this._ajax('DELETE', link)
+    return this._ajax(this.Method.DELETE, link)
   }
 
   _ajax (type, url, data) {
@@ -87,7 +97,7 @@ class HttpAdapter {
 
     // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
     // some instrumented Vue data)
-    if (data && ['PATCH', 'POST'].indexOf(type) > -1) {
+    if (data && [this.Method.PATCH, this.Method.POST].indexOf(type) > -1) {
       data = JSON.stringify(data)
     }
 
