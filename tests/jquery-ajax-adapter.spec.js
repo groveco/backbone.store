@@ -1,7 +1,7 @@
 import JQueryAjaxHttpAdapter from '../src/http-adapter/jquery-ajax-adapter'
 import sinon from 'sinon'
 
-describe('jQuery HTTP adapter', function () {
+describe('JQuery HTTP adapter', function () {
   let adapter, server
 
   beforeEach(function () {

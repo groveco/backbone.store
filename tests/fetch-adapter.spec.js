@@ -1,39 +1,16 @@
-import JQueryAjaxHttpAdapter from '../src/http-adapter/jquery-ajax-adapter'
-import sinon from 'sinon'
+import FetchHttpAdapter from '../src/http-adapter/fetch-adapter'
+import fetchMock from 'fetch-mock'
 
-describe('jQuery HTTP adapter', function () {
-  let adapter, server
+describe('Fetch HTTP adapter', () => {
+  let adapter
 
-  beforeEach(function () {
-    adapter = new JQueryAjaxHttpAdapter()
-    server = sinon.fakeServer.create({autoRespond: true})
-    server.respondImmediately = true
-  })
-
-  afterEach(function () {
-    server.restore()
+  beforeEach(() => {
+    adapter = new FetchHttpAdapter()
+    fetchMock.reset()
+    fetchMock.resetBehavior()
   })
 
   describe('defaultHeaders via  "defaultHeaders" option', () => {
-    it('calls "setRequestHeader" on xhr when "defaultHeaders" is set', () => {
-      const options = {
-        headers: {
-          'some-test-header': 'test-header',
-          'some-other-header': 'test-other-header'
-        }
-      }
-
-      adapter = new JQueryAjaxHttpAdapter(options)
-      const mockXhr = {
-        setRequestHeader: jest.fn()
-      }
-      adapter._requestDecorator(mockXhr)
-
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledTimes(2)
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledWith('some-test-header', 'test-header')
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledWith('some-other-header', 'test-other-header')
-    })
-
     it('Sets headers on request appropriately via blackbox testing', async () => {
       const options = {
         headers: {
@@ -41,40 +18,23 @@ describe('jQuery HTTP adapter', function () {
           'some-other-header': 'test-other-header'
         }
       }
-      adapter = new JQueryAjaxHttpAdapter(options)
 
-      server.respondWith('GET', '/my-test-url', JSON.stringify({}))
+      adapter = new FetchHttpAdapter(options)
+
+      fetchMock.mock(/.*/g, {}, {
+        method: 'GET'
+      })
 
       await adapter._http('GET', '/my-test-url')
 
-      expect(server.requests[0].url).toEqual('/my-test-url')
-      expect(server.requests[0].requestHeaders).toMatchObject({'some-test-header': 'test-header'})
-      expect(server.requests[0].requestHeaders).toMatchObject({'some-other-header': 'test-other-header'})
+      const callDetails = fetchMock.lastCall()
+      expect(fetchMock.lastUrl()).toContain('/my-test-url')
+      expect(callDetails[1].headers).toMatchObject({'some-test-header': 'test-header'})
+      expect(callDetails[1].headers).toMatchObject({'some-other-header': 'test-other-header'})
     })
   })
 
   describe('dynamic headers via "addHeadersBeforeRequest()" options', () => {
-    it('calls "setRequestHeader" on xhr when "defaultHeaders" is set', () => {
-      const options = {
-        addHeadersBeforeRequest: jest.fn(() => {
-          return {
-            'some-test-header': 'test-header',
-            'some-other-header': 'test-other-header'
-          }
-        })
-      }
-
-      adapter = new JQueryAjaxHttpAdapter(options)
-      const mockXhr = {
-        setRequestHeader: jest.fn()
-      }
-      adapter._requestDecorator(mockXhr)
-      expect(options.addHeadersBeforeRequest).toHaveBeenCalledTimes(1)
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledTimes(2)
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledWith('some-test-header', 'test-header')
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledWith('some-other-header', 'test-other-header')
-    })
-
     it('Sets headers on request appropriately via blackbox testing', async () => {
       const options = {
         addHeadersBeforeRequest: jest.fn(() => {
@@ -84,79 +44,95 @@ describe('jQuery HTTP adapter', function () {
           }
         })
       }
-      adapter = new JQueryAjaxHttpAdapter(options)
 
-      server.respondWith('GET', '/my-test-url', JSON.stringify({}))
+      adapter = new FetchHttpAdapter(options)
+
+      fetchMock.mock(/.*/g, {}, {
+        method: 'GET'
+      })
 
       await adapter._http('GET', '/my-test-url')
 
-      expect(server.requests[0].url).toEqual('/my-test-url')
-      expect(server.requests[0].requestHeaders).toMatchObject({'some-test-header': 'test-header'})
-      expect(server.requests[0].requestHeaders).toMatchObject({'some-other-header': 'test-other-header'})
+      const callDetails = fetchMock.lastCall()
+      expect(fetchMock.lastUrl()).toContain('/my-test-url')
+      expect(callDetails[1].headers).toMatchObject({'some-test-header': 'test-header'})
+      expect(callDetails[1].headers).toMatchObject({'some-other-header': 'test-other-header'})
+      expect(options.addHeadersBeforeRequest).toHaveBeenCalledTimes(1)
     })
   })
 
   describe('#get', function () {
-    it('returns a parsed resource from the network', function () {
+    it('returns a parsed resource from the network', async function () {
       let payload = {data: {id: 123, attributes: {foo: 'asdf'}}}
-      server.respondWith('GET', '/api/user/42/', JSON.stringify(payload))
+      fetchMock.mock(/.*api\/user\/42\//g, payload, {
+        method: 'GET'
+      })
 
-      return adapter.get('/api/user/42/')
-        .then((response) => {
-          expect(response).toEqual(payload)
-        })
+      const response = await adapter.get('api/user/42/')
+      expect(response).toEqual(payload)
     })
 
-    it('accepts arbitrary query parameters', function () {
+    it('accepts arbitrary query parameters', async () => {
       let payload = {data: {id: 123, attributes: {foo: 'asdf'}}}
-      server.respondWith('GET', '/api/user/42/?include=bio&foo=bar', JSON.stringify(payload))
+      fetchMock.mock(/.*api\/user\/42\/\?include=bio&foo=bar/g, payload, {
+        method: 'GET'
+      })
 
-      return adapter.get('/api/user/42/', {include: 'bio', foo: 'bar'})
-        .then((response) => {
-          expect(response).toEqual(payload)
-        })
+      const response = await adapter.get('api/user/42/', {include: 'bio', foo: 'bar'})
+      expect(response).toEqual(payload)
     })
 
-    it('returns a meaningful error message', function () {
+    it('returns a meaningful error message', async () => {
       const path = '/api/user/42/'
       const errorCode = 400
-      server.respondWith('GET', path, [errorCode, {}, ''])
+      fetchMock.mock(/.*api\/user\/42\//g, errorCode, {
+        method: 'GET',
+        status: errorCode,
+        statusText: ''
+      })
 
-      return adapter.get(path)
-        .catch((err) => {
-          expect(err).toBeInstanceOf(Error)
-          expect(err.message).toEqual(expect.stringContaining(path))
-          expect(err.message).toEqual(expect.stringContaining(`${errorCode}`))
-        })
+      try {
+        await adapter.get(path)
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error)
+        expect(err.message).toEqual(expect.stringContaining(path))
+        expect(err.message).toEqual(expect.stringContaining(`${errorCode}`))
+      }
     })
   })
 
-  describe('#create', function () {
-    it('creates a new resource on the network', function () {
+  describe('#create', () => {
+    it('creates a new resource on the network', async () => {
       let payload = {data: {foo: 'bar', fiz: {biz: 'buz'}}}
-      server.respondWith('POST', '/api/user/', JSON.stringify(payload))
+      fetchMock.mock(/.*api\/user\//g, payload, {
+        method: 'POST'
+      })
 
-      return adapter.create('/api/user/', payload)
-        .then((response) => {
-          expect(response).toEqual(payload)
-        })
+      const response = await adapter.create('api/user/', payload)
+      expect(response).toEqual(payload)
     })
   })
 
-  describe('#update', function () {
-    it('patches a resource on the network', async function () {
+  describe('#update', () => {
+    it('patches a resource on the network', async () => {
       let payload = {foo: 'bar', fiz: {biz: 'buz'}}
-      server.respondWith('PATCH', '/api/user/2/', JSON.stringify(payload))
+      fetchMock.mock(/.*api\/user\/2\//g, payload, {
+        method: 'PATCH'
+      })
 
-      return expect(adapter.update('/api/user/2/', payload)).resolves.toEqual(payload)
+      const response = await adapter.update('api/user/2/', payload)
+      expect(response).toEqual(payload)
     })
   })
 
-  describe('#destroy', function () {
-    it('deletes a record from the network', function () {
-      server.respondWith('DELETE', '/api/user/42/', [204, {}, ''])
+  describe('#destroy', () => {
+    it('deletes a record from the network', async () => {
+      fetchMock.mock(/.*api\/user\/42\//g, 204, {
+        method: 'DELETE'
+      })
 
-      return adapter.destroy('/api/user/42/')
+      const response = await adapter.destroy('api/user/42/')
+      expect(response).toMatchObject({})
     })
   })
 })
