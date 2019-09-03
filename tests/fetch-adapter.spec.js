@@ -1,4 +1,5 @@
 import FetchHttpAdapter from '../src/http-adapter/fetch-adapter'
+import FetchAdapterError from '../src/http-adapter/fetch-adapter-error'
 import fetchMock from 'fetch-mock'
 
 describe('Fetch HTTP adapter', () => {
@@ -133,6 +134,29 @@ describe('Fetch HTTP adapter', () => {
 
       const response = await adapter.destroy('api/user/42/')
       expect(response).toMatchObject({})
+    })
+  })
+
+  describe('Fetch Adapter Error', () => {
+    it('throws instance of FetchAdapterError when an bad URL parameter is passed', () => {
+      expect(adapter.request('')).rejects.toThrow(new FetchAdapterError(`url is not defined!`))
+    })
+
+    it('throws instance of FetchAdapterError when a request fails', () => {
+      fetchMock.mock(/.*/g, 503, {
+        method: 'GET'
+      })
+
+      expect(adapter.request('test')).rejects.toThrow(new FetchAdapterError(`request for resource, http://localhost/test, returned 503 Service Unavailable`))
+    })
+
+    it('throws instance of FetchAdapterError when a request is succeeds, but returns an empty body and is NOT a 204', () => {
+      fetchMock.mock(/.*/g, 200, {
+        method: 'GET',
+        body: undefined
+      })
+
+      expect(adapter.request('test')).rejects.toThrow(new FetchAdapterError(`request returned 200 status without data`))
     })
   })
 })

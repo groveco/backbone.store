@@ -3,6 +3,7 @@
  * @module
  */
 import HttpAdapter from './http-adapter'
+import FetchAdapterError from './fetch-adapter-error'
 import _ from 'underscore'
 /**
  * Adapter which works with data over HTTP via fetch
@@ -12,8 +13,7 @@ class FetchHttpAdapter extends HttpAdapter {
     'Accept': 'application/vnd.api+json',
     'Content-Type': 'application/vnd.api+json'
   }, isInternal = true) {
-    // TODO: implement this as a custom error
-    if (!url) throw new Error(`url is not defined!`)
+    if (!url) throw new FetchAdapterError(`url is not defined!`)
 
     // explicitly set body to undefined. Contrary to MDN documentation, GET methods cannot take a body. Therefore, the default must be undefined
     let body
@@ -59,16 +59,15 @@ class FetchHttpAdapter extends HttpAdapter {
       if (response.status === 204) return {}
 
       const respBodyStringified = await response.text()
-
       if (!respBodyStringified) {
-        throw new Error(
+        throw new FetchAdapterError(
           `request returned ${response.status} status without data`
         )
       }
 
       return JSON.parse(respBodyStringified)
     }
-    throw new Error(
+    throw new FetchAdapterError(
       `request for resource, ${url}, returned ${response.status} ${
         response.statusText
       }`
