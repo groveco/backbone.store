@@ -103,7 +103,7 @@ class HttpAdapter {
     options.method = options.method || this.Method.GET
     options.headers = options.headers || {}
 
-    // pass in data, even if none is defined to preverve _http method
+    // pass in data, even if none is defined to preserve _http method
     // pass in headers, even if none are defined to override default headers that are set with the _http method
     return this._http(options.method, url, options.data, options.headers, false)
   }

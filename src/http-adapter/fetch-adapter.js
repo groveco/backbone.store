@@ -6,7 +6,7 @@ import HttpAdapter from './http-adapter'
 import FetchAdapterError from './fetch-adapter-error'
 import _ from 'underscore'
 /**
- * Adapter which works with data over HTTP via jquery ajax
+ * Adapter which works with data over HTTP via fetch
  */
 class FetchHttpAdapter extends HttpAdapter {
   async _http (method = this.Method.GET, url, data, headers = {
