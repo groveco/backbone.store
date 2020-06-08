@@ -1,11 +1,8 @@
 {
   "name": "@groveco/backbone.store",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "version": "0.3.3",
   "scripts": {
-    "prepack": "NODE_ENV=development npm install && npm run build",
-    "build": "babel src --out-dir dist",
-    "build:watch": "babel --watch src --out-dir dist",
     "build:docs": "jsdoc --readme README.md src/* -d ./docs",
     "test": "jest",
     "lint": "eslint ./src/index.js"
