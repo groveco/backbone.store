@@ -3,9 +3,5 @@
 npm-debug.log
 dist
 node_modules
-bower_components
 coverage
-
-yarn-error.log
 junit.xml
-yarn-lock.json
