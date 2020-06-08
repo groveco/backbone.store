@@ -44,51 +44,18 @@ If you're using `@groveco/backbone.store` in your own project:
   $> popd
   ~/Projects/backbone.store
   ```
-5. Run `npm run build` to recompile the library:
-  ```sh
-  $> pwd
-  ~/Projects/backbone.store
-  $> npm run build
 
-  > @groveco/backbone.store@0.2.3 build ~/Projects/backbone.store
-  > babel src --out-dir dist
-
-  src/camelcase-dash.js -> dist/camelcase-dash.js
-  src/collection-proxy.js -> dist/collection-proxy.js
-  src/http-adapter.js -> dist/http-adapter.js
-  src/index.js -> dist/index.js
-  src/internal-model.js -> dist/internal-model.js
-  src/json-api-parser.js -> dist/json-api-parser.js
-  src/model-proxy.js -> dist/model-proxy.js
-  src/repository-collection.js -> dist/repository-collection.js
-  src/repository.js -> dist/repository.js
-  src/store.js -> dist/store.js
-
-  $> tree dist/
-  dist
-  ├── camelcase-dash.js
-  ├── collection-proxy.js
-  ├── http-adapter.js
-  ├── index.js
-  ├── internal-model.js
-  ├── json-api-parser.js
-  ├── model-proxy.js
-  ├── repository-collection.js
-  ├── repository.js
-  └── store.js
-
-  0 directories, 10 files
-  ```
-6. Rebuild `other-project` to pick up the changes to `backbone.store`
-
-> **Bonus:** Run `npm run build:watch` to rebuild when any file updates. If
-> your `other-project` build is _also_ watching for filesystem changes, the
-> rebuild in `backbone.store` will trigger it as well.
+5. Rebuild `other-project` to pick up the changes to `backbone.store`
 
 > **Caveat:** Running `npm install` in `other-project` will destroy the link
 > that you made in Step 3 above, so if your build process runs `npm install`,
 > you'll have to rerun `npm link` per Step 3 after the build starts... or pass
 > `--link` to `npm install`.
+
+> **Caveat:**  If running `other-project` inside of a container, using `npm link`
+> may prove difficult to link dependencies between local and containered environments. 
+> One may need to clone this repository within the container and run steps 1-5. 
+> This is not recommended, but may be inevitable depending on the use case.
 
 ## Using Backbone Store
 
