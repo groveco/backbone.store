@@ -1,7 +1,7 @@
 {
   "name": "@groveco/backbone.store",
   "main": "src/index.js",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "scripts": {
     "build:docs": "jsdoc --readme README.md src/* -d ./docs",
     "test": "jest ./tests",
