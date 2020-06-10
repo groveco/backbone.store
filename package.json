@@ -1,6 +1,7 @@
 {
   "name": "@groveco/backbone.store",
   "main": "dist/index.js",
+  "module": "src/index.js",
   "version": "0.3.3",
   "scripts": {
     "prepack": "NODE_ENV=development npm install && npm run build",
