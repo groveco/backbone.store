@@ -198,7 +198,7 @@ describe('Store', function () {
     // errors that cannot be caught with normal `thennable.catch()` which is
     // annoying and dangerous! So this test runs `fetch` through it's paces
     // and ensures we are returning well behaving promises.
-    it('does not fork the thennable chain', function (done) {
+    it('does not fork the thennable chain', async (done) => {
       let store = createStore()
 
       // Force the eventual `fetch` call to fail.
@@ -211,21 +211,22 @@ describe('Store', function () {
       let spy = sinon.spy()
       const promise = store.fetch('user', 1)
 
-      return promise
+      promise
         // If no global errors are triggered, we should still be able to catch
         // the rejection here.
         .catch(() => spy())
-        .finally(() => {
-          sinon.assert.calledOnce(spy)
-          done()
-        })
-        // Make sure no global errors are being triggered
         .catch(() => {
+          // Make sure no global errors are being triggered
           throw new Error('Should not be called, there is a problem with the thennable chain')
         })
+
+      await new Promise(resolve => setTimeout(resolve))
+
+      sinon.assert.calledOnce(spy)
+      done()
     })
 
-    xit('returns a single promise instance if previous request has not resolved', function () {
+    xit('returns a single promise instance if previous request has not resolved', async () => {
       let store = createStore()
       let resolver
       sinon.stub(store._adapter, 'get', function () {
@@ -241,10 +242,9 @@ describe('Store', function () {
       let third = store.fetch('mything')
       resolver.resolve()
 
-      return Promise.all([first, second, third]).finally(() => {
-        expect(first).toEqual(second)
-        expect(first).not.toEqual(third)
-      })
+      await Promise.all([first, second, third])
+      expect(first).toEqual(second)
+      expect(first).not.toEqual(third)
     })
 
     it('updates an existing resource in the store', function () {

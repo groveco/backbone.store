@@ -221,13 +221,18 @@ class Store {
       // promise to go unresolved so we catch it first and then proceed. The
       // returned promise will still raise a global exception if not caught,
       // which is the intended behavior, and should be handled accordingly.
-      promise
+      new Promise(resolve => {
+        promise
+        .then(() => {
+          resolve()
+        })
         .catch(() => {
           // no op
+          resolve()
         })
-        .finally(() => {
-          this._pending[key] = null
-        })
+      }).then(() => {
+        this._pending[key] = null
+      })
 
       this._pending[key] = promise
     }
