@@ -194,26 +194,4 @@ describe('CollectionProxy', function () {
       expect(message)
     })
   })
-
-  it('#finally is called when the promise is resolved', function () {
-    let promiseCollection = new CollectionProxy()
-
-    promiseCollection.promise = Promise.resolve('ping')
-
-    return promiseCollection.finally(function () {
-      expect(true)
-    })
-  })
-
-  it('#finally is called when the promise is rejected', function () {
-    let promiseCollection = new CollectionProxy()
-
-    promiseCollection.promise = Promise.reject(new Error('ping'))
-
-    return promiseCollection
-      .finally(function () {
-        expect(true)
-      })
-      .catch(() => {}) // catch the error so it doesn't throw and break the test
-  })
 })
