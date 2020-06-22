@@ -81,10 +81,6 @@ class ModelProxy {
     return this.promise.catch(...arguments)
   }
 
-  finally () {
-    return this.promise.finally(...arguments)
-  }
-
   off () { return this.eventProxy.stopListening(this.content, ...arguments) }
   on () { return this.eventProxy.listenTo(this.content, ...arguments) }
   once () { return this.eventProxy.listenToOnce(this.content, ...arguments) }

@@ -176,22 +176,4 @@ describe('ModelProxy', function () {
 
     return model.catch(message => expect(message))
   })
-
-  it('#finally is called when the promise is resolved', function () {
-    let model = new ModelProxy()
-
-    model.promise = Promise.resolve('ping')
-
-    return model.finally(() => expect(true))
-  })
-
-  it('#finally is called when the promise is rejected', function () {
-    let model = new ModelProxy()
-
-    model.promise = Promise.reject(new Error('ping'))
-
-    return model
-      .finally(() => expect(true))
-      .catch(() => {}) // catch the error so it doesn't throw and break the test
-  })
 })
