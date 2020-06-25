@@ -142,11 +142,11 @@ describe('ModelProxy', function () {
     sinon.assert.calledOnce(spyB)
   })
 
-  it('isPending is true when the promise has not been resolved or rejected')
-  it('isResolved is true when the promise has been resolved')
-  it('isResolved is false when the promise has been rejected')
-  it('isRejected is true when the promise has been rejected')
-  it('isRejected is false when the promise has been resolved')
+  it.todo('isPending is true when the promise has not been resolved or rejected')
+  it.todo('isResolved is true when the promise has been resolved')
+  it.todo('isResolved is false when the promise has been rejected')
+  it.todo('isRejected is true when the promise has been rejected')
+  it.todo('isRejected is false when the promise has been resolved')
 
   it('sets the content when the promise is resolved', function () {
     let model = new ModelProxy(new Model({something: 'nothing'}))

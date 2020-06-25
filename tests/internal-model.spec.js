@@ -190,8 +190,8 @@ let userWithRelationships = {
 }
 
 describe('InternalModel', function () {
-  it('triggers a change event when a new relationship is added')
-  it('peeks a new related resource when a relationship is added')
+  it.todo('triggers a change event when a new relationship is added')
+  it.todo('peeks a new related resource when a relationship is added')
 
   describe('toJSON', function () {
     it('returns a hash of all attributes and computed properties', function () {
@@ -354,6 +354,6 @@ describe('InternalModel', function () {
       return expect(() => resource.getRelated('unregistered')).toThrow('Relation for "unregistered" is not defined on the model.')
     })
 
-    it('pends request until parent promise has resolved')
+    it.todo('pends request until parent promise has resolved')
   })
 })
