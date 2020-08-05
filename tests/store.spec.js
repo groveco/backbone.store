@@ -1,4 +1,4 @@
-import HttpAdapter from '../src/http-adapter'
+import HttpAdapter from '../src/http-adapter/jquery'
 import Store from '../src/store'
 import sinon from 'sinon'
 import Model from '../src/internal-model'
