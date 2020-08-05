@@ -1,128 +1,59 @@
 /***
- * HttpAdapter
+ * JqueryHttpAdapter
  * @module
  */
-import {ajax} from 'jquery'
+import HttpAdapter, { HTTP_METHOD } from '../index'
+import { ajax, ajaxSetup } from 'jquery'
+import _ from 'underscore'
 
-/**
- * Adapter which works with data over HTTP, based on the options that
- * are passed to it's constructor. This class is responsible for
- * any CRUD operations that need to be carried out with your {@link https://jsonapi.org/ JSON:API} service
- * from within the Backbone.Store.
- * @param {Object} options -  An object that contains a property, `urlPrefix`,
- * that defines the REST service that will be returning a {@link https://jsonapi.org/ JSON:API} response
- */
-class HttpAdapter {
+export default class JqueryHttpAdapter extends HttpAdapter {
   constructor (options = {}) {
-    this.urlPrefix = options.urlPrefix
-
-    this.serializeRequests = false
-    this._outstandingRequests = new Set()
+    super(options)
+    ajaxSetup({
+      beforeSend: this._requestDecorator.bind(this)
+    })
   }
 
-  buildUrl (type, id) {
-    let idPath = `/${id}`
-    let typePath = `/${type}`
-    let path = this.urlPrefix || ''
-
-    path += typePath
-
-    if (id != null) {
-      path += idPath
+  _requestDecorator (xhr) {
+    // see if any default headers have been added to the adapter
+    if (_.isObject(this.defaultHeaders) && !_.isEmpty(this.defaultHeaders)) {
+      for (let [key, value] of Object.entries(this.defaultHeaders)) {
+        xhr.setRequestHeader(key, value)
+      }
     }
 
-    return path + '/'
-  }
-
-  /**
-   * Get entity by link.
-   * @private
-   * @param {string} link - Link to entity.
-   * @returns {Promise} Promise for fetched data.
-   */
-  get (link, query) {
-    return this._ajax('GET', link, query)
-      .then(body => JSON.parse(body))
-  }
-
-  /**
-   * Create entity.
-   * @private
-   * @param {string} link - Entity url.
-   * @param {object} attributes - Data to create entity with.
-   * @returns {Promise} Promise for created data.
-   */
-  create (link, payload) {
-    return this._ajax('POST', link, payload)
-      .then(body => body && JSON.parse(body))
-  }
-
-  /**
-   * Update entity.
-   * @private
-   * @param {string} link - Entity url.
-   * @param {object} attributes - Data to update entity with.
-   * @returns {Promise} Promise for updated data.
-   */
-  update (link, payload) {
-    return this._ajax('PATCH', link, payload)
-      .then(body => JSON.parse(body))
-  }
-
-  /**
-   * Destroy entity.
-   * @private
-   * @param {string} link - Entity self link.
-   * @returns {Promise} Promise for destroy.
-   */
-  destroy (link) {
-    return this._ajax('DELETE', link)
-  }
-
-  _ajax (type, url, data) {
-    let headers = {
-      'Accept': 'application/vnd.api+json',
-      'Content-Type': 'application/vnd.api+json'
+    // see if any dynamic headers have been calculated in the "addHeadersBeforeRequest" method
+    const dynamicHeaders = this.addHeadersBeforeRequest()
+    if (_.isObject(dynamicHeaders) && !_.isEmpty(dynamicHeaders)) {
+      for (let [key, value] of Object.entries(dynamicHeaders)) {
+        xhr.setRequestHeader(key, value)
+      }
     }
+  }
 
+  async _makeRequest ({
+    url,
+    method,
+    headers,
+    data,
+    isInternal
+  }) {
     // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
     // some instrumented Vue data)
-    if (data && ['PATCH', 'POST'].indexOf(type) > -1) {
+    if (data && [HTTP_METHOD.PATCH, HTTP_METHOD.POST].indexOf(method) > -1) {
       data = JSON.stringify(data)
     }
 
-    let promise
-    if (this.serializeRequests) {
-      // Wait for all requests to settle (either with success or rejection) before making request
-      const promises = Array.from(this._outstandingRequests)
-        .map(promise => promise.catch(() => {}))
-
-      promise = Promise.all(promises)
-        .then(() => this._makeRequest({ url, type, headers, data }))
-    } else {
-      promise = this._makeRequest({ url, type, headers, data })
-    }
-
-    this._outstandingRequests.add(promise)
-    const removeFromOutstandingRequests = () => {
-      this._outstandingRequests.delete(promise)
-    }
-    promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests)
-
-    return promise
-  }
-
-  _makeRequest ({ url, type, headers, data }) {
     return new Promise((resolve, reject) => {
       let request = {
         url,
-        type,
+        type: method,
         headers,
         success: (data, textStatus, jqXhr) => {
           if (!data && jqXhr.status !== 204) {
             throw new Error(`request returned ${jqXhr.status} status without data`)
           }
-          return resolve(data)
+          return method !== HTTP_METHOD.DELETE ? resolve(JSON.parse(data)) : resolve(data)
         },
         error: (response) => {
           if (response.readyState === 0 || response.status === 0) {
@@ -134,15 +65,17 @@ class HttpAdapter {
           error.response = response
           reject(error)
         },
+        data
+      }
+
+      // for methods besides `request` in the base class, we want to turn of intelligent guessing to be safe
+      if (isInternal) {
         // being explicit about data type so jQuery doesn't "intelligent guess" wrong
         // changing this may not break tests, but does behave badly in prod
-        dataType: 'text',
-        data
+        request.dataType = 'text'
       }
 
       ajax(request)
     })
   }
 }
-
-export default HttpAdapter
