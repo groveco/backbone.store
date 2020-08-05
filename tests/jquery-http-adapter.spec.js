@@ -96,6 +96,40 @@ describe('HTTP adapter', () => {
     })
   })
 
+  describe('Response interceptor option', () => {
+    it('calls "responseInterceptor" on xhr when response is returned successfully', async () => {
+      const options = {
+        responseInterceptor: jest.fn()
+      }
+
+      adapter = new JqueryHttpAdapter(options)
+
+      let payload = {data: {id: 123, attributes: {foo: 'asdf'}}}
+      server.respondWith('GET', '/api/user/42/', JSON.stringify(payload))
+
+      await adapter.get('/api/user/42/')
+      expect(options.responseInterceptor).toHaveBeenCalledTimes(1)
+    })
+
+    it('calls "responseInterceptor" on xhr when response errors', async () => {
+      const options = {
+        responseInterceptor: jest.fn()
+      }
+
+      adapter = new JqueryHttpAdapter(options)
+
+      const path = '/api/user/42/'
+      const errorCode = 400
+      server.respondWith('GET', path, [errorCode, {}, ''])
+
+      try {
+        await adapter.get('/api/user/42/')
+      } catch (e) {
+        expect(options.responseInterceptor).toHaveBeenCalledTimes(1)
+      }
+    })
+  })
+
   describe('#get', function () {
     it('returns a parsed resource from the network', function () {
       let payload = {data: {id: 123, attributes: {foo: 'asdf'}}}

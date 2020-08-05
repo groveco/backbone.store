@@ -14,7 +14,7 @@ export default class JqueryHttpAdapter extends HttpAdapter {
     })
   }
 
-  _requestDecorator (xhr) {
+  _requestDecorator (xhr, options) {
     // see if any default headers have been added to the adapter
     if (_.isObject(this.defaultHeaders) && !_.isEmpty(this.defaultHeaders)) {
       for (let [key, value] of Object.entries(this.defaultHeaders)) {
@@ -23,7 +23,8 @@ export default class JqueryHttpAdapter extends HttpAdapter {
     }
 
     // see if any dynamic headers have been calculated in the "addHeadersBeforeRequest" method
-    const dynamicHeaders = this.addHeadersBeforeRequest()
+    // the xhr object may be mutated by reference. This is a pattern we should avoid in the future
+    const dynamicHeaders = this.addHeadersBeforeRequest(xhr, options)
     if (_.isObject(dynamicHeaders) && !_.isEmpty(dynamicHeaders)) {
       for (let [key, value] of Object.entries(dynamicHeaders)) {
         xhr.setRequestHeader(key, value)
@@ -44,18 +45,24 @@ export default class JqueryHttpAdapter extends HttpAdapter {
       data = JSON.stringify(data)
     }
 
+    const responseInterceptor = this.responseInterceptor
+
     return new Promise((resolve, reject) => {
       let request = {
         url,
         type: method,
         headers,
-        success: (data, textStatus, jqXhr) => {
+        success: async (data, textStatus, jqXhr) => {
+          await responseInterceptor(jqXhr, textStatus, data)
+
           if (!data && jqXhr.status !== 204) {
             throw new Error(`request returned ${jqXhr.status} status without data`)
           }
           return method !== HTTP_METHOD.DELETE ? resolve(JSON.parse(data)) : resolve(data)
         },
-        error: (response) => {
+        error: async (response) => {
+          await responseInterceptor(response)
+
           if (response.readyState === 0 || response.status === 0) {
             // this is a canceled request, so we literally should do nothing
             return
@@ -63,6 +70,7 @@ export default class JqueryHttpAdapter extends HttpAdapter {
 
           const error = new Error(`request for resource, ${url}, returned ${response.status} ${response.statusText}`)
           error.response = response
+
           reject(error)
         },
         data

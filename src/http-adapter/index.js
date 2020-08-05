@@ -26,7 +26,12 @@ export default class HttpAdapter {
     this.serializeRequests = false
     this._outstandingRequests = new Set()
     this.defaultHeaders = options.headers || {}
+    
     this.addHeadersBeforeRequest = options.addHeadersBeforeRequest || (() => {
+      return {}
+    })
+
+    this.responseInterceptor = options.responseInterceptor || (() => {
       return {}
     })
   }
