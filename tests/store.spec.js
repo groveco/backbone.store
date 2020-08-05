@@ -522,4 +522,25 @@ describe('Store', function () {
     it.todo('fetches a single resource')
     it.todo('updates the resource with the response')
   })
+
+  describe('request', function () {
+    it('calls the http adapter request method when store.request is invoked', async function () {
+      let store = createStore()
+      let requestMock = jest.fn()
+      
+      store._adapter = {
+        request: requestMock
+      }
+
+      await store.request('test-url', {
+        foo: 'bar',
+        bizz: 'baz'
+      })
+
+      expect(requestMock).toHaveBeenNthCalledWith(1, 'test-url', {
+        foo: 'bar',
+        bizz: 'baz'
+      })
+    })
+  })
 })
