@@ -388,6 +388,10 @@ class Store {
       .destroy(resource.get('_self'))
       .then(() => resource.set('isDeleted', true))
   }
+
+  request (url, options = {}) {
+    return this._adapter.request(url, options)
+  }
 }
 
 export default Store
