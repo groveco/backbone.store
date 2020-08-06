@@ -86,7 +86,7 @@ describe('HttpAdapter', () => {
       httpAdapter.get(path2)
 
       // Tick microtask queue
-      await new Promise(setImmediate)
+      await new Promise(setTimeout)
       expect(httpAdapter._makeRequest).toHaveBeenCalledTimes(1)
       expect(httpAdapter._makeRequest).toHaveBeenNthCalledWith(
         1,
@@ -108,7 +108,7 @@ describe('HttpAdapter', () => {
       httpAdapter.get(path2)
 
       // Tick microtask queue
-      await new Promise(setImmediate)
+      await new Promise(setTimeout)
 
       expect(httpAdapter._makeRequest).toHaveBeenCalledTimes(1)
       expect(httpAdapter._makeRequest).toHaveBeenNthCalledWith(
@@ -134,7 +134,7 @@ describe('HttpAdapter', () => {
       const fetch2 = httpAdapter.get(path2)
 
       // Tick microtask queue
-      await new Promise(setImmediate)
+      await new Promise(setTimeout)
 
       expect(httpAdapter._makeRequest).toHaveBeenCalledTimes(1)
       expect(httpAdapter._makeRequest).toHaveBeenNthCalledWith(
@@ -152,7 +152,7 @@ describe('HttpAdapter', () => {
       await fetch1
 
       // Tick microtask queue
-      await new Promise(setImmediate)
+      await new Promise(setTimeout)
 
       expect(httpAdapter._makeRequest).toHaveBeenCalledTimes(2)
       expect(httpAdapter._makeRequest).toHaveBeenNthCalledWith(
@@ -185,7 +185,7 @@ describe('HttpAdapter', () => {
       const fetch2 = httpAdapter.get(path2)
 
       // Tick microtask queue
-      await new Promise(setImmediate)
+      await new Promise(setTimeout)
 
       expect(httpAdapter._makeRequest).toHaveBeenCalledTimes(1)
       expect(httpAdapter._makeRequest).toHaveBeenNthCalledWith(
@@ -201,7 +201,7 @@ describe('HttpAdapter', () => {
       await fetch1
 
       // Tick microtask queue
-      await new Promise(setImmediate)
+      await new Promise(setTimeout)
 
       expect(httpAdapter._makeRequest).toHaveBeenCalledTimes(2)
       expect(httpAdapter._makeRequest).toHaveBeenNthCalledWith(
@@ -222,7 +222,7 @@ describe('HttpAdapter', () => {
       httpAdapter.get(path2)
 
       // Tick microtask queue
-      await new Promise(setImmediate)
+      await new Promise(setTimeout)
 
       expect(httpAdapter._makeRequest).toHaveBeenCalledTimes(4)
       expect(httpAdapter._makeRequest).toHaveBeenNthCalledWith(

@@ -1,130 +1,63 @@
 /***
- * HttpAdapter
- * @module
+ * @module http-adapter/jquery
  */
-import {ajax} from 'jquery'
+import HttpAdapter, { HTTP_METHOD } from '../index'
+import { ajax } from 'jquery'
 
-/**
- * Adapter which works with data over HTTP, based on the options that
- * are passed to it's constructor. This class is responsible for
- * any CRUD operations that need to be carried out with your {@link https://jsonapi.org/ JSON:API} service
- * from within the Backbone.Store.
- * @param {Object} options -  An object that contains a property, `urlPrefix`,
- * that defines the REST service that will be returning a {@link https://jsonapi.org/ JSON:API} response
- */
-class HttpAdapter {
-  constructor (options = {}) {
-    this.urlPrefix = options.urlPrefix
-
-    this.serializeRequests = false
-    this._outstandingRequests = new Set()
-  }
-
-  buildUrl (type, id) {
-    let idPath = `/${id}`
-    let typePath = `/${type}`
-    let path = this.urlPrefix || ''
-
-    path += typePath
-
-    if (id != null) {
-      path += idPath
-    }
-
-    return path + '/'
-  }
-
+export default class JqueryHttpAdapter extends HttpAdapter {
   /**
-   * Get entity by link.
-   * @private
-   * @param {string} link - Link to entity.
-   * @returns {Promise} Promise for fetched data.
+   * The Http request method implemented by jQuery adapter class.
+   * @param {Object} options - request options to be propagated to the request
+   * @param {string} options.url - the url of the request
+   * @param {HTTP_METHOD} options.method - the method of the request
+   * @param {Object} options.headers - A key/value object of headers to be sent with the request
+   * @param {Object} options.data - A key/value payload to be sent with the request. If method is GET, these
+   * options will be transformed into query paramters
+   * @param {boolean} options.isInternal - Whether a request is being sent to an internal server
+   * or not to invoke request/response interceptors
+   * @returns {Promise} Promise relating to request resolution.
    */
-  get (link, query) {
-    return this._ajax('GET', link, query)
-      .then(body => JSON.parse(body))
-  }
-
-  /**
-   * Create entity.
-   * @private
-   * @param {string} link - Entity url.
-   * @param {object} attributes - Data to create entity with.
-   * @returns {Promise} Promise for created data.
-   */
-  create (link, payload) {
-    return this._ajax('POST', link, payload)
-      .then(body => body && JSON.parse(body))
-  }
-
-  /**
-   * Update entity.
-   * @private
-   * @param {string} link - Entity url.
-   * @param {object} attributes - Data to update entity with.
-   * @returns {Promise} Promise for updated data.
-   */
-  update (link, payload) {
-    return this._ajax('PATCH', link, payload)
-      .then(body => JSON.parse(body))
-  }
-
-  /**
-   * Destroy entity.
-   * @private
-   * @param {string} link - Entity self link.
-   * @returns {Promise} Promise for destroy.
-   */
-  destroy (link) {
-    return this._ajax('DELETE', link)
-  }
-
-  _ajax (type, url, data) {
-    let headers = {
-      'Accept': 'application/vnd.api+json',
-      'Content-Type': 'application/vnd.api+json'
-    }
-
+  async _makeRequest ({
+    url,
+    method,
+    headers,
+    data,
+    isInternal
+  }) {
     // Stringify data before any async stuff, just in case it's accidentally a mutable object (e.g.
     // some instrumented Vue data)
-    if (data && ['PATCH', 'POST'].indexOf(type) > -1) {
+    if (data && [HTTP_METHOD.PATCH, HTTP_METHOD.POST].indexOf(method) > -1) {
       data = JSON.stringify(data)
     }
 
-    let promise
-    if (this.serializeRequests) {
-      // Wait for all requests to settle (either with success or rejection) before making request
-      const promises = Array.from(this._outstandingRequests)
-        .map(promise => promise.catch(() => {}))
+    const requestInterceptor = this.requestInterceptor
+    const responseInterceptor = this.responseInterceptor
 
-      promise = Promise.all(promises)
-        .then(() => this._makeRequest({ url, type, headers, data }))
-    } else {
-      promise = this._makeRequest({ url, type, headers, data })
-    }
-
-    this._outstandingRequests.add(promise)
-    const removeFromOutstandingRequests = () => {
-      this._outstandingRequests.delete(promise)
-    }
-    promise.then(removeFromOutstandingRequests, removeFromOutstandingRequests)
-
-    return promise
-  }
-
-  _makeRequest ({ url, type, headers, data }) {
     return new Promise((resolve, reject) => {
       let request = {
         url,
-        type,
+        type: method,
         headers,
-        success: (data, textStatus, jqXhr) => {
+        beforeSend (xhr, options) {
+          if (isInternal) {
+            requestInterceptor(xhr, options)
+          }
+        },
+        success: async (data, textStatus, jqXhr) => {
+          if (isInternal) {
+            await responseInterceptor(jqXhr, textStatus, data)
+          }
+
           if (!data && jqXhr.status !== 204) {
             throw new Error(`request returned ${jqXhr.status} status without data`)
           }
-          return resolve(data)
+          return method !== HTTP_METHOD.DELETE ? resolve(JSON.parse(data)) : resolve(data)
         },
-        error: (response) => {
+        error: async (response) => {
+          if (isInternal) {
+            await responseInterceptor(response)
+          }
+
           if (response.readyState === 0 || response.status === 0) {
             // this is a canceled request, so we literally should do nothing
             return
@@ -132,17 +65,20 @@ class HttpAdapter {
 
           const error = new Error(`request for resource, ${url}, returned ${response.status} ${response.statusText}`)
           error.response = response
+
           reject(error)
         },
+        data
+      }
+
+      // for methods besides `request` in the base class, we want to turn of intelligent guessing to be safe
+      if (isInternal) {
         // being explicit about data type so jQuery doesn't "intelligent guess" wrong
         // changing this may not break tests, but does behave badly in prod
-        dataType: 'text',
-        data
+        request.dataType = 'text'
       }
 
       ajax(request)
     })
   }
 }
-
-export default HttpAdapter
