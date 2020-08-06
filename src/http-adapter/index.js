@@ -17,15 +17,13 @@ export const HTTP_METHOD = Object.freeze({
  * from within the Backbone.Store.
  * @param {Object} options -  An object that contains a property, `urlPrefix`,
  * that defines the REST service that will be returning a {@link https://jsonapi.org/ JSON:API} response.
- * The Object can also include a defaultHeaders object to be sent with internal requests,
- * or a requestInterceptor/responseInterceptor function for configs that need to be calculated/addeddynamically
+ * The Object can also include a requestInterceptor/responseInterceptor functions to be used with internal requests
  */
 export default class HttpAdapter {
   constructor (options = {}) {
     this.urlPrefix = options.urlPrefix
     this.serializeRequests = false
     this._outstandingRequests = new Set()
-    this.defaultHeaders = options.headers || {}
     
     this.requestInterceptor = options.requestInterceptor || (() => {})
 

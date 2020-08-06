@@ -14,45 +14,6 @@ describe('JqueryHttpAdapter', () => {
     server.restore()
   })
 
-  describe('defaultHeaders via  "defaultHeaders" option', () => {
-    it('calls "setRequestHeader" on xhr when "defaultHeaders" is set', () => {
-      const options = {
-        headers: {
-          'some-test-header': 'test-header',
-          'some-other-header': 'test-other-header'
-        }
-      }
-
-      adapter = new JqueryHttpAdapter(options)
-      const mockXhr = {
-        setRequestHeader: jest.fn()
-      }
-      adapter._requestDecorator(mockXhr)
-
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledTimes(2)
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledWith('some-test-header', 'test-header')
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledWith('some-other-header', 'test-other-header')
-    })
-
-    it('Sets headers on request appropriately via blackbox testing', async () => {
-      const options = {
-        headers: {
-          'some-test-header': 'test-header',
-          'some-other-header': 'test-other-header'
-        }
-      }
-      adapter = new JqueryHttpAdapter(options)
-
-      server.respondWith('GET', '/my-test-url', JSON.stringify({}))
-
-      await adapter._http('GET', '/my-test-url')
-
-      expect(server.requests[0].url).toEqual('/my-test-url')
-      expect(server.requests[0].requestHeaders).toMatchObject({'some-test-header': 'test-header'})
-      expect(server.requests[0].requestHeaders).toMatchObject({'some-other-header': 'test-other-header'})
-    })
-  })
-
   describe('dynamic headers via "requestInterceptor" options', () => {
     it('Sets headers on request appropriately via blackbox testing', async () => {
       const options = {

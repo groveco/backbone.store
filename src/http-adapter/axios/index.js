@@ -6,8 +6,8 @@ import HttpAdapter, { HTTP_METHOD } from '../index'
 import axios from 'axios'
 
 export class AxiosHttpAdapterError extends Error {
-  constructor () {
-    super()
+  constructor (message) {
+    super(message)
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
     if (Error.captureStackTrace) {
@@ -36,7 +36,7 @@ export default class AxiosHttpAdapter extends HttpAdapter {
         data
       })
     }
-  
+
     const responseInterceptor = this.responseInterceptor
     try {
       if (isInternal) {
@@ -44,7 +44,7 @@ export default class AxiosHttpAdapter extends HttpAdapter {
       }
 
       response = await axios(axiosConfig)
-      
+
       if (isInternal) {
         responseInterceptor(response)
       }
@@ -61,7 +61,7 @@ export default class AxiosHttpAdapter extends HttpAdapter {
         responseInterceptor(error.response)
       }
       throw new AxiosHttpAdapterError(
-        `reuest for resource ${url} failed: ${error.message}`
+        `request for resource ${url} failed: ${error.message}`
       )
     }
   }

@@ -12,39 +12,11 @@ describe('Axios HTTP Client', () => {
     axiosMockAdapter = new AxiosMockAdapter(axios)
   })
 
-  it('Sets headers on request appropriately via blackbox testing', async () => {
-    const options = {
-      urlPrefix: 'http://my.testapi.co/api',
-      headers: {
-        'some-test-header': 'test-header',
-        'some-other-header': 'test-other-header'
-      }
-    }
-
-    axiosHttpAdapter = new AxiosHttpAdapter(options)
-
-    axiosMockAdapter.onGet(/.*/g).reply(200, {})
-
-    await axiosHttpAdapter.get('/my-test-url')
-
-    expect(axiosMockAdapter.history.get.length).toBe(1)
-
-    const lastRequest = axiosMockAdapter.history.get[0]
-    expect(lastRequest.url).toContain('/my-test-url')
-    expect(lastRequest.headers).toEqual(expect.objectContaining({
-      'some-test-header': 'test-header'
-    }))
-    expect(lastRequest.headers).toEqual(expect.objectContaining({
-      'some-other-header': 'test-other-header'
-    }))
-  })
-
   describe('dynamic options via "requestInterceptor" options', () => {
     it('Sets headers on request appropriately via blackbox testing', async () => {
       const options = {
         urlPrefix: 'http://my.testapi.co/api',
         requestInterceptor: jest.fn((config) => {
-          debugger
           return {
             ...config,
             headers: {

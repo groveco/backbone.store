@@ -12,13 +12,6 @@ export default class JqueryHttpAdapter extends HttpAdapter {
   }
 
   _requestDecorator (xhr, options) {
-    // see if any default headers have been added to the adapter
-    if (_.isObject(this.defaultHeaders) && !_.isEmpty(this.defaultHeaders)) {
-      for (let [key, value] of Object.entries(this.defaultHeaders)) {
-        xhr.setRequestHeader(key, value)
-      }
-    }
-
     // call the request interceptor to edit the request as needed
     this.requestInterceptor(xhr, options)
   }
