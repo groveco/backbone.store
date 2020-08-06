@@ -6,7 +6,7 @@ import HttpAdapter, { HTTP_METHOD } from '../index'
 import axios from 'axios'
 
 export class AxiosHttpAdapterError extends Error {
-  constructor() {
+  constructor () {
     super()
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
@@ -18,7 +18,7 @@ export class AxiosHttpAdapterError extends Error {
 }
 
 export default class AxiosHttpAdapter extends HttpAdapter {
-  async _makeRequest({
+  async _makeRequest ({
     url,
     method,
     headers,
@@ -26,28 +26,41 @@ export default class AxiosHttpAdapter extends HttpAdapter {
     isInternal
   }) {
     let response
-
-    try {
-      response = await axios({
-        url,
-        method,
-        headers,
-        ...axios(method === HTTP_METHOD.GET ? {
-          params: data
-        } : {
-          data
-        })
+    let axiosConfig = {
+      url,
+      method,
+      headers,
+      ...(method === HTTP_METHOD.GET ? {
+        params: data
+      } : {
+        data
       })
+    }
+  
+    const responseInterceptor = this.responseInterceptor
+    try {
+      if (isInternal) {
+        axiosConfig = this.requestInterceptor(axiosConfig) || axiosConfig
+      }
 
-      if( response.status === 200 && response.data == null){
+      response = await axios(axiosConfig)
+      
+      if (isInternal) {
+        responseInterceptor(response)
+      }
+
+      if (response.status === 200 && response.data == null) {
         throw new AxiosHttpAdapterError(
           `request returned ${response.status} status without data`
         )
       }
 
       return response.data || {}
-    } catch (e) {
-      throw new AxiosHttpClientError(
+    } catch (error) {
+      if (isInternal) {
+        responseInterceptor(error.response)
+      }
+      throw new AxiosHttpAdapterError(
         `reuest for resource ${url} failed: ${error.message}`
       )
     }

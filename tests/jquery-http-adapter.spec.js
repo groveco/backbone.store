@@ -1,7 +1,7 @@
 import JqueryHttpAdapter from '../src/http-adapter/jquery'
 import sinon from 'sinon'
 
-describe('HTTP adapter', () => {
+describe('JqueryHttpAdapter', () => {
   let adapter, server
 
   beforeEach(() => {
@@ -53,37 +53,15 @@ describe('HTTP adapter', () => {
     })
   })
 
-  describe('dynamic headers via "addHeadersBeforeRequest()" options', () => {
-    it('calls "setRequestHeader" on xhr when "defaultHeaders" is set', () => {
-      const options = {
-        addHeadersBeforeRequest: jest.fn(() => {
-          return {
-            'some-test-header': 'test-header',
-            'some-other-header': 'test-other-header'
-          }
-        })
-      }
-
-      adapter = new JqueryHttpAdapter(options)
-      const mockXhr = {
-        setRequestHeader: jest.fn()
-      }
-      adapter._requestDecorator(mockXhr)
-      expect(options.addHeadersBeforeRequest).toHaveBeenCalledTimes(1)
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledTimes(2)
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledWith('some-test-header', 'test-header')
-      expect(mockXhr.setRequestHeader).toHaveBeenCalledWith('some-other-header', 'test-other-header')
-    })
-
+  describe('dynamic headers via "requestInterceptor" options', () => {
     it('Sets headers on request appropriately via blackbox testing', async () => {
       const options = {
-        addHeadersBeforeRequest: jest.fn(() => {
-          return {
-            'some-test-header': 'test-header',
-            'some-other-header': 'test-other-header'
-          }
+        requestInterceptor: jest.fn((xhr, options) => {
+          xhr.setRequestHeader('some-test-header', 'test-header')
+          xhr.setRequestHeader('some-other-header', 'test-other-header')
         })
       }
+
       adapter = new JqueryHttpAdapter(options)
 
       server.respondWith('GET', '/my-test-url', JSON.stringify({}))

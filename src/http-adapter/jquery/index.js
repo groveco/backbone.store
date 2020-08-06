@@ -3,15 +3,12 @@
  * @module
  */
 import HttpAdapter, { HTTP_METHOD } from '../index'
-import { ajax, ajaxSetup } from 'jquery'
+import { ajax } from 'jquery'
 import _ from 'underscore'
 
 export default class JqueryHttpAdapter extends HttpAdapter {
   constructor (options = {}) {
     super(options)
-    ajaxSetup({
-      beforeSend: this._requestDecorator.bind(this)
-    })
   }
 
   _requestDecorator (xhr, options) {
@@ -22,14 +19,8 @@ export default class JqueryHttpAdapter extends HttpAdapter {
       }
     }
 
-    // see if any dynamic headers have been calculated in the "addHeadersBeforeRequest" method
-    // the xhr object may be mutated by reference. This is a pattern we should avoid in the future
-    const dynamicHeaders = this.addHeadersBeforeRequest(xhr, options)
-    if (_.isObject(dynamicHeaders) && !_.isEmpty(dynamicHeaders)) {
-      for (let [key, value] of Object.entries(dynamicHeaders)) {
-        xhr.setRequestHeader(key, value)
-      }
-    }
+    // call the request interceptor to edit the request as needed
+    this.requestInterceptor(xhr, options)
   }
 
   async _makeRequest ({
@@ -45,6 +36,7 @@ export default class JqueryHttpAdapter extends HttpAdapter {
       data = JSON.stringify(data)
     }
 
+    const requestDecorator = this._requestDecorator.bind(this)
     const responseInterceptor = this.responseInterceptor
 
     return new Promise((resolve, reject) => {
@@ -52,6 +44,11 @@ export default class JqueryHttpAdapter extends HttpAdapter {
         url,
         type: method,
         headers,
+        beforeSend (xhr, options) {
+          if (isInternal) {
+            requestDecorator(xhr, options)
+          }
+        },
         success: async (data, textStatus, jqXhr) => {
           await responseInterceptor(jqXhr, textStatus, data)
 
