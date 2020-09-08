@@ -37,8 +37,7 @@ describe('HttpAdapter', () => {
         url: 'test-url',
         method: 'GET',
         headers: {},
-        data: undefined,
-        isInternal: false
+        data: undefined
       })
     })
 
@@ -64,8 +63,7 @@ describe('HttpAdapter', () => {
         },
         data: {
           foo: 'bar'
-        },
-        isInternal: false
+        }
       })
     })
   })
