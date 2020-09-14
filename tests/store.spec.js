@@ -202,7 +202,7 @@ describe('Store', function () {
       let store = createStore()
 
       // Force the eventual `fetch` call to fail.
-      sinon.stub(store._adapter, 'get', function () {
+      sinon.stub(store._adapter, 'get').callsFake(() => {
         return new Promise((_, reject) => {
           reject(new Error('rejected!'))
         })
@@ -228,7 +228,7 @@ describe('Store', function () {
     xit('returns a single promise instance if previous request has not resolved', function () {
       let store = createStore()
       let resolver
-      sinon.stub(store._adapter, 'get', function () {
+      sinon.stub(store._adapter, 'get').callsFake(() => {
         return new Promise((resolve, reject) => {
           resolver = {resolve, reject}
         })
@@ -443,7 +443,7 @@ describe('Store', function () {
     it('POSTs a serialized resource', function () {
       let store = createStore()
       let user = store.build('user', {name: 'Hello'})
-      sinon.stub(store._adapter, 'create', function () {
+      sinon.stub(store._adapter, 'create').callsFake(() => {
         return new Promise((resolve) => {
           resolve({
             data: {
@@ -472,7 +472,7 @@ describe('Store', function () {
     it('PATCHes a serialized resource', function () {
       let store = createStore()
       let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'})
-      sinon.stub(store._adapter, 'update', function () {
+      sinon.stub(store._adapter, 'update').callsFake(() => {
         return new Promise((resolve) => {
           resolve({
             data: {
@@ -501,7 +501,7 @@ describe('Store', function () {
     it('DELETEs a serialized resource', function () {
       let store = createStore()
       let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'})
-      sinon.stub(store._adapter, 'destroy', function () {
+      sinon.stub(store._adapter, 'destroy').callsFake(() => {
         return new Promise((resolve) => {
           resolve()
         })
