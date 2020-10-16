@@ -39,12 +39,13 @@ export default class JqueryHttpAdapter extends HttpAdapter {
           requestInterceptor(xhr, options)
         },
         success: async (data, textStatus, jqXhr) => {
+          data = data ? JSON.parse(data) : data
           await responseInterceptor(jqXhr, textStatus, data)
 
           if (!data && jqXhr.status !== 204) {
             throw new Error(`request returned ${jqXhr.status} status without data`)
           }
-          return method !== HTTP_METHOD.DELETE ? resolve(JSON.parse(data)) : resolve(data)
+          return resolve(data)
         },
         error: async (response) => {
           await responseInterceptor(response)
