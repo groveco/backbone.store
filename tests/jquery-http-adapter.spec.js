@@ -102,6 +102,11 @@ describe('JqueryHttpAdapter', () => {
           expect(err.message).toEqual(expect.stringContaining(`${errorCode}`))
         })
     })
+
+    it('Allows for GET requests with no content responses', async () => {
+      server.respondWith('GET', '/api/user/42/', [204, {}, ''])
+      return adapter.get('/api/user/42/')
+    })
   })
 
   describe('#create', () => {
