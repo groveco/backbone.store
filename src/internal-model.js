@@ -41,9 +41,10 @@ export default Model.extend({
     const defaults = _.result(this, 'defaults')
 
     this.set(attributesWithDefaults(attributes, defaults))
-    Object.keys(this.attributes).forEach((attr) => window.$BB_STORE_MONITOR.access(`${this.attributes._type}-${this.id}#${attr}`))
 
     this.initialize.apply(this, arguments)
+
+    Object.keys(this.attributes).forEach((attr) => window.$BB_STORE_MONITOR.add(`${this.attributes._type}-${this.id}#${attr}`))
   },
 
   toJSON () {
@@ -60,7 +61,7 @@ export default Model.extend({
    */
   get (attr) {
     if (this.attributes.hasOwnProperty(attr)) {
-      window.$BB_STORE_MONITOR.add(`${this.attributes._type}-${this.id}#${attr}`)
+      window.$BB_STORE_MONITOR.access(`${this.attributes._type}-${this.id}#${attr}`)
       return this.attributes[attr]
     }
 
