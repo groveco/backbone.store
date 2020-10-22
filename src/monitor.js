@@ -4,6 +4,9 @@ const EVENT_ADD = 'add'
 export default class Monitor {
   constructor() {
     this._log = []
+    this.add_store = new Set()
+    this.access_store = new Set()
+    this.propCache = {}
   }
 
   install() {
@@ -11,33 +14,22 @@ export default class Monitor {
   }
 
   add(val) {
-    this._evt(EVENT_ADD, val)
+    this.add_store.add(val)
+    if (this.propCache.hasOwnProperty(val)) {
+      this.propCache[val] += 1
+    } else {
+      this.propCache[val] = 1
+    }
   }
 
   access(val) {
-    this._evt(EVENT_ACCESS, val)
-  }
-
-  _evt(event, val) {
-    this._log.push({ event, val })
-  }
-
-  state() {
-    return this._log.reduce((res, {event, val}) => {
-      res[event].add(val)
-      return res
-    }, {
-      [EVENT_ADD]: new Set(),
-      [EVENT_ACCESS]: new Set()
-    })
+    this.access_store.add(val)
   }
 
   stats() {
-    const state = this.state()
-
     return {
-      [EVENT_ADD]: state[EVENT_ADD].size,
-      [EVENT_ACCESS]: state[EVENT_ACCESS].size
+      [EVENT_ADD]: this.add_store.size,
+      [EVENT_ACCESS]: this.access_store.size
     }
   }
 }
