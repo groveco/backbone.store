@@ -13,6 +13,20 @@ import CollectionProxy from './collection-proxy'
 import querystring from 'querystring'
 import Monitor from './monitor'
 
+function glaze(model) {
+  Object.keys(model.attributes).forEach((attr) => window.$BB_STORE_MONITOR.add(`${model.attributes._type}-${model.id}#${attr}`))
+
+  model.attributes = new Proxy(model.attributes, {
+    get(target, property) {
+      if (property in target) {
+        window.$BB_STORE_MONITOR.access(`${target._type}-${model.id}#${property}`)
+      }
+
+      return Reflect.get(...arguments)
+    }
+  })
+}
+
 /**
  * Backbone Store class that manages all {@link https://jsonapi.org/ JSON:API} formatted responses
  * and caching.
@@ -63,7 +77,13 @@ class Store {
    * @returns {void}
    */
   register (modelName, definition = {}) {
-    this._modelDefinitions[modelName] = definition
+    this._modelDefinitions[modelName] = Model.extend({
+      ...definition,
+      constructor() {
+        Model.apply(this, arguments);
+        glaze(this)
+      }
+    })
   }
 
   /***
@@ -78,7 +98,7 @@ class Store {
       throw new Error(`"${modelName}" is not registered.`)
     }
 
-    return Model.extend(definition)
+    return definition
   }
 
   /**

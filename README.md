@@ -142,3 +142,38 @@ let parser = new BackboneStore.JsonApiParser();
 let adapter = new BackboneStore.HttpAdapter('/api/blog/', parser);
 let repo = new BackboneStore.Repository(BlogModel, adapter);
 ```
+
+### Debugging
+
+```js
+try { delete window.access } catch (e) { /* ignore */ }
+try { delete window.data } catch (e) { /* ignore */ }
+
+window.access = window.$BB_STORE_MONITOR.counters.access
+window.data
+
+data = Object.keys(access).reduce((summary, attr) => {
+  const val = access[attr]
+
+  if (attr.indexOf('_') == -1 && attr.indexOf('#relationships') == -1) {
+    summary.total++
+    summary.src[attr] = val
+
+    if (val !== 0) {
+      summary.nonzero++
+    }
+  }
+  return summary
+}, {
+  nonzero: 0,
+  total: 0,
+  ratio: 0,
+  mostUsed: [],
+  src: {}
+})
+
+data.ratio = data.nonzero / data.total
+data.mostUsed = Object.keys(data.src).map((attr) => [data.src[attr], attr]).sort((a, b) => a[0] > b[0] ? -1 : a[0] === b[0] ? 0 : 1)
+
+console.dir(data)
+```
