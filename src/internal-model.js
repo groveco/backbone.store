@@ -41,6 +41,7 @@ export default Model.extend({
     const defaults = _.result(this, 'defaults')
 
     this.set(attributesWithDefaults(attributes, defaults))
+    Object.keys(this.attributes).forEach((attr) => window.$BB_STORE_MONITOR.access(`${this.attributes._type}-${this.id}#${attr}`))
 
     this.initialize.apply(this, arguments)
   },
@@ -58,7 +59,10 @@ export default Model.extend({
    * @return {mixed|undefined} via {attributes[attr]} or {computed[attr]}
    */
   get (attr) {
-    if (this.attributes.hasOwnProperty(attr)) return this.attributes[attr]
+    if (this.attributes.hasOwnProperty(attr)) {
+      window.$BB_STORE_MONITOR.add(`${this.attributes._type}-${this.id}#${attr}`)
+      return this.attributes[attr]
+    }
 
     if (this.computed.hasOwnProperty(attr)) return this.computed[attr].call(this)
 

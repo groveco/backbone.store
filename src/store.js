@@ -11,6 +11,7 @@ import Model from './internal-model'
 import ModelProxy from './model-proxy'
 import CollectionProxy from './collection-proxy'
 import querystring from 'querystring'
+import Monitor from './monitor'
 
 /**
  * Backbone Store class that manages all {@link https://jsonapi.org/ JSON:API} formatted responses
@@ -24,6 +25,9 @@ class Store {
     this._repository = new Repository()
     this._pending = {}
     this._modelDefinitions = {}
+
+    this.monitor = new Monitor()
+    this.monitor.install()
   }
 
   /**
