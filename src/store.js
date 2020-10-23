@@ -11,7 +11,7 @@ import Model from './internal-model'
 import ModelProxy from './model-proxy'
 import CollectionProxy from './collection-proxy'
 import querystring from 'querystring'
-import Monitor from './monitor'
+import {Monitor, ModelMonitor} from './monitor'
 
 /**
  * Backbone Store class that manages all {@link https://jsonapi.org/ JSON:API} formatted responses
@@ -65,17 +65,7 @@ class Store {
   register (modelName, definition = {}) {
     this._modelDefinitions[modelName] = Model.extend({
       ...definition,
-      constructor() {
-        Model.apply(this, arguments);
-        Object.keys(this.attributes).forEach((attr) => window.$BB_STORE_MONITOR.add(`${this.attributes._type}-${this.id}#${attr}`))
-      },
-      get(attr) {
-        if (attr in this.attributes) {
-          window.$BB_STORE_MONITOR.access(`${this.attributes._type}-${this.id}#${attr}`)
-        }
-
-        return Model.prototype.get.apply(this, arguments)
-      }
+      ...ModelMonitor(this.monitor)
     })
   }
 
