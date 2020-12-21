@@ -96,7 +96,7 @@ class Store {
     if (_.isArray(data)) {
       const result = new Collection(data.map(model => this._pushInternalModel(model)));
       if (meta) {
-        result.meta = meta;
+        result.meta = this._parser._parseWithNames(meta);
       }
       return result;
     }
