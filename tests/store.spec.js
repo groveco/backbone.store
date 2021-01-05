@@ -72,6 +72,33 @@ describe('Store', function () {
       sinon.assert.calledTwice(spy)
       expect(user.get('name')).toEqual('bar')
     })
+
+    it('adds metadata to the collection if it exists', function () {
+      const store = createStore()
+      const userCollection = store.push({
+        data: [
+          {
+            id: 2,
+            type: 'user',
+            attributes: {
+              name: 'foo'
+            }
+          },
+          {
+            id: 4,
+            type: 'user',
+            attributes: {
+              name: 'bar'
+            }
+          }
+        ],
+        meta: {
+          'search-string': 'foobar',
+        }
+      })
+      expect(userCollection.at(0).get('name')).toEqual('foo')
+      expect(userCollection.meta.searchString).toEqual('foobar')
+    })
   })
 
   describe('get', function () {

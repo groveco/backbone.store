@@ -83,7 +83,7 @@ class Store {
    * @returns {internal-model | Collection}
    */
   push (resource) {
-    let {data, included} = resource
+    let {data, included, meta} = resource
 
     if (!resource.hasOwnProperty('data')) {
       throw new Error('Expected the resource pushed to include a top level property `data`')
@@ -94,7 +94,11 @@ class Store {
     }
 
     if (_.isArray(data)) {
-      return new Collection(data.map(model => this._pushInternalModel(model)))
+      const result = new Collection(data.map(model => this._pushInternalModel(model)));
+      if (meta) {
+        result.meta = this._parser._parseWithNames(meta);
+      }
+      return result;
     }
 
     if (data == null) {
