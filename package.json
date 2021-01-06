@@ -2,7 +2,7 @@
   "name": "@groveco/backbone.store",
   "main": "src/index.js",
   "module": "src/index.js",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "scripts": {
     "prepack": "NODE_ENV=development npm install",
     "build:docs": "jsdoc --readme README.md src/* -d ./docs",
