@@ -2,7 +2,7 @@
   "name": "@groveco/backbone.store",
   "main": "dist/index.js",
   "module": "src/index.js",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "scripts": {
     "prepack": "NODE_ENV=development npm install && npm run build",
     "build": "babel src --out-dir dist",
@@ -14,7 +14,7 @@
   "dependencies": {
     "backbone": "^1.3.3",
     "clone": "^2.1.0",
-    "jquery": "^2.2.4",
+    "jquery": "^3.6.0",
     "underscore": "^1.9.1"
   },
   "devDependencies": {
