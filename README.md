@@ -4,8 +4,8 @@ Backbone Store is a library for managing and caching data in Backbone applicatio
 
 ## Contributing to Backbone Store
 
-As of `v0.5.1` this package is currently private to Grove Collaborative.
-They are only published up to Github's packaging service.
+As of `v0.5.1` this package is private to Grove Collaborative.
+It is only published up to Github's packaging service.
 To declare a dependency on this package, you need to create a personal access token to fetch/publish packages from a private Github packages.
 I'll try to boil it down to a few steps below:
 
