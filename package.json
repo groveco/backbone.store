@@ -2,12 +2,16 @@
   "name": "@groveco/backbone.store",
   "main": "src/index.js",
   "module": "src/index.js",
+  "repository": "git://github.com/groveco/backbone.store.git",
   "version": "0.5.1",
   "scripts": {
     "prepack": "NODE_ENV=development npm install",
     "build:docs": "jsdoc --readme README.md src/* -d ./docs",
     "test": "jest",
     "lint": "eslint ./src/index.js"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
     "backbone": "^1.3.3",
