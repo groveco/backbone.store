@@ -4,6 +4,27 @@ Backbone Store is a library for managing and caching data in Backbone applicatio
 
 ## Contributing to Backbone Store
 
+As of `v1.0.0` this package is private to Grove Collaborative.
+It is only published up to Github's packaging service.
+To declare a dependency on this package, you need to create a personal access token to fetch/publish packages from a private Github packages.
+I'll try to boil it down to a few steps below:
+
+1. Create a [PAT (personal access token)](https://github.com/settings/tokens/new) to fetch and publish the package.
+You should only need to enable the `write:packages` and `delete:packages` scopes.
+
+2. Create or edit a `~/.npmrc` configuration file to add a new registry entry.
+Your config should contain the following lines.
+Make sure to replace `{TOKEN}` with the PAT you just generated
+
+   ```npmrc
+   //npm.pkg.github.com/:_authToken={TOKEN}
+   @groveco:registry=https://npm.pkg.github.com/
+   ```
+
+3. With the changes present to your `~/.npmrc`, you should be able to install the package as a dependency as normal.
+
+---
+
 If you're using `@groveco/backbone.store` in your own project:
 
 1. Clone this repo locally, e.g.

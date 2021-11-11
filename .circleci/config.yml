@@ -121,11 +121,12 @@ jobs:
 
       - run:
           name: Authenticating NPM
-          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+          # The registry that this package will be published to is defined within the `package.json`
+          command: echo "//npm.pkg.github.com/:_authToken=$NPM_GITHUB_REGISTRY_ACCESS_TOKEN" >> ~/.npmrc
 
       - run:
           name: Publish NPM module
-          command: npm publish --access public
+          command: npm publish
 
 workflows:
   version: 2
