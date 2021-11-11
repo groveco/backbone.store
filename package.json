@@ -1,17 +1,15 @@
 {
   "name": "@groveco/backbone.store",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "module": "src/index.js",
-  "repository": "git://github.com/groveco/backbone.store.git",
-  "version": "0.5.1",
+  "version": "0.4.0",
   "scripts": {
-    "prepack": "NODE_ENV=development npm install",
+    "prepack": "NODE_ENV=development npm install && npm run build",
+    "build": "babel src --out-dir dist",
+    "build:watch": "babel --watch src --out-dir dist",
     "build:docs": "jsdoc --readme README.md src/* -d ./docs",
-    "test": "jest",
+    "test": "jest ./tests",
     "lint": "eslint ./src/index.js"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
     "backbone": "^1.3.3",
@@ -20,19 +18,25 @@
     "underscore": "^1.9.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.1",
-    "@babel/core": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
-    "babel-jest": "^24.9.0",
-    "core-js": "^3.6.5",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-0": "^6.24.1",
     "eslint": "^3.19.0",
     "eslint-config-standard": "^7.0.1",
     "eslint-plugin-jest": "^19.0.1",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
-    "jest": "^24.9.0",
-    "jest-junit": "^10.0.0",
+    "jest": "^22.4.0",
+    "jest-junit": "^1.3.0",
     "jsdoc": "^3.6.2",
-    "sinon": "^9.0.3"
+    "sinon": "^1.17.2"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageDirectory": "./coverage",
+    "testResultsProcessor": "jest-junit",
+    "testURL": "http://localhost/"
   }
 }

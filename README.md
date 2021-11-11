@@ -4,27 +4,6 @@ Backbone Store is a library for managing and caching data in Backbone applicatio
 
 ## Contributing to Backbone Store
 
-As of `v0.5.1` this package is private to Grove Collaborative.
-It is only published up to Github's packaging service.
-To declare a dependency on this package, you need to create a personal access token to fetch/publish packages from a private Github packages.
-I'll try to boil it down to a few steps below:
-
-1. Create a [PAT (personal access token)](https://github.com/settings/tokens/new) to fetch and publish the package.
-You should only need to enable the `write:packages` and `delete:packages` scopes.
-
-2. Create or edit a `~/.npmrc` configuration file to add a new registry entry.
-Your config should contain the following lines.
-Make sure to replace `{TOKEN}` with the PAT you just generated
-
-   ```npmrc
-   //npm.pkg.github.com/:_authToken={TOKEN}
-   @groveco:registry=https://npm.pkg.github.com/
-   ```
-
-3. With the changes present to your `~/.npmrc`, you should be able to install the package as a dependency as normal.
-
----
-
 If you're using `@groveco/backbone.store` in your own project:
 
 1. Clone this repo locally, e.g.
@@ -65,18 +44,51 @@ If you're using `@groveco/backbone.store` in your own project:
   $> popd
   ~/Projects/backbone.store
   ```
+5. Run `npm run build` to recompile the library:
+  ```sh
+  $> pwd
+  ~/Projects/backbone.store
+  $> npm run build
 
-5. Rebuild `other-project` to pick up the changes to `backbone.store`
+  > @groveco/backbone.store@0.2.3 build ~/Projects/backbone.store
+  > babel src --out-dir dist
+
+  src/camelcase-dash.js -> dist/camelcase-dash.js
+  src/collection-proxy.js -> dist/collection-proxy.js
+  src/http-adapter.js -> dist/http-adapter.js
+  src/index.js -> dist/index.js
+  src/internal-model.js -> dist/internal-model.js
+  src/json-api-parser.js -> dist/json-api-parser.js
+  src/model-proxy.js -> dist/model-proxy.js
+  src/repository-collection.js -> dist/repository-collection.js
+  src/repository.js -> dist/repository.js
+  src/store.js -> dist/store.js
+
+  $> tree dist/
+  dist
+  ├── camelcase-dash.js
+  ├── collection-proxy.js
+  ├── http-adapter.js
+  ├── index.js
+  ├── internal-model.js
+  ├── json-api-parser.js
+  ├── model-proxy.js
+  ├── repository-collection.js
+  ├── repository.js
+  └── store.js
+
+  0 directories, 10 files
+  ```
+6. Rebuild `other-project` to pick up the changes to `backbone.store`
+
+> **Bonus:** Run `npm run build:watch` to rebuild when any file updates. If
+> your `other-project` build is _also_ watching for filesystem changes, the
+> rebuild in `backbone.store` will trigger it as well.
 
 > **Caveat:** Running `npm install` in `other-project` will destroy the link
 > that you made in Step 3 above, so if your build process runs `npm install`,
 > you'll have to rerun `npm link` per Step 3 after the build starts... or pass
 > `--link` to `npm install`.
-
-> **Caveat:**  If running `other-project` inside of a container, using `npm link`
-> may prove difficult to link dependencies between local and containered environments. 
-> One may need to clone this repository within the container and run steps 1-5. 
-> This is not recommended, but may be inevitable depending on the use case.
 
 ## Using Backbone Store
 
