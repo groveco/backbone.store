@@ -1,4 +1,4 @@
-import HttpAdapter from '../src/http-adapter/jquery'
+import HttpAdapter from '../src/http-adapter'
 import sinon from 'sinon'
 import Store from '../src/store'
 import {Collection} from 'backbone'
@@ -190,8 +190,8 @@ let userWithRelationships = {
 }
 
 describe('InternalModel', function () {
-  it.todo('triggers a change event when a new relationship is added')
-  it.todo('peeks a new related resource when a relationship is added')
+  it('triggers a change event when a new relationship is added')
+  it('peeks a new related resource when a relationship is added')
 
   describe('toJSON', function () {
     it('returns a hash of all attributes and computed properties', function () {
@@ -354,6 +354,6 @@ describe('InternalModel', function () {
       return expect(() => resource.getRelated('unregistered')).toThrow('Relation for "unregistered" is not defined on the model.')
     })
 
-    it.todo('pends request until parent promise has resolved')
+    it('pends request until parent promise has resolved')
   })
 })

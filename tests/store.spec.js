@@ -1,4 +1,4 @@
-import HttpAdapter from '../src/http-adapter/jquery'
+import HttpAdapter from '../src/http-adapter'
 import Store from '../src/store'
 import sinon from 'sinon'
 import Model from '../src/internal-model'
@@ -229,7 +229,7 @@ describe('Store', function () {
       let store = createStore()
 
       // Force the eventual `fetch` call to fail.
-      sinon.stub(store._adapter, 'get').callsFake(() => {
+      sinon.stub(store._adapter, 'get', function () {
         return new Promise((_, reject) => {
           reject(new Error('rejected!'))
         })
@@ -255,7 +255,7 @@ describe('Store', function () {
     xit('returns a single promise instance if previous request has not resolved', function () {
       let store = createStore()
       let resolver
-      sinon.stub(store._adapter, 'get').callsFake(() => {
+      sinon.stub(store._adapter, 'get', function () {
         return new Promise((resolve, reject) => {
           resolver = {resolve, reject}
         })
@@ -470,7 +470,7 @@ describe('Store', function () {
     it('POSTs a serialized resource', function () {
       let store = createStore()
       let user = store.build('user', {name: 'Hello'})
-      sinon.stub(store._adapter, 'create').callsFake(() => {
+      sinon.stub(store._adapter, 'create', function () {
         return new Promise((resolve) => {
           resolve({
             data: {
@@ -492,14 +492,14 @@ describe('Store', function () {
       })
     })
 
-    it.todo('makes request with a valid request body')
+    it('makes request with a valid request body')
   })
 
   describe('update', function () {
     it('PATCHes a serialized resource', function () {
       let store = createStore()
       let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'})
-      sinon.stub(store._adapter, 'update').callsFake(() => {
+      sinon.stub(store._adapter, 'update', function () {
         return new Promise((resolve) => {
           resolve({
             data: {
@@ -520,15 +520,15 @@ describe('Store', function () {
       })
     })
 
-    it.todo('only PATCHes dirty attributes')
-    it.todo('makes request with a valid request body')
+    it('only PATCHes dirty attributes')
+    it('makes request with a valid request body')
   })
 
   describe('destroy', function () {
     it('DELETEs a serialized resource', function () {
       let store = createStore()
       let user = store.build('user', {id: 1, _self: '/api/user/1', name: 'Hello'})
-      sinon.stub(store._adapter, 'destroy').callsFake(() => {
+      sinon.stub(store._adapter, 'destroy', function () {
         return new Promise((resolve) => {
           resolve()
         })
@@ -541,33 +541,12 @@ describe('Store', function () {
     })
 
     // maybe this is wrong, maybe the store should simply not return deteled records?
-    it.todo('removes a record from the store')
-    it.todo('makes request with an empty request body')
+    it('removes a record from the store')
+    it('makes request with an empty request body')
   })
 
   describe('reload', function () {
-    it.todo('fetches a single resource')
-    it.todo('updates the resource with the response')
-  })
-
-  describe('request', function () {
-    it('calls the http adapter request method when store.request is invoked', async function () {
-      let store = createStore()
-      let requestMock = jest.fn()
-      
-      store._adapter = {
-        request: requestMock
-      }
-
-      await store.request('test-url', {
-        foo: 'bar',
-        bizz: 'baz'
-      })
-
-      expect(requestMock).toHaveBeenNthCalledWith(1, 'test-url', {
-        foo: 'bar',
-        bizz: 'baz'
-      })
-    })
+    it('fetches a single resource')
+    it('updates the resource with the response')
   })
 })
